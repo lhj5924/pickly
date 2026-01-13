@@ -1,0 +1,72 @@
+export const theme = {
+  colors: {
+    primary: {
+      50: '#f5f7ed',
+      100: '#e8ebd8',
+      200: '#d4e4c4',
+      300: '#c5d9a4',
+      400: '#a3c47a',
+      500: '#7d9240',
+      600: '#57824C',
+      700: '#4a5a26',
+      800: '#3d4a20',
+      900: '#2d3718',
+    },
+    accent: {
+      400: '#FEE500',
+      500: '#FAE100',
+      600: '#E5CD00',
+    },
+    neutral: {
+      50: '#fafafa',
+      100: '#f5f5f5',
+      200: '#e5e5e5',
+      300: '#d4d4d4',
+      400: '#a3a3a3',
+      500: '#737373',
+      600: '#525252',
+      700: '#404040',
+      800: '#262626',
+      900: '#171717',
+    },
+    background: {
+      primary: '#ffffff',
+      secondary: '#f5f5f5',
+      card: '#ffffff',
+      gradient: 'linear-gradient(180deg, #f5f6e8 0%, #e8ebd8 50%, #d4e4c4 100%)',
+    },
+    text: {
+      primary: '#171717',
+      secondary: '#525252',
+      tertiary: '#a3a3a3',
+      quaternary: '#4C4C4C',
+      quinary: '#646464',
+    },
+    border: {
+      light: '#e5e5e5',
+      default: '#d4d4d4',
+    },
+    status: {
+      reading: '#3b82f6',
+      wishlist: '#ef4444',
+      completed: '#22c55e',
+    },
+    error: '#ef4444',
+    success: '#22c55e',
+    warning: '#f59e0b',
+  },
+  shadows: {
+    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+  },
+  borderRadius: {
+    sm: '0.375rem',
+    md: '0.5rem',
+    lg: '0.75rem',
+    xl: '1rem',
+    full: '9999px',
+  },
+};
+
+export type Theme = typeof theme;
