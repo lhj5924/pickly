@@ -254,7 +254,7 @@ export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = f
     completed: book.status === 'completed',
   });
 
-  const handleStatusClick = (e: React.MouseEvent, status: BookStatus) => {
+  const handleStatusClick = (e: React.MouseEvent, status: 'reading' | 'wishlist' | 'completed') => {
     e.stopPropagation();
     setStatusState(prev => ({
       ...prev,

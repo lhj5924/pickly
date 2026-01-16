@@ -23,7 +23,7 @@ const BookHeader = styled.section`
   border-radius: 1rem;
   box-shadow: ${({ theme }) => theme.shadows.sm};
   margin-bottom: 1.5rem;
-  
+
   @media (max-width: 640px) {
     flex-direction: column;
     align-items: center;
@@ -39,7 +39,7 @@ const BookCover = styled.div`
   overflow: hidden;
   box-shadow: ${({ theme }) => theme.shadows.lg};
   flex-shrink: 0;
-  
+
   img {
     width: 100%;
     height: 100%;
@@ -82,7 +82,7 @@ const TagList = styled.div`
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-bottom: 1.25rem;
-  
+
   @media (max-width: 640px) {
     justify-content: center;
   }
@@ -99,7 +99,7 @@ const Tag = styled.span`
 const StatusButtons = styled.div`
   display: flex;
   gap: 1rem;
-  
+
   @media (max-width: 640px) {
     justify-content: center;
   }
@@ -110,10 +110,9 @@ const StatusButton = styled.button<{ $active: boolean; $color: string }>`
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: ${({ $active, $color, theme }) =>
-    $active ? $color : theme.colors.text.secondary};
+  color: ${({ $active, $color, theme }) => ($active ? $color : theme.colors.text.secondary)};
   transition: all 0.2s ease;
-  
+
   &:hover {
     color: ${({ $color }) => $color};
   }
@@ -174,7 +173,7 @@ const DescriptionContent = styled.div<{ $expanded: boolean }>`
   max-height: ${({ $expanded }) => ($expanded ? 'none' : '200px')};
   overflow: hidden;
   position: relative;
-  
+
   ${({ $expanded, theme }) =>
     !$expanded &&
     `
@@ -200,7 +199,7 @@ const ExpandButton = styled.button`
   margin-top: 0.5rem;
   font-size: 0.875rem;
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.text.secondary};
   }
@@ -237,18 +236,71 @@ const mockBook: Book = {
   publisher: '오마이북스',
   publishDate: '2019년 01월 30일',
   pageCount: 280,
-  categories: [{ id: 12, name: '자연과학' }, { id: 11, name: '철학적' }],
+  categories: [
+    { id: 12, name: '자연과학' },
+    { id: 11, name: '철학적' },
+  ],
 };
 
 const authorDescription = `지웅배
 우주와 사업에 빠진 천문과자, 우주를 너무 사랑한 나머저 연정 좋무터 배가어, 메트와 밤고 다니는 노트북지 천를 별과 우주로 가득하며, 구독자 수 26만 명인 유주인지와 인지태안 천, 고리고 다양한 관엄을 통해 최실 천문학적 늘압을 소개하며 대중과 가까이 즐거이 위해 일읽에 면단 한는 구려 카팩나빼어어아이기도 하다. MBC TV [능녀저음]와 무두 능시되로 중역어으며, 한국과학카웅보원이애, 서울시시아박년관하, 국조문신사무학관, 스도국곤사물관, TEDx, [나니] 통 우주에 관한 좋체대을 아이기가 될수있는 것이던 어디론 다더님인다. 한국대하교등학교와 연세 대학교 천문우주하라과를 중만라고 한직는 서울대라고 지의전문하학뗘애 모스자로 좋업하고 있다. 지식 책으로 "[바만이더 우주 한 조각", "잘 수 없다판 알 수 있다, "지우을 닮은 너이 1, 2, 3, 좋 힘이 있다. "우리는 모두 천문학자로 태어나다"이는서 지가는 별고과 좋등의 있어진 안측과 세대학자, 이동이기 우구에 이헤합 한 관점을 이야기어이덤, 천철학으로 이때에 가장 인간적 우주를 이야기한다.`;
 
 const similarBooks: Book[] = [
-  { id: '2', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '3', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '4', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '5', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '6', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
+  {
+    id: '2',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
+  },
+  {
+    id: '3',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
+  },
+  {
+    id: '4',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
+  },
+  {
+    id: '5',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
+  },
+  {
+    id: '6',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
+  },
 ];
 
 // Mock review (set to null to show empty state)
@@ -291,16 +343,12 @@ export default function BookDetailPage() {
           </BookMeta>
           <CategoryLabel>카테고리</CategoryLabel>
           <TagList>
-            {mockBook.categories.map((cat) => (
+            {mockBook.categories.map(cat => (
               <Tag key={cat.id}>{cat.name}</Tag>
             ))}
           </TagList>
           <StatusButtons>
-            <StatusButton
-              $active={status === 'reading'}
-              $color="#3b82f6"
-              onClick={() => handleStatusClick('reading')}
-            >
+            <StatusButton $active={status === 'reading'} $color="#3b82f6" onClick={() => handleStatusClick('reading')}>
               <Eye size={18} fill={status === 'reading' ? 'currentColor' : 'none'} />
               읽는 중
             </StatusButton>
@@ -336,11 +384,7 @@ export default function BookDetailPage() {
           <ReviewEmpty>
             <ReviewEmptyText>아직 작성한 리뷰가 없어요.</ReviewEmptyText>
             <ReviewEmptySubtext>이 책을 읽으셨다면 리뷰를 작성해볼까요?</ReviewEmptySubtext>
-            <Button 
-              as={Link}
-              href={`/review/write?bookId=${mockBook.id}`}
-              rightIcon={<ArrowRight size={18} />}
-            >
+            <Button as={Link} href={`/review/write?bookId=${mockBook.id}`} rightIcon={<ArrowRight size={18} />}>
               이 책 리뷰 쓰러 가기
             </Button>
           </ReviewEmpty>
@@ -350,9 +394,7 @@ export default function BookDetailPage() {
       {/* Book Description */}
       <Section>
         <SectionTitle>책 소개</SectionTitle>
-        <DescriptionContent $expanded={descExpanded}>
-          {mockBook.description}
-        </DescriptionContent>
+        <DescriptionContent $expanded={descExpanded}>{mockBook.description}</DescriptionContent>
         <ExpandButton onClick={() => setDescExpanded(!descExpanded)}>
           {descExpanded ? '접기' : '펼쳐 보기'}
           <ChevronDown size={16} style={{ transform: descExpanded ? 'rotate(180deg)' : 'none' }} />
@@ -363,9 +405,7 @@ export default function BookDetailPage() {
       <Section>
         <SectionTitle>저자 소개</SectionTitle>
         <AuthorName>{mockBook.author}</AuthorName>
-        <DescriptionContent $expanded={authorExpanded}>
-          {authorDescription}
-        </DescriptionContent>
+        <DescriptionContent $expanded={authorExpanded}>{authorDescription}</DescriptionContent>
         <ExpandButton onClick={() => setAuthorExpanded(!authorExpanded)}>
           {authorExpanded ? '접기' : '펼쳐 보기'}
           <ChevronDown size={16} style={{ transform: authorExpanded ? 'rotate(180deg)' : 'none' }} />
@@ -376,7 +416,7 @@ export default function BookDetailPage() {
       <Section>
         <SectionTitle>이 책과 비슷한 책</SectionTitle>
         <SimilarBooksGrid>
-          {similarBooks.map((book) => (
+          {similarBooks.map(book => (
             <BookCard key={book.id} book={book} size="sm" />
           ))}
         </SimilarBooksGrid>

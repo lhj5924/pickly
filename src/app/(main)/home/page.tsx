@@ -372,7 +372,7 @@ const AnimatedPieChart = ({ data, animate }: { data: ChartSegment[]; animate: bo
 
     // Determine text anchor based on position
     const isLeftSide = labelX < center;
-    const textAnchor = isLeftSide ? 'end' : 'start';
+    const textAnchor: 'end' | 'start' = isLeftSide ? 'end' : 'start';
     const labelOffset = isLeftSide ? -10 : 10;
 
     accumulatedPercentage += percentage;

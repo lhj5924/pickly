@@ -258,7 +258,7 @@ const CalendarDay = styled.div<{ $hasBooks: boolean; $bookCount: number }>`
   color: ${({ theme }) => theme.colors.text.secondary};
   border-radius: 0.25rem;
   background: ${({ $hasBooks, $bookCount, theme }) =>
-    $hasBooks ? `${theme.colors.primary[100 + Math.min($bookCount * 100, 400)]}` : 'transparent'};
+    $hasBooks ? `${theme.colors.primary[(100 + Math.min($bookCount * 100, 400)) as keyof typeof theme.colors.primary]}` : 'transparent'};
   position: relative;
   cursor: ${({ $hasBooks }) => ($hasBooks ? 'pointer' : 'default')};
   
