@@ -3,7 +3,7 @@
 import styled from 'styled-components';
 import { Button, StarRating } from '@/components/common';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Book } from '@/types';
 import { useBookStore } from '@/stores';
@@ -335,7 +335,7 @@ const mockBooks: Book[] = [
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
-export default function ReviewWritePage() {
+function ReviewWriteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { addReview } = useBookStore();
@@ -594,5 +594,13 @@ export default function ReviewWritePage() {
         리뷰 작성 완료
       </SubmitButton>
     </Container>
+  );
+}
+
+export default function ReviewWritePage() {
+  return (
+    <Suspense fallback={<Container><FormCard><Title>로딩 중...</Title></FormCard></Container>}>
+      <ReviewWriteContent />
+    </Suspense>
   );
 }
