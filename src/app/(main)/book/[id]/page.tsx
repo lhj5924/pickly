@@ -252,7 +252,7 @@ const similarBooks: Book[] = [
 ];
 
 // Mock review (set to null to show empty state)
-const mockReview = null;
+const mockReview: { hashtags: string; content: string } | null = null;
 // const mockReview = {
 //   hashtags: '#우리는모두천문학자로태어난다 #사시오매미가 #지갈해',
 //   content: `* 이 책은 카시오매아어원셔 로부터 제공한할이에서 죽절 있고 저성한 주관적 서럼합니다.
