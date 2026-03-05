@@ -4,18 +4,12 @@ import styled from 'styled-components';
 import { Button } from '@/components/common';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { mockReviews } from '@/data/mockData';
 
 const Container = styled.div`
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
-`;
-
-const Card = styled.div`
-  background: white;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
 
 const Title = styled.h1`
@@ -37,22 +31,20 @@ const ReviewGrid = styled.div`
 
 const ReviewCard = styled.div`
   background: white;
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
   border-radius: 0.75rem;
   padding: 1.25rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
-    box-shadow: ${({ theme }) => theme.shadows.md};
+    box-shadow: ${({ theme }) => theme.shadows.sm};
   }
 `;
 
 const BookCover = styled.img`
   width: 100%;
   height: 180px;
-  object-fit: cover;
-  border-radius: 0.5rem;
+  object-fit: contain;
   margin-bottom: 1rem;
 `;
 
@@ -82,37 +74,26 @@ const WriteButtonWrapper = styled.div`
   margin-top: 2rem;
 `;
 
-const mockReviews = [
-  { id: '1', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-  { id: '2', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-  { id: '3', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-  { id: '4', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-  { id: '5', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-  { id: '6', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-  { id: '7', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-  { id: '8', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-];
+// Data from centralized mock data (replace with API calls later)
 
 export default function ReviewPage() {
   return (
     <Container>
-      <Card>
-        <Title>내가 작성한 리뷰</Title>
-        <ReviewGrid>
-          {mockReviews.map((review) => (
-            <ReviewCard key={review.id}>
-              <BookCover src={review.book.coverImage} alt={review.book.title} />
-              <BookTitle>{review.book.title}</BookTitle>
-              <ReviewContent>{review.content}</ReviewContent>
-            </ReviewCard>
-          ))}
-        </ReviewGrid>
-        <WriteButtonWrapper>
-          <Button as={Link} href="/review/write" rightIcon={<ArrowRight size={18} />}>
-            내가 읽은 책 리뷰 쓰러 가기
-          </Button>
-        </WriteButtonWrapper>
-      </Card>
+      <Title>내가 작성한 리뷰</Title>
+      <ReviewGrid>
+        {mockReviews.map((review) => (
+          <ReviewCard key={review.id}>
+            <BookCover src={review.book.coverImage} alt={review.book.title} />
+            <BookTitle>{review.book.title}</BookTitle>
+            <ReviewContent>{review.content}</ReviewContent>
+          </ReviewCard>
+        ))}
+      </ReviewGrid>
+      <WriteButtonWrapper>
+        <Button as={Link} href="/review/write" rightIcon={<ArrowRight size={18} />}>
+          내가 읽은 책 리뷰 쓰러 가기
+        </Button>
+      </WriteButtonWrapper>
     </Container>
   );
 }

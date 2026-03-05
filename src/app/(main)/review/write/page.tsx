@@ -7,6 +7,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Book } from '@/types';
 import { useBookStore } from '@/stores';
+import { searchableBooks } from '@/data/mockData';
 
 const Container = styled.div`
   max-width: 700px;
@@ -297,41 +298,8 @@ const SubmitButton = styled(Button)`
   background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary[400]} 0%, ${({ theme }) => theme.colors.primary[500]} 100%);
 `;
 
-const mockBooks: Book[] = [
-  {
-    id: '1',
-    title: '우리는 모두 천문학자로 태어난다',
-    author: '지웅배',
-    publisher: '오마이북스',
-    publishDate: '2019년 01월 30일',
-    coverImage: 'https://image.yes24.com/goods/124857283/XL',
-    description: '별과 우주에 관한 가장 인간적인 이야기',
-    pageCount: 280,
-    categories: [{ id: 12, name: '자연과학' }, { id: 11, name: '천문학' }],
-  },
-  {
-    id: '2',
-    title: '우리가 빛의 속도로 갈 수 없다면',
-    author: '김초엽',
-    publisher: '허블',
-    publishDate: '2019년 06월 24일',
-    coverImage: 'https://image.yes24.com/goods/77091141/XL',
-    description: 'SF 소설',
-    pageCount: 272,
-    categories: [{ id: 4, name: 'SF' }, { id: 1, name: '소설' }],
-  },
-  {
-    id: '3',
-    title: '중독된 뇌를 어떻게 바꾸는가',
-    author: '저드슨 브루어',
-    publisher: '안드로메디안',
-    publishDate: '2020년 05월 15일',
-    coverImage: 'https://image.yes24.com/goods/90309531/XL',
-    description: '나쁜 습관을 끊는 과학적 방법',
-    pageCount: 320,
-    categories: [{ id: 12, name: '과학' }, { id: 9, name: '자기계발' }],
-  },
-];
+// Data from centralized mock data (replace with API calls later)
+const mockBooks = searchableBooks;
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 

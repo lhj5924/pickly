@@ -5,6 +5,13 @@ import { BookCard } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
 import { Book } from '@/types';
+import {
+  similarBooks as similarBooksData,
+  genreRecommendBooks as genreBooksData,
+  aiRecommendations,
+  popularBooks as popularBooksData,
+  hiddenTasteBooks as hiddenBooksData,
+} from '@/data/mockData';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -250,41 +257,43 @@ const FooterLogo = styled.p`
   font-size: 1.25rem;
   font-weight: 800;
   color: ${({ theme }) => theme.colors.primary[600]};
-  font-family: 'Georgia', serif;
-  margin-bottom: 0.5rem;
+  font-family: 'Titan One', 'Georgia', serif;
+  margin-bottom: 0.75rem;
 `;
 
-// Mock data
-const similarBooks: Book[] = [
-  { id: '1', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '2', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '3', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '4', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-];
+const FooterSubLinks = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+`;
 
-const genreBooks = [
-  { id: '1', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '때론이 아니 적어 마음이만 한다 걸 *', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: '2', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '때론이 아니 적어 마음이만 한다 걸 *', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: '3', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '때론이 아니 적어 마음이만 한다 걸 *', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-];
+const SocialIcons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+`;
 
-const aiBooks = [
-  { id: '1', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: '2', coverImage: 'https://image.yes24.com/goods/124857283/XL' },
-  { id: '3', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: '4', coverImage: 'https://image.yes24.com/goods/124857283/XL' },
-];
+const SocialIcon = styled.span`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.neutral[800]};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.625rem;
+`;
 
-const popularBooks = [
-  { id: '1', title: '"나가 했던 어느 날에" 의', subtitle: '비슷한 작품이에요!', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: '2', title: '"나가 했던 어느 날에" 의', subtitle: '비슷한 작품이에요!', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: '3', title: '"나가 했던 어느 날에" 의', subtitle: '비슷한 작품이에요!', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-];
-
-const hiddenBooks = [
-  { id: '1', coverImage: 'https://image.yes24.com/goods/125698547/XL', quote: '"어선원지가 내 번채 평에서 만났던 분들 세는 사업가를 가이미시닙요?"' },
-  { id: '2', coverImage: 'https://image.yes24.com/goods/124857283/XL', quote: '"어선원지가 내 번채 평에서 만났던 분들 세는 사업가를 가이미시닙요?"' },
-];
+// Data from centralized mock data (replace with API calls later)
+const similarBooks = similarBooksData;
+const genreBooks = genreBooksData;
+const aiBooks = aiRecommendations;
+const popularBooks = popularBooksData;
+const hiddenBooks = hiddenBooksData;
 
 export default function RecommendPage() {
   const { user } = useAuthStore();
@@ -334,7 +343,7 @@ export default function RecommendPage() {
         <AIBookGrid>
           {aiBooks.map((book) => (
             <AIBookCard key={book.id}>
-              <AIBookCover src={book.coverImage} alt="" />
+              <AIBookCover src={book.coverImage} alt={book.title} />
             </AIBookCard>
           ))}
         </AIBookGrid>
@@ -378,6 +387,16 @@ export default function RecommendPage() {
 
       <Footer>
         <FooterLogo>Pickley</FooterLogo>
+        <FooterSubLinks>
+          <span>고객센터</span>
+          <span>CONTACT US</span>
+        </FooterSubLinks>
+        <SocialIcons>
+          <SocialIcon>Y</SocialIcon>
+          <SocialIcon>@</SocialIcon>
+          <SocialIcon>X</SocialIcon>
+          <SocialIcon>♪</SocialIcon>
+        </SocialIcons>
       </Footer>
     </Container>
   );
