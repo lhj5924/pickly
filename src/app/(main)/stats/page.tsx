@@ -5,6 +5,8 @@ import { BookCard, Button } from '@/components/common';
 import { Book, Calendar, BarChart3, ArrowRight, ChevronLeft, ChevronRight, HelpCircle, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { readingStats, monthlyBarData, staleReadingBooks } from '@/data/mockData';
 
 const Container = styled.div`
   max-width: 900px;
@@ -15,16 +17,27 @@ const Container = styled.div`
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 2rem;
-  
+  background: linear-gradient(135deg, #f5f7ed 0%, #e8ebd8 100%);
+  border-radius: 1rem;
+  padding: 1.5rem 2rem;
+
   @media (max-width: 640px) {
     flex-direction: column;
     gap: 1rem;
   }
 `;
 
-const HeaderLeft = styled.div``;
+const HeaderLeft = styled.div`
+  flex: 1;
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
 
 const Level = styled.h1`
   font-size: 1.5rem;
@@ -485,23 +498,9 @@ const MoreButton = styled.button`
   }
 `;
 
-// Mock data
-const monthlyData = [
-  { label: '1월', value: 20.5 },
-  { label: '5/13 - 5/20', value: 20.5 },
-  { label: '5/20 - 5/27', value: 20.5 },
-  { label: '5/27 - 6/3', value: 20.5 },
-  { label: '6/3 - 6/10', value: 20.5 },
-  { label: '6/10 - 6/17', value: 3.4, highlight: true },
-];
-
-const staleBooks = [
-  { id: '1', coverImage: 'https://image.yes24.com/goods/124857283/XL', date: '2025년 3월 3일부터 읽는 중' },
-  { id: '2', coverImage: 'https://image.yes24.com/goods/124857283/XL', date: '2025년 3월 3일부터 읽는 중' },
-  { id: '3', coverImage: 'https://image.yes24.com/goods/124857283/XL', date: '2025년 3월 3일부터 읽는 중' },
-  { id: '4', coverImage: 'https://image.yes24.com/goods/124857283/XL', date: '2025년 3월 3일부터 읽는 중' },
-  { id: '5', coverImage: 'https://image.yes24.com/goods/124857283/XL', date: '2025년 3월 3일부터 읽는 중' },
-];
+// Data from centralized mock data (replace with API calls later)
+const monthlyData = monthlyBarData;
+const staleBooks = staleReadingBooks;
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -532,32 +531,35 @@ export default function StatsPage() {
       <Header>
         <HeaderLeft>
           <Level>나의 독서 레벨 Lv.5 - 안정적 독서자</Level>
-          <LevelDesc>"독서가 일상의 한 부분이에요."</LevelDesc>
+          <LevelDesc>&quot;독서가 일상의 한 부분이에요.&quot;</LevelDesc>
         </HeaderLeft>
-        <Button rightIcon={<ArrowRight size={18} />}>
-          내 통계 공유하기
-        </Button>
+        <HeaderRight>
+          <Button size="sm" rightIcon={<ArrowRight size={16} />}>
+            내 통계 공유하기
+          </Button>
+          <Image src="/pickly-jar.png" alt="Pickley" width={60} height={96} />
+        </HeaderRight>
       </Header>
 
       <StatsGrid>
         <StatCard>
           <StatInfo>
             <StatLabel>총 읽은 책 수</StatLabel>
-            <StatValue>12권</StatValue>
+            <StatValue>{readingStats.totalBooks}권</StatValue>
           </StatInfo>
           <StatIcon><Book size={24} /></StatIcon>
         </StatCard>
         <StatCard>
           <StatInfo>
             <StatLabel>평균 독서 기간</StatLabel>
-            <StatValue>5일</StatValue>
+            <StatValue>{readingStats.averageReadingDays}일</StatValue>
           </StatInfo>
           <StatIcon><Calendar size={24} /></StatIcon>
         </StatCard>
         <StatCard>
           <StatInfo>
             <StatLabel>월 평균 권 수</StatLabel>
-            <StatValue>3권</StatValue>
+            <StatValue>{readingStats.monthlyAverage}권</StatValue>
           </StatInfo>
           <StatIcon><BarChart3 size={24} /></StatIcon>
         </StatCard>

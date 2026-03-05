@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores';
 import { Category, BOOK_CATEGORIES } from '@/types';
+import { mockReviews as allMockReviews } from '@/data/mockData';
 
 const Container = styled.div`
   max-width: 900px;
@@ -16,10 +17,7 @@ const Container = styled.div`
 
 // Profile Section
 const ProfileCard = styled.div`
-  background: white;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: ${({ theme }) => theme.shadows.sm};
+  padding: 2rem 0;
   margin-bottom: 1.5rem;
 `;
 
@@ -125,10 +123,9 @@ const GenreTag = styled.span<{ $highlight?: boolean }>`
 
 // Reviews Section
 const ReviewSection = styled.div`
-  background: white;
+  background: ${({ theme }) => theme.colors.neutral[50]};
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: ${({ theme }) => theme.shadows.sm};
 `;
 
 const SectionHeader = styled.div`
@@ -165,16 +162,14 @@ const ReviewGrid = styled.div`
 
 const ReviewCard = styled.div`
   background: white;
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
   border-radius: 0.75rem;
-  padding: 1.25rem;
+  padding: 1.5rem;
 `;
 
 const ReviewBookCover = styled.img`
   width: 100%;
   height: 180px;
-  object-fit: cover;
-  border-radius: 0.5rem;
+  object-fit: contain;
   margin-bottom: 1rem;
 `;
 
@@ -183,6 +178,7 @@ const ReviewBookTitle = styled.h3`
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text.primary};
   margin-bottom: 0.75rem;
+  text-align: center;
 `;
 
 const ReviewContent = styled.p`
@@ -292,10 +288,7 @@ const GenreChip = styled.button<{ $selected: boolean }>`
   }
 `;
 
-const mockReviews = [
-  { id: '1', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-  { id: '2', book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' }, content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..' },
-];
+const mockReviews = allMockReviews.slice(0, 2);
 
 export default function MyPage() {
   const { user, updateNickname, updateFavoriteCategories, logout } = useAuthStore();
@@ -420,7 +413,7 @@ export default function MyPage() {
         
         <WriteButtonWrapper>
           <Button as={Link} href="/review/write" rightIcon={<ArrowRight size={18} />}>
-            내가 쓴 책 리뷰 쓰러 가기
+            내가 읽은 책 리뷰 쓰러 가기
           </Button>
         </WriteButtonWrapper>
       </ReviewSection>

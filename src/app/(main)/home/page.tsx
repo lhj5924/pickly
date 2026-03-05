@@ -6,18 +6,15 @@ import { ChevronLeft, ChevronRight, ArrowRight, Book, Calendar, BarChart3 } from
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuthStore, useBookStore } from '@/stores';
-
-// Chart Data Types
-interface ChartSegment {
-  name: string;
-  value: number;
-  color: string;
-}
-
-interface ChartData {
-  title: string;
-  segments: ChartSegment[];
-}
+import {
+  readingStats,
+  genreChartData,
+  keywordChartData,
+  bannerData,
+  getReadingBooks,
+  aiRecommendations,
+  type ChartSegment,
+} from '@/data/mockData';
 
 const PageWrapper = styled.div`
   position: relative;
@@ -113,7 +110,7 @@ const StatsSection = styled.section`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 2rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.quaternary};
   margin-bottom: 1rem;
@@ -131,11 +128,9 @@ const StatsGrid = styled.div`
 `;
 
 const StatCard = styled.div`
-  width: 368px;
-  height: 208px;
   background: white;
   border-radius: 0.75rem;
-  padding: 1.75rem 2.5rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -149,14 +144,14 @@ const StatInfo = styled.div`
 `;
 
 const StatLabel = styled.p`
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: ${({ theme }) => theme.colors.text.quinary};
   margin-bottom: 0.5rem;
 `;
 
 const StatValue = styled.p`
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.primary[600]};
 `;
@@ -180,10 +175,10 @@ const ChartSection = styled.div`
 `;
 
 const ChartTitle = styled.h3`
-  font-size: 1.75rem;
+  font-size: 1rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.quaternary};
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   text-align: left;
 `;
 
@@ -215,10 +210,10 @@ const PieChartWrapper = styled.div`
 `;
 
 const PieChartLabel = styled.p`
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 `;
 
 const PieChartContainer = styled.div`
@@ -480,110 +475,9 @@ const AnimatedPieChart = ({ data, animate }: { data: ChartSegment[]; animate: bo
   );
 };
 
-// Mock data
-// Chart mock data
-const genreChartData: ChartSegment[] = [
-  { name: '소설', value: 54, color: '#7d9240' },
-  { name: '에세이', value: 34, color: '#a3c47a' },
-  { name: '경제경영', value: 12, color: '#c5d9a4' },
-];
-
-const keywordChartData: ChartSegment[] = [
-  { name: '로맨스', value: 40, color: '#7d9240' },
-  { name: '성장', value: 35, color: '#a3c47a' },
-  { name: '힐링', value: 25, color: '#c5d9a4' },
-];
-const bannerData = [
-  {
-    id: 1,
-    book: {
-      title: '나나 올리브에게',
-      coverImage: 'https://image.yes24.com/goods/109933559/XL',
-    },
-    quote: '서운해하지는 마세요. 물건들에게도 계절이 있다면, 긴 겨울이 지나 봄이 온 것뿐이에요.',
-  },
-  {
-    id: 2,
-    book: {
-      title: '배너 2',
-      coverImage: '',
-    },
-    quote: '',
-  },
-  {
-    id: 3,
-    book: {
-      title: '배너 3',
-      coverImage: '',
-    },
-    quote: '',
-  },
-];
-
-const mockReadingBooks = [
-  {
-    id: '1',
-    title: '중독된 뇌를 어떻게 바꾸는가',
-    author: '저드슨 브루어',
-    coverImage: 'https://image.yes24.com/goods/90309531/XL',
-    progress: 36,
-  },
-  {
-    id: '2',
-    title: '중독된 뇌를 어떻게 바꾸는가',
-    author: '저드슨 브루어',
-    coverImage: 'https://image.yes24.com/goods/90309531/XL',
-    progress: 36,
-  },
-  {
-    id: '3',
-    title: '중독된 뇌를 어떻게 바꾸는가',
-    author: '저드슨 브루어',
-    coverImage: 'https://image.yes24.com/goods/90309531/XL',
-    progress: 36,
-  },
-  {
-    id: '4',
-    title: '중독된 뇌를 어떻게 바꾸는가',
-    author: '저드슨 브루어',
-    coverImage: 'https://image.yes24.com/goods/90309531/XL',
-    progress: 36,
-  },
-  {
-    id: '5',
-    title: '중독된 뇌를 어떻게 바꾸는가',
-    author: '저드슨 브루어',
-    coverImage: 'https://image.yes24.com/goods/90309531/XL',
-    progress: 36,
-  },
-];
-
-const mockRecommendations = [
-  {
-    id: '1',
-    title: '서해는 모든 것을 알았다',
-    author: '정세랑',
-    coverImage: 'https://image.yes24.com/goods/125698547/XL',
-  },
-  {
-    id: '2',
-    title: '우리는 모두 천문학자로 태어난다',
-    author: '지웅배',
-    coverImage: 'https://image.yes24.com/goods/124857283/XL',
-  },
-  {
-    id: '3',
-    title: '서해는 모든 것을 알았다',
-    author: '정세랑',
-    coverImage: 'https://image.yes24.com/goods/125698547/XL',
-  },
-  {
-    id: '4',
-    title: '우리는 모두 천문학자로 태어난다',
-    author: '지웅배',
-    coverImage: 'https://image.yes24.com/goods/124857283/XL',
-  },
-];
+// Data from centralized mock data (replace with API calls later)
+const mockReadingBooks = getReadingBooks();
+const mockRecommendations = aiRecommendations;
 
 export default function HomePage() {
   const { user } = useAuthStore();
@@ -653,28 +547,28 @@ export default function HomePage() {
             <StatCard>
               <StatInfo>
                 <StatLabel>총 읽은 책 수</StatLabel>
-                {hasData ? <StatValue>12권</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
+                {hasData ? <StatValue>{readingStats.totalBooks}권</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
               </StatInfo>
               <StatIcon>
-                <Book size={36} />
+                <Book size={24} />
               </StatIcon>
             </StatCard>
             <StatCard>
               <StatInfo>
                 <StatLabel>평균 독서 기간</StatLabel>
-                {hasData ? <StatValue>5일</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
+                {hasData ? <StatValue>{readingStats.averageReadingDays}일</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
               </StatInfo>
               <StatIcon>
-                <Calendar size={36} />
+                <Calendar size={24} />
               </StatIcon>
             </StatCard>
             <StatCard>
               <StatInfo>
                 <StatLabel>월 평균 권 수</StatLabel>
-                {hasData ? <StatValue>3권</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
+                {hasData ? <StatValue>{readingStats.monthlyAverage}권</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
               </StatInfo>
               <StatIcon>
-                <BarChart3 size={36} />
+                <BarChart3 size={24} />
               </StatIcon>
             </StatCard>
           </StatsGrid>
@@ -714,7 +608,7 @@ export default function HomePage() {
               {mockReadingBooks.map(book => (
                 <BookCard
                   key={book.id}
-                  book={{ ...book, description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] }}
+                  book={book}
                   size="sm"
                   showProgress
                 />
@@ -732,7 +626,7 @@ export default function HomePage() {
             {mockRecommendations.map(book => (
               <BookCard
                 key={book.id}
-                book={{ ...book, description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] }}
+                book={book}
                 size="md"
               />
             ))}
