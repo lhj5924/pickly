@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import StyledComponentsRegistry from './registry';
-import { ThemeProvider } from '@/components/providers';
+import { ThemeProvider, QueryProvider } from '@/components/providers';
 
 export const metadata: Metadata = {
   title: '피클리 - 도서 큐레이션 서비스',
@@ -21,7 +21,9 @@ export default function RootLayout({
       </head>
       <body>
         <StyledComponentsRegistry>
-          <ThemeProvider>{children}</ThemeProvider>
+          <QueryProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </QueryProvider>
         </StyledComponentsRegistry>
       </body>
     </html>
