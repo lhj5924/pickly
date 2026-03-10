@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores';
 import { Category, BOOK_CATEGORIES } from '@/types';
 import { mockReviews as allMockReviews } from '@/data/mockData';
+import { useMe, useUpdateMe, useDeleteMe } from '@/api/useMe';
 
 const Container = styled.div`
   max-width: 900px;
@@ -25,7 +26,7 @@ const ProfileHeader = styled.div`
   display: flex;
   gap: 2rem;
   align-items: center;
-  
+
   @media (max-width: 640px) {
     flex-direction: column;
     text-align: center;
@@ -71,7 +72,7 @@ const NicknameInput = styled.input`
   background: transparent;
   outline: none;
   padding: 0;
-  
+
   &:focus {
     border-bottom-color: ${({ theme }) => theme.colors.primary[500]};
   }
@@ -86,7 +87,7 @@ const EditDoneLabel = styled.span`
 const EditButton = styled.button`
   padding: 0.25rem;
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.primary[600]};
   }
@@ -103,7 +104,7 @@ const GenreRow = styled.div`
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  
+
   @media (max-width: 640px) {
     justify-content: center;
   }
@@ -111,12 +112,9 @@ const GenreRow = styled.div`
 
 const GenreTag = styled.span<{ $highlight?: boolean }>`
   padding: 0.375rem 0.75rem;
-  background: ${({ theme, $highlight }) =>
-    $highlight ? theme.colors.primary[100] : theme.colors.neutral[100]};
-  color: ${({ theme, $highlight }) =>
-    $highlight ? theme.colors.primary[600] : theme.colors.text.secondary};
-  border: 1px solid ${({ theme, $highlight }) =>
-    $highlight ? theme.colors.primary[300] : 'transparent'};
+  background: ${({ theme, $highlight }) => ($highlight ? theme.colors.primary[100] : theme.colors.neutral[100])};
+  color: ${({ theme, $highlight }) => ($highlight ? theme.colors.primary[600] : theme.colors.text.secondary)};
+  border: 1px solid ${({ theme, $highlight }) => ($highlight ? theme.colors.primary[300] : 'transparent')};
   border-radius: 0.375rem;
   font-size: 0.875rem;
 `;
@@ -144,7 +142,7 @@ const SectionTitle = styled.h2`
 const SeeMoreLink = styled(Link)`
   font-size: 0.875rem;
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.primary[600]};
   }
@@ -154,7 +152,7 @@ const ReviewGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -209,7 +207,7 @@ const FooterLinks = styled.div`
 
 const FooterLink = styled.button`
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.text.secondary};
   }
@@ -217,7 +215,7 @@ const FooterLink = styled.button`
 
 const DeleteLink = styled.button`
   color: ${({ theme }) => theme.colors.error};
-  
+
   &:hover {
     text-decoration: underline;
   }
@@ -258,7 +256,7 @@ const ModalTitle = styled.h3`
 const CloseButton = styled.button`
   font-size: 1.5rem;
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.text.primary};
   }
@@ -275,14 +273,11 @@ const GenreChip = styled.button<{ $selected: boolean }>`
   padding: 0.5rem 1rem;
   border-radius: 2rem;
   font-size: 0.875rem;
-  border: 1.5px solid ${({ theme, $selected }) =>
-    $selected ? theme.colors.primary[500] : theme.colors.border.default};
-  background: ${({ theme, $selected }) =>
-    $selected ? theme.colors.primary[50] : 'white'};
-  color: ${({ theme, $selected }) =>
-    $selected ? theme.colors.primary[600] : theme.colors.text.secondary};
+  border: 1.5px solid ${({ theme, $selected }) => ($selected ? theme.colors.primary[500] : theme.colors.border.default)};
+  background: ${({ theme, $selected }) => ($selected ? theme.colors.primary[50] : 'white')};
+  color: ${({ theme, $selected }) => ($selected ? theme.colors.primary[600] : theme.colors.text.secondary)};
   transition: all 0.2s ease;
-  
+
   &:hover {
     border-color: ${({ theme }) => theme.colors.primary[400]};
   }
@@ -291,20 +286,36 @@ const GenreChip = styled.button<{ $selected: boolean }>`
 const mockReviews = allMockReviews.slice(0, 2);
 
 export default function MyPage() {
-  const { user, updateNickname, updateFavoriteCategories, logout } = useAuthStore();
-  
+  const { user: localUser, updateNickname, updateFavoriteCategories, logout, setUserFromApi } = useAuthStore();
+  const { data: serverUser, isLoading, isError } = useMe();
+  const { mutate: updateUser } = useUpdateMe();
+  const { mutate: deleteUser, isPending: isDeleting } = useDeleteMe();
+
+  // 서버 데이터가 오면 zustand 스토어 동기화
+  useEffect(() => {
+    if (serverUser) {
+      setUserFromApi(serverUser);
+    }
+  }, [serverUser, setUserFromApi]);
+
+  const displayNickname = serverUser?.nickname ?? localUser?.nickname ?? '';
+  const displayEmail = serverUser?.email ?? localUser?.email ?? '';
+
   const [isEditingNickname, setIsEditingNickname] = useState(false);
-  const [nicknameValue, setNicknameValue] = useState(user?.nickname || '김피꼴리_3421');
+  const [nicknameValue, setNicknameValue] = useState(displayNickname);
   const [showGenreModal, setShowGenreModal] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>(
-    user?.preferences.favoriteCategories || [
-      { id: 5, name: '스릴러' },
-      { id: 2, name: '로맨스' },
-      { id: 24, name: '뭐암튼아무거나' },
-    ]
+    localUser?.preferences.favoriteCategories || [],
   );
   const [tempCategories, setTempCategories] = useState<Category[]>([]);
-  
+
+  // 서버 데이터 도착 시 닉네임 input 동기화
+  useEffect(() => {
+    if (serverUser?.nickname) {
+      setNicknameValue(serverUser.nickname);
+    }
+  }, [serverUser?.nickname]);
+
   const nicknameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -318,8 +329,17 @@ export default function MyPage() {
   };
 
   const handleNicknameSave = () => {
-    updateNickname(nicknameValue);
+    const trimmed = nicknameValue.trim();
+    if (!trimmed || trimmed === displayNickname) {
+      setNicknameValue(displayNickname);
+      setIsEditingNickname(false);
+      return;
+    }
+    // 즉시 로컬 반영
+    updateNickname(trimmed);
     setIsEditingNickname(false);
+    // 서버에 반영
+    updateUser({ nickname: trimmed });
   };
 
   const handleNicknameKeyDown = (e: React.KeyboardEvent) => {
@@ -334,10 +354,8 @@ export default function MyPage() {
   };
 
   const handleGenreToggle = (category: Category) => {
-    setTempCategories((prev) =>
-      prev.find((c) => c.id === category.id)
-        ? prev.filter((c) => c.id !== category.id)
-        : [...prev, category]
+    setTempCategories(prev =>
+      prev.find(c => c.id === category.id) ? prev.filter(c => c.id !== category.id) : [...prev, category],
     );
   };
 
@@ -353,6 +371,20 @@ export default function MyPage() {
     window.location.href = '/login';
   };
 
+  const handleDeleteAccount = () => {
+    if (window.confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      deleteUser();
+    }
+  };
+
+  if (isLoading) {
+    return <Container><p style={{ textAlign: 'center', padding: '4rem 0' }}>불러오는 중...</p></Container>;
+  }
+
+  if (isError) {
+    return <Container><p style={{ textAlign: 'center', padding: '4rem 0' }}>정보를 불러오지 못했습니다.</p></Container>;
+  }
+
   return (
     <Container>
       <ProfileCard>
@@ -365,7 +397,7 @@ export default function MyPage() {
                   <NicknameInput
                     ref={nicknameInputRef}
                     value={nicknameValue}
-                    onChange={(e) => setNicknameValue(e.target.value)}
+                    onChange={e => setNicknameValue(e.target.value)}
                     onBlur={handleNicknameSave}
                     onKeyDown={handleNicknameKeyDown}
                   />
@@ -380,7 +412,7 @@ export default function MyPage() {
                 </>
               )}
             </NicknameRow>
-            <Email>Pickley01@gmail.com</Email>
+            <Email>{displayEmail}</Email>
             <GenreRow>
               {selectedCategories.slice(0, 3).map((cat, index) => (
                 <GenreTag key={cat.id} $highlight={index === 1}>
@@ -400,9 +432,9 @@ export default function MyPage() {
           <SectionTitle>내가 작성한 리뷰</SectionTitle>
           <SeeMoreLink href="/review">더보기</SeeMoreLink>
         </SectionHeader>
-        
+
         <ReviewGrid>
-          {mockReviews.map((review) => (
+          {mockReviews.map(review => (
             <ReviewCard key={review.id}>
               <ReviewBookCover src={review.book.coverImage} alt={review.book.title} />
               <ReviewBookTitle>{review.book.title}</ReviewBookTitle>
@@ -410,7 +442,7 @@ export default function MyPage() {
             </ReviewCard>
           ))}
         </ReviewGrid>
-        
+
         <WriteButtonWrapper>
           <Button as={Link} href="/review/write" rightIcon={<ArrowRight size={18} />}>
             내가 읽은 책 리뷰 쓰러 가기
@@ -424,34 +456,32 @@ export default function MyPage() {
         <FooterLink>개인정보이용약관</FooterLink>
       </FooterLinks>
       <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-        <DeleteLink>회원탈퇴</DeleteLink>
+        <DeleteLink onClick={handleDeleteAccount} disabled={isDeleting}>
+          {isDeleting ? '처리 중...' : '회원탈퇴'}
+        </DeleteLink>
       </div>
 
       {/* Genre Selection Modal */}
       <ModalOverlay $isOpen={showGenreModal} onClick={() => setShowGenreModal(false)}>
-        <Modal onClick={(e) => e.stopPropagation()}>
+        <Modal onClick={e => e.stopPropagation()}>
           <ModalHeader>
             <ModalTitle>최소 3개 이상 선택해주세요</ModalTitle>
             <CloseButton onClick={() => setShowGenreModal(false)}>×</CloseButton>
           </ModalHeader>
-          
+
           <GenreGrid>
-            {BOOK_CATEGORIES.map((category) => (
+            {BOOK_CATEGORIES.map(category => (
               <GenreChip
                 key={category.id}
-                $selected={tempCategories.some((c) => c.id === category.id)}
+                $selected={tempCategories.some(c => c.id === category.id)}
                 onClick={() => handleGenreToggle(category)}
               >
                 {category.name}
               </GenreChip>
             ))}
           </GenreGrid>
-          
-          <Button
-            fullWidth
-            disabled={tempCategories.length < 3}
-            onClick={handleGenreSave}
-          >
+
+          <Button fullWidth disabled={tempCategories.length < 3} onClick={handleGenreSave}>
             선택완료
           </Button>
         </Modal>

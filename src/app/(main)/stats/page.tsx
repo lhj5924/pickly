@@ -2,7 +2,16 @@
 
 import styled, { keyframes } from 'styled-components';
 import { BookCard, Button } from '@/components/common';
-import { Book, Calendar, BarChart3, ArrowRight, ChevronLeft, ChevronRight, HelpCircle, ChevronDown } from 'lucide-react';
+import {
+  Book,
+  Calendar,
+  BarChart3,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  HelpCircle,
+  ChevronDown,
+} from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -57,7 +66,7 @@ const StatsGrid = styled.div`
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
-  
+
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
@@ -146,7 +155,7 @@ const NavButton = styled.button`
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     background: ${({ theme }) => theme.colors.neutral[50]};
   }
@@ -181,14 +190,13 @@ const BarWrapper = styled.div`
 const Bar = styled.div<{ $height: number; $highlight: boolean; $delay: number }>`
   width: 50px;
   height: ${({ $height }) => $height}%;
-  background: ${({ theme, $highlight }) =>
-    $highlight ? theme.colors.primary[500] : theme.colors.primary[200]};
+  background: ${({ theme, $highlight }) => ($highlight ? theme.colors.primary[500] : theme.colors.primary[200])};
   border-radius: 0.25rem 0.25rem 0 0;
   transform-origin: bottom;
   animation: ${growUp} 0.8s ease-out forwards;
   animation-delay: ${({ $delay }) => $delay}s;
   position: relative;
-  
+
   @media (max-width: 640px) {
     width: 30px;
   }
@@ -237,7 +245,7 @@ const CalendarMonth = styled.span`
 
 const CalendarNavBtn = styled.button`
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.text.primary};
   }
@@ -271,10 +279,12 @@ const CalendarDay = styled.div<{ $hasBooks: boolean; $bookCount: number }>`
   color: ${({ theme }) => theme.colors.text.secondary};
   border-radius: 0.25rem;
   background: ${({ $hasBooks, $bookCount, theme }) =>
-    $hasBooks ? `${theme.colors.primary[(100 + Math.min($bookCount * 100, 400)) as keyof typeof theme.colors.primary]}` : 'transparent'};
+    $hasBooks
+      ? `${theme.colors.primary[(100 + Math.min($bookCount * 100, 400)) as keyof typeof theme.colors.primary]}`
+      : 'transparent'};
   position: relative;
   cursor: ${({ $hasBooks }) => ($hasBooks ? 'pointer' : 'default')};
-  
+
   &:hover {
     background: ${({ theme }) => theme.colors.primary[100]};
   }
@@ -314,7 +324,7 @@ const PieContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  
+
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
@@ -396,7 +406,7 @@ const QuarterlyGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
-  
+
   @media (max-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -469,7 +479,7 @@ const StaleBookCover = styled.div`
   border-radius: 0.5rem;
   overflow: hidden;
   margin-bottom: 0.5rem;
-  
+
   img {
     width: 100%;
     height: 100%;
@@ -492,7 +502,7 @@ const MoreButton = styled.button`
   margin-top: 1rem;
   font-size: 0.875rem;
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.text.secondary};
   }
@@ -513,7 +523,7 @@ export default function StatsPage() {
     const month = currentMonth.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
+
     const days = [];
     for (let i = 0; i < firstDay; i++) {
       days.push({ day: 0, books: 0 });
@@ -537,7 +547,7 @@ export default function StatsPage() {
           <Button size="sm" rightIcon={<ArrowRight size={16} />}>
             내 통계 공유하기
           </Button>
-          <Image src="/pickly-jar.png" alt="Pickley" width={60} height={96} />
+          <Image src="/pickly-jar.png" alt="pickly" width={60} height={96} />
         </HeaderRight>
       </Header>
 
@@ -547,21 +557,27 @@ export default function StatsPage() {
             <StatLabel>총 읽은 책 수</StatLabel>
             <StatValue>{readingStats.totalBooks}권</StatValue>
           </StatInfo>
-          <StatIcon><Book size={24} /></StatIcon>
+          <StatIcon>
+            <Book size={24} />
+          </StatIcon>
         </StatCard>
         <StatCard>
           <StatInfo>
             <StatLabel>평균 독서 기간</StatLabel>
             <StatValue>{readingStats.averageReadingDays}일</StatValue>
           </StatInfo>
-          <StatIcon><Calendar size={24} /></StatIcon>
+          <StatIcon>
+            <Calendar size={24} />
+          </StatIcon>
         </StatCard>
         <StatCard>
           <StatInfo>
             <StatLabel>월 평균 권 수</StatLabel>
             <StatValue>{readingStats.monthlyAverage}권</StatValue>
           </StatInfo>
-          <StatIcon><BarChart3 size={24} /></StatIcon>
+          <StatIcon>
+            <BarChart3 size={24} />
+          </StatIcon>
         </StatCard>
       </StatsGrid>
 
@@ -577,18 +593,18 @@ export default function StatsPage() {
             <ThisWeekBooks>3권 (이번 주)</ThisWeekBooks>
           </ChartInfo>
           <ChartNav>
-            <NavButton><ChevronLeft size={16} /></NavButton>
-            <NavButton><ChevronRight size={16} /></NavButton>
+            <NavButton>
+              <ChevronLeft size={16} />
+            </NavButton>
+            <NavButton>
+              <ChevronRight size={16} />
+            </NavButton>
           </ChartNav>
         </ChartHeader>
         <BarChartContainer>
           {monthlyData.map((data, index) => (
             <BarWrapper key={index}>
-              <Bar
-                $height={(data.value / maxBarValue) * 100}
-                $highlight={data.highlight || false}
-                $delay={index * 0.1}
-              >
+              <Bar $height={(data.value / maxBarValue) * 100} $highlight={data.highlight || false} $delay={index * 0.1}>
                 <BarValue>{data.value}</BarValue>
               </Bar>
               <BarLabel>{data.label}</BarLabel>
@@ -605,11 +621,15 @@ export default function StatsPage() {
             <HelpCircle size={16} color="#a3a3a3" />
           </ChartTitle>
           <CalendarNav>
-            <CalendarNavBtn onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}>
+            <CalendarNavBtn
+              onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}
+            >
               <ChevronLeft size={18} />
             </CalendarNavBtn>
             <CalendarMonth>{currentMonth.getMonth() + 1}월</CalendarMonth>
-            <CalendarNavBtn onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}>
+            <CalendarNavBtn
+              onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}
+            >
               <ChevronRight size={18} />
             </CalendarNavBtn>
           </CalendarNav>
@@ -637,9 +657,18 @@ export default function StatsPage() {
               <PieCenter />
             </PieChart>
             <PieLegend>
-              <LegendItem><LegendDot $color="#7d9240" />소설 54%</LegendItem>
-              <LegendItem><LegendDot $color="#a3c47a" />에세이 34%</LegendItem>
-              <LegendItem><LegendDot $color="#c5d9a4" />경제/경영 32%</LegendItem>
+              <LegendItem>
+                <LegendDot $color="#7d9240" />
+                소설 54%
+              </LegendItem>
+              <LegendItem>
+                <LegendDot $color="#a3c47a" />
+                에세이 34%
+              </LegendItem>
+              <LegendItem>
+                <LegendDot $color="#c5d9a4" />
+                경제/경영 32%
+              </LegendItem>
             </PieLegend>
           </PieChartWrapper>
           <PieChartWrapper>
@@ -648,9 +677,18 @@ export default function StatsPage() {
               <PieCenter />
             </PieChart>
             <PieLegend>
-              <LegendItem><LegendDot $color="#7d9240" />소설 54%</LegendItem>
-              <LegendItem><LegendDot $color="#a3c47a" />에세이 34%</LegendItem>
-              <LegendItem><LegendDot $color="#c5d9a4" />경제/경영 32%</LegendItem>
+              <LegendItem>
+                <LegendDot $color="#7d9240" />
+                소설 54%
+              </LegendItem>
+              <LegendItem>
+                <LegendDot $color="#a3c47a" />
+                에세이 34%
+              </LegendItem>
+              <LegendItem>
+                <LegendDot $color="#c5d9a4" />
+                경제/경영 32%
+              </LegendItem>
             </PieLegend>
           </PieChartWrapper>
         </PieContainer>
@@ -662,30 +700,46 @@ export default function StatsPage() {
         <QuarterlyGrid>
           <QuarterCard>
             <QuarterLabel>1분기</QuarterLabel>
-            <QuarterGenre>스릴러 <QuarterPercent>65%</QuarterPercent></QuarterGenre>
+            <QuarterGenre>
+              스릴러 <QuarterPercent>65%</QuarterPercent>
+            </QuarterGenre>
             <QuarterSubGenres>
-              로맨스 23%<br />로맨스 13%
+              로맨스 23%
+              <br />
+              로맨스 13%
             </QuarterSubGenres>
           </QuarterCard>
           <QuarterCard>
             <QuarterLabel>2분기</QuarterLabel>
-            <QuarterGenre>라이트노벨 <QuarterPercent>65%</QuarterPercent></QuarterGenre>
+            <QuarterGenre>
+              라이트노벨 <QuarterPercent>65%</QuarterPercent>
+            </QuarterGenre>
             <QuarterSubGenres>
-              로맨스 23%<br />로맨스 13%
+              로맨스 23%
+              <br />
+              로맨스 13%
             </QuarterSubGenres>
           </QuarterCard>
           <QuarterCard>
             <QuarterLabel>3분기</QuarterLabel>
-            <QuarterGenre>예술/대중문화 <QuarterPercent>65%</QuarterPercent></QuarterGenre>
+            <QuarterGenre>
+              예술/대중문화 <QuarterPercent>65%</QuarterPercent>
+            </QuarterGenre>
             <QuarterSubGenres>
-              로맨스 23%<br />로맨스 13%
+              로맨스 23%
+              <br />
+              로맨스 13%
             </QuarterSubGenres>
           </QuarterCard>
           <QuarterCard>
             <QuarterLabel>4분기</QuarterLabel>
-            <QuarterGenre>스릴러 <QuarterPercent>65%</QuarterPercent></QuarterGenre>
+            <QuarterGenre>
+              스릴러 <QuarterPercent>65%</QuarterPercent>
+            </QuarterGenre>
             <QuarterSubGenres>
-              로맨스 23%<br />로맨스 13%
+              로맨스 23%
+              <br />
+              로맨스 13%
             </QuarterSubGenres>
           </QuarterCard>
         </QuarterlyGrid>
@@ -698,7 +752,7 @@ export default function StatsPage() {
           <HelpCircle size={16} color="#a3a3a3" />
         </StaleTitle>
         <StaleBooks>
-          {staleBooks.map((book) => (
+          {staleBooks.map(book => (
             <StaleBookCard key={book.id}>
               <StaleBookCover>
                 <img src={book.coverImage} alt="" />

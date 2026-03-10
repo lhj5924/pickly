@@ -39,7 +39,7 @@ const SectionTitle = styled.h2`
 const SeeMoreLink = styled.button`
   font-size: 0.875rem;
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.primary[600]};
   }
@@ -59,7 +59,7 @@ const NavButton = styled.button`
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.colors.text.tertiary};
-  
+
   &:hover {
     background: ${({ theme }) => theme.colors.neutral[50]};
   }
@@ -70,16 +70,16 @@ const HorizontalScroll = styled.div`
   gap: 1rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
-  
+
   &::-webkit-scrollbar {
     height: 4px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: ${({ theme }) => theme.colors.neutral[100]};
     border-radius: 2px;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: ${({ theme }) => theme.colors.neutral[300]};
     border-radius: 2px;
@@ -90,11 +90,11 @@ const VerticalGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
   }
@@ -168,7 +168,7 @@ const PopularGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -213,7 +213,7 @@ const HiddenGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-  
+
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
@@ -306,12 +306,16 @@ export default function RecommendPage() {
         <SectionHeader>
           <SectionTitle>&lt;내가 했던 어느 날에&gt; 와 비슷한 책</SectionTitle>
           <NavButtons>
-            <NavButton><ChevronLeft size={18} /></NavButton>
-            <NavButton><ChevronRight size={18} /></NavButton>
+            <NavButton>
+              <ChevronLeft size={18} />
+            </NavButton>
+            <NavButton>
+              <ChevronRight size={18} />
+            </NavButton>
           </NavButtons>
         </SectionHeader>
         <HorizontalScroll>
-          {similarBooks.map((book) => (
+          {similarBooks.map(book => (
             <BookCard key={book.id} book={book} size="md" />
           ))}
         </HorizontalScroll>
@@ -324,7 +328,7 @@ export default function RecommendPage() {
           <SeeMoreLink>더보기</SeeMoreLink>
         </SectionHeader>
         <VerticalGrid>
-          {genreBooks.map((book) => (
+          {genreBooks.map(book => (
             <VerticalBookCard key={book.id}>
               <VerticalBookCover src={book.coverImage} alt={book.title} />
               <VerticalBookTitle>{book.title}</VerticalBookTitle>
@@ -341,7 +345,7 @@ export default function RecommendPage() {
           <SeeMoreLink style={{ color: '#a3a3a3' }}>더보기</SeeMoreLink>
         </SectionHeader>
         <AIBookGrid>
-          {aiBooks.map((book) => (
+          {aiBooks.map(book => (
             <AIBookCard key={book.id}>
               <AIBookCover src={book.coverImage} alt={book.title} />
             </AIBookCard>
@@ -356,7 +360,7 @@ export default function RecommendPage() {
           <SeeMoreLink>더보기</SeeMoreLink>
         </SectionHeader>
         <PopularGrid>
-          {popularBooks.map((book) => (
+          {popularBooks.map(book => (
             <PopularCard key={book.id}>
               <PopularBookCover src={book.coverImage} alt="" />
               <PopularLabel>{nickname}님이 읽은</PopularLabel>
@@ -374,7 +378,7 @@ export default function RecommendPage() {
           <SeeMoreLink>더보기</SeeMoreLink>
         </SectionHeader>
         <HiddenGrid>
-          {hiddenBooks.map((book) => (
+          {hiddenBooks.map(book => (
             <HiddenCard key={book.id}>
               <HiddenBookCover src={book.coverImage} alt="" />
               <HiddenQuote>
@@ -386,7 +390,7 @@ export default function RecommendPage() {
       </HiddenSection>
 
       <Footer>
-        <FooterLogo>Pickley</FooterLogo>
+        <FooterLogo>pickly</FooterLogo>
         <FooterSubLinks>
           <span>고객센터</span>
           <span>CONTACT US</span>
