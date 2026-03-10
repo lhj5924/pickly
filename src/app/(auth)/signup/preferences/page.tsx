@@ -4,6 +4,7 @@ import styled, { keyframes } from 'styled-components';
 import Image from 'next/image';
 import { Button } from '@/components/common';
 import { useAuthStore } from '@/stores';
+import { useUpdateMe } from '@/api/useMe';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Category, BOOK_CATEGORIES } from '@/types';
@@ -151,8 +152,10 @@ const ButtonWrapper = styled.div`
 
 export default function PreferencesPage() {
   const router = useRouter();
-  const { updateSignupData, completeSignup } = useAuthStore();
+  const { updateSignupData, completeSignup, updateFavoriteCategories } = useAuthStore();
+  const { mutate: updateUser } = useUpdateMe();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCategoryToggle = (category: Category) => {
     setSelectedCategories(prev =>
@@ -161,11 +164,27 @@ export default function PreferencesPage() {
   };
 
   const handleComplete = () => {
-    if (selectedCategories.length < 3) return;
+    if (selectedCategories.length < 3 || isSubmitting) return;
+    setIsSubmitting(true);
 
     updateSignupData({ favoriteCategories: selectedCategories });
+    updateFavoriteCategories(selectedCategories);
     completeSignup();
-    router.push('/home');
+
+    // 서버에 닉네임 등 온보딩 정보 전송 (실패해도 로컬 상태는 유지)
+    const user = useAuthStore.getState().user;
+    if (user) {
+      updateUser(
+        { nickname: user.nickname },
+        {
+          onSettled: () => {
+            router.push('/home');
+          },
+        },
+      );
+    } else {
+      router.push('/home');
+    }
   };
 
   const isValid = selectedCategories.length >= 3;
@@ -174,7 +193,7 @@ export default function PreferencesPage() {
     <PageWrapper>
       <Container>
         <LeftPanel>
-          <Logo>Pickley</Logo>
+          <Logo>pickly</Logo>
           <JarImage>
             <Image src="/pickly-jar.png" alt="Pickly Jar" width={174} height={280} priority />
           </JarImage>
@@ -197,8 +216,13 @@ export default function PreferencesPage() {
           </CategoryGrid>
 
           <ButtonWrapper>
-            <Button size="lg" disabled={!isValid} onClick={handleComplete} rightIcon={<ArrowRight size={20} />}>
-              피클리 시작하기
+            <Button
+              size="lg"
+              disabled={!isValid || isSubmitting}
+              onClick={handleComplete}
+              rightIcon={<ArrowRight size={20} />}
+            >
+              {isSubmitting ? '처리 중...' : '피클리 시작하기'}
             </Button>
           </ButtonWrapper>
         </RightPanel>
