@@ -110,7 +110,7 @@ export const GNB = () => {
   return (
     <Header>
       <Container>
-        <Logo href="/home">Pickley</Logo>
+        <Logo href="/home">pickly</Logo>
 
         <Nav>
           {navItems.map(item => (

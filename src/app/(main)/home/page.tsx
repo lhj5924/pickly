@@ -401,11 +401,14 @@ const AnimatedPieChart = ({ data, animate }: { data: ChartSegment[]; animate: bo
               fill="none"
               stroke={segment.color}
               strokeWidth={strokeWidth}
-              strokeDasharray={animationComplete ? segment.strokeDasharray : (animate ? `0 ${circumference}` : segment.strokeDasharray)}
+              strokeDasharray={
+                animationComplete ? segment.strokeDasharray : animate ? `0 ${circumference}` : segment.strokeDasharray
+              }
               strokeDashoffset={segment.strokeDashoffset}
               style={{
                 transition: animate && !animationComplete ? 'none' : undefined,
-                animation: animate && !animationComplete ? `pieSegment${index} 1s ease-out ${index * 0.1}s forwards` : undefined,
+                animation:
+                  animate && !animationComplete ? `pieSegment${index} 1s ease-out ${index * 0.1}s forwards` : undefined,
               }}
             />
           ))}
@@ -423,8 +426,9 @@ const AnimatedPieChart = ({ data, animate }: { data: ChartSegment[]; animate: bo
               stroke="#999"
               strokeWidth={1}
               style={{
-                opacity: animationComplete ? 1 : (animate ? 0 : 1),
-                animation: animate && !animationComplete ? `fadeIn 0.3s ease-out ${segment.delay}s forwards` : undefined,
+                opacity: animationComplete ? 1 : animate ? 0 : 1,
+                animation:
+                  animate && !animationComplete ? `fadeIn 0.3s ease-out ${segment.delay}s forwards` : undefined,
               }}
             />
             {/* Label text */}
@@ -437,9 +441,10 @@ const AnimatedPieChart = ({ data, animate }: { data: ChartSegment[]; animate: bo
               fontWeight="500"
               fill="#333"
               style={{
-                opacity: animationComplete ? 1 : (animate ? 0 : 1),
+                opacity: animationComplete ? 1 : animate ? 0 : 1,
                 transform: 'translateY(0)',
-                animation: animate && !animationComplete ? `fadeInUp 0.5s ease-out ${segment.delay + 0.1}s forwards` : undefined,
+                animation:
+                  animate && !animationComplete ? `fadeInUp 0.5s ease-out ${segment.delay + 0.1}s forwards` : undefined,
               }}
             >
               {segment.name} {segment.value}%
@@ -547,7 +552,11 @@ export default function HomePage() {
             <StatCard>
               <StatInfo>
                 <StatLabel>총 읽은 책 수</StatLabel>
-                {hasData ? <StatValue>{readingStats.totalBooks}권</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
+                {hasData ? (
+                  <StatValue>{readingStats.totalBooks}권</StatValue>
+                ) : (
+                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
+                )}
               </StatInfo>
               <StatIcon>
                 <Book size={24} />
@@ -556,7 +565,11 @@ export default function HomePage() {
             <StatCard>
               <StatInfo>
                 <StatLabel>평균 독서 기간</StatLabel>
-                {hasData ? <StatValue>{readingStats.averageReadingDays}일</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
+                {hasData ? (
+                  <StatValue>{readingStats.averageReadingDays}일</StatValue>
+                ) : (
+                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
+                )}
               </StatInfo>
               <StatIcon>
                 <Calendar size={24} />
@@ -565,7 +578,11 @@ export default function HomePage() {
             <StatCard>
               <StatInfo>
                 <StatLabel>월 평균 권 수</StatLabel>
-                {hasData ? <StatValue>{readingStats.monthlyAverage}권</StatValue> : <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>}
+                {hasData ? (
+                  <StatValue>{readingStats.monthlyAverage}권</StatValue>
+                ) : (
+                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
+                )}
               </StatInfo>
               <StatIcon>
                 <BarChart3 size={24} />
@@ -606,12 +623,7 @@ export default function HomePage() {
           {mockReadingBooks.length > 0 ? (
             <BooksScroll>
               {mockReadingBooks.map(book => (
-                <BookCard
-                  key={book.id}
-                  book={book}
-                  size="sm"
-                  showProgress
-                />
+                <BookCard key={book.id} book={book} size="sm" showProgress />
               ))}
             </BooksScroll>
           ) : (
@@ -624,11 +636,7 @@ export default function HomePage() {
           <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
           <BooksScroll>
             {mockRecommendations.map(book => (
-              <BookCard
-                key={book.id}
-                book={book}
-                size="md"
-              />
+              <BookCard key={book.id} book={book} size="md" />
             ))}
           </BooksScroll>
         </BooksSection>
@@ -636,7 +644,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <Footer>
-        <FooterLogo>Pickley</FooterLogo>
+        <FooterLogo>pickly</FooterLogo>
         <FooterLinks>
           <FooterLink href="#">고객센터</FooterLink>
           <FooterLink href="#">CONTACT US</FooterLink>
