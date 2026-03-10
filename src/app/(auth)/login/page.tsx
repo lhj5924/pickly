@@ -256,18 +256,25 @@ export default function LoginPage() {
   const handleAgreeAndContinue = () => {
     if (!termsAgreed || !pendingProvider) return;
 
-    const mockEmail = pendingProvider === 'kakao' ? 'user@kakao.com' : 'user@gmail.com';
-    login(pendingProvider, mockEmail);
-    updateSignupData({ termsAgreed: true });
+    updateSignupData({ termsAgreed: true, provider: pendingProvider });
     setShowTermsModal(false);
-    router.push('/signup/preferences');
+
+    if (pendingProvider === 'kakao') {
+      const clientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
+      const redirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
+      window.location.href = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri!)}&response_type=code`;
+    } else {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri!)}&response_type=code&scope=email%20profile`;
+    }
   };
 
   return (
     <PageWrapper>
       <Container>
         <LeftPanel>
-          <Logo>Pickley</Logo>
+          <Logo>pickly</Logo>
           <JarImage>
             <Image src="/pickly-jar.png" alt="Pickly Jar" width={174} height={280} priority />
           </JarImage>
