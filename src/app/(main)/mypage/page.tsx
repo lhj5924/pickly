@@ -286,18 +286,13 @@ const GenreChip = styled.button<{ $selected: boolean }>`
 const mockReviews = allMockReviews.slice(0, 2);
 
 export default function MyPage() {
-  const { user: localUser, updateNickname, updateFavoriteCategories, logout, setUserFromApi } = useAuthStore();
+  const { user: localUser, updateNickname, updateFavoriteCategories, logout } = useAuthStore();
   const { data: serverUser, isLoading, isError } = useMe();
   const { mutate: updateUser } = useUpdateMe();
   const { mutate: deleteUser, isPending: isDeleting } = useDeleteMe();
 
-  // 서버 데이터가 오면 zustand 스토어 동기화
-  useEffect(() => {
-    if (serverUser) {
-      setUserFromApi(serverUser);
-    }
-  }, [serverUser, setUserFromApi]);
-
+  // React Query를 서버 상태의 Single Source of Truth로 사용
+  // Zustand 동기화 useEffect 제거 → 불필요한 리렌더링 방지
   const displayNickname = serverUser?.nickname ?? localUser?.nickname ?? '';
   const displayEmail = serverUser?.email ?? localUser?.email ?? '';
 
