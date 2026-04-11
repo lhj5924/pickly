@@ -348,9 +348,9 @@ const PieChart = styled.div`
   height: 180px;
   border-radius: 50%;
   background: conic-gradient(
-    ${({ theme }) => theme.colors.primary[500]} 0deg 194deg,
-    ${({ theme }) => theme.colors.primary[300]} 194deg 316deg,
-    ${({ theme }) => theme.colors.primary[200]} 316deg 360deg
+    ${({ theme }) => theme.colors.chart[0]} 0deg 194deg,
+    ${({ theme }) => theme.colors.chart[2]} 194deg 316deg,
+    ${({ theme }) => theme.colors.chart[4]} 316deg 360deg
   );
   position: relative;
   display: flex;
@@ -658,15 +658,15 @@ export default function StatsPage() {
             </PieChart>
             <PieLegend>
               <LegendItem>
-                <LegendDot $color="#7d9240" />
+                <LegendDot $color="#DEFFD6" />
                 소설 54%
               </LegendItem>
               <LegendItem>
-                <LegendDot $color="#a3c47a" />
+                <LegendDot $color="#D1FBC6" />
                 에세이 34%
               </LegendItem>
               <LegendItem>
-                <LegendDot $color="#c5d9a4" />
+                <LegendDot $color="#BDF0AF" />
                 경제/경영 32%
               </LegendItem>
             </PieLegend>
@@ -678,15 +678,15 @@ export default function StatsPage() {
             </PieChart>
             <PieLegend>
               <LegendItem>
-                <LegendDot $color="#7d9240" />
+                <LegendDot $color="#DEFFD6" />
                 소설 54%
               </LegendItem>
               <LegendItem>
-                <LegendDot $color="#a3c47a" />
+                <LegendDot $color="#D1FBC6" />
                 에세이 34%
               </LegendItem>
               <LegendItem>
-                <LegendDot $color="#c5d9a4" />
+                <LegendDot $color="#BDF0AF" />
                 경제/경영 32%
               </LegendItem>
             </PieLegend>

@@ -15,19 +15,18 @@ export const readingStats: ReadingStats = {
 export interface ChartSegment {
   name: string;
   value: number;
-  color: string;
 }
 
 export const genreChartData: ChartSegment[] = [
-  { name: '소설', value: 54, color: '#7d9240' },
-  { name: '에세이', value: 34, color: '#a3c47a' },
-  { name: '경제경영', value: 12, color: '#c5d9a4' },
+  { name: '소설', value: 54 },
+  { name: '에세이', value: 34 },
+  { name: '경제경영', value: 12 },
 ];
 
 export const keywordChartData: ChartSegment[] = [
-  { name: '로맨스', value: 40, color: '#7d9240' },
-  { name: '성장', value: 35, color: '#a3c47a' },
-  { name: '힐링', value: 25, color: '#c5d9a4' },
+  { name: '로맨스', value: 40 },
+  { name: '성장', value: 35 },
+  { name: '힐링', value: 25 },
 ];
 
 // ===========================

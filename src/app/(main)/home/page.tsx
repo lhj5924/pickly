@@ -1,7 +1,7 @@
 'use client';
 
 import styled, { keyframes } from 'styled-components';
-import { BookCard, Button } from '@/components/common';
+import { BookCard, Button, AnimatedPieChart } from '@/components/common';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { useState, useEffect, useRef } from 'react';
@@ -14,7 +14,6 @@ import {
   bannerData,
   getReadingBooks,
   aiRecommendations,
-  type ChartSegment,
 } from '@/data/mockData';
 
 const PageWrapper = styled.div`
@@ -166,7 +165,7 @@ const StatIcon = styled.div`
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: #F0FFE0;
+  background-color: #f0ffe0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -190,7 +189,7 @@ const ChartSection = styled.div`
 const ChartTitle = styled.h3`
   font-size: 1.25rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.colors.text.quaternary};
+  color: ${({ theme }) => theme.colors.text.quinary};
   margin-bottom: 1.5rem;
   text-align: left;
 `;
@@ -344,159 +343,6 @@ const SocialIcon = styled.a`
   color: white;
   font-size: 0.75rem;
 `;
-
-// Animated Pie Chart Component
-const AnimatedPieChart = ({ data, animate }: { data: ChartSegment[]; animate: boolean }) => {
-  const [animationComplete, setAnimationComplete] = useState(false);
-  const size = 220;
-  const strokeWidth = 110;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const center = size / 2;
-
-  // Mark animation as complete after it finishes
-  useEffect(() => {
-    if (animate && !animationComplete) {
-      const timer = setTimeout(() => {
-        setAnimationComplete(true);
-      }, 1500); // Animation duration + delays
-      return () => clearTimeout(timer);
-    }
-  }, [animate, animationComplete]);
-
-  // Calculate segment positions
-  let accumulatedPercentage = 0;
-  const segments = data.map((segment, index) => {
-    const percentage = segment.value;
-    const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-    const strokeDashoffset = -(accumulatedPercentage / 100) * circumference;
-
-    // Calculate label position (middle of segment)
-    const segmentMiddle = accumulatedPercentage + percentage / 2;
-    const angle = (segmentMiddle / 100) * 2 * Math.PI - Math.PI / 2;
-    const labelRadius = radius + strokeWidth / 2 + 30;
-    const labelX = center + Math.cos(angle) * labelRadius;
-    const labelY = center + Math.sin(angle) * labelRadius;
-
-    // Line start point (edge of pie)
-    const lineStartRadius = radius + strokeWidth / 2;
-    const lineStartX = center + Math.cos(angle) * lineStartRadius;
-    const lineStartY = center + Math.sin(angle) * lineStartRadius;
-
-    // Determine text anchor based on position
-    const isLeftSide = labelX < center;
-    const textAnchor: 'end' | 'start' = isLeftSide ? 'end' : 'start';
-    const labelOffset = isLeftSide ? -10 : 10;
-
-    accumulatedPercentage += percentage;
-
-    return {
-      ...segment,
-      strokeDasharray,
-      strokeDashoffset,
-      labelX: labelX + labelOffset,
-      labelY,
-      lineStartX,
-      lineStartY,
-      lineEndX: labelX,
-      lineEndY: labelY,
-      textAnchor,
-      delay: 1 + index * 0.2,
-    };
-  });
-
-  return (
-    <svg width={size + 100} height={size + 40} style={{ overflow: 'visible' }}>
-      <g transform={`translate(50, 20)`}>
-        {/* Pie segments */}
-        <g style={{ transform: 'rotate(-90deg)', transformOrigin: `${center}px ${center}px` }}>
-          {segments.map((segment, index) => (
-            <circle
-              key={index}
-              cx={center}
-              cy={center}
-              r={radius}
-              fill="none"
-              stroke={segment.color}
-              strokeWidth={strokeWidth}
-              strokeDasharray={
-                animationComplete ? segment.strokeDasharray : animate ? `0 ${circumference}` : segment.strokeDasharray
-              }
-              strokeDashoffset={segment.strokeDashoffset}
-              style={{
-                transition: animate && !animationComplete ? 'none' : undefined,
-                animation:
-                  animate && !animationComplete ? `pieSegment${index} 1s ease-out ${index * 0.1}s forwards` : undefined,
-              }}
-            />
-          ))}
-        </g>
-
-        {/* Labels with lines */}
-        {segments.map((segment, index) => (
-          <g key={`label-${index}`}>
-            {/* Connection line */}
-            <line
-              x1={segment.lineStartX}
-              y1={segment.lineStartY}
-              x2={segment.lineEndX}
-              y2={segment.lineEndY}
-              stroke="#999"
-              strokeWidth={1}
-              style={{
-                opacity: animationComplete ? 1 : animate ? 0 : 1,
-                animation:
-                  animate && !animationComplete ? `fadeIn 0.3s ease-out ${segment.delay}s forwards` : undefined,
-              }}
-            />
-            {/* Label text */}
-            <text
-              x={segment.labelX}
-              y={segment.labelY}
-              textAnchor={segment.textAnchor}
-              dominantBaseline="middle"
-              fontSize="14"
-              fontWeight="500"
-              fill="#333"
-              style={{
-                opacity: animationComplete ? 1 : animate ? 0 : 1,
-                transform: 'translateY(0)',
-                animation:
-                  animate && !animationComplete ? `fadeInUp 0.5s ease-out ${segment.delay + 0.1}s forwards` : undefined,
-              }}
-            >
-              {segment.name} {segment.value}%
-            </text>
-          </g>
-        ))}
-      </g>
-
-      {/* CSS animations */}
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          ${segments
-            .map(
-              (segment, index) => `
-            @keyframes pieSegment${index} {
-              from { stroke-dasharray: 0 ${circumference}; }
-              to { stroke-dasharray: ${segment.strokeDasharray}; }
-            }
-          `,
-            )
-            .join('')}
-        `}
-      </style>
-    </svg>
-  );
-};
 
 // Data from centralized mock data (replace with API calls later)
 const mockReadingBooks = getReadingBooks();
