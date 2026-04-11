@@ -135,6 +135,7 @@ const StatCard = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  box-shadow: ${({ theme }) => theme.shadows.md};
 `;
 
 const StatInfo = styled.div`
@@ -173,6 +174,7 @@ const ChartSection = styled.div`
   border-radius: 1rem;
   padding: 2.5rem 3rem;
   margin-bottom: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.md};
 `;
 
 const ChartTitle = styled.h3`
@@ -232,6 +234,11 @@ const EmptyChart = styled.div`
   min-height: 200px;
   color: ${({ theme }) => theme.colors.text.tertiary};
   font-size: 0.875rem;
+`;
+
+const CtaButtonWrapper = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 // Books Section
@@ -613,9 +620,11 @@ export default function HomePage() {
             )}
           </ChartSection>
 
-          <Button variant="stats" as={Link} href="/stats" fullWidth rightIcon={<ArrowRight size={18} />}>
-            전체 통계 보러가기
-          </Button>
+          <CtaButtonWrapper>
+            <Button variant="cta" as={Link} href="/stats" rightIcon={<ArrowRight size={24} />}>
+              전체 통계 보러가기
+            </Button>
+          </CtaButtonWrapper>
         </StatsSection>
 
         {/* Reading Books */}

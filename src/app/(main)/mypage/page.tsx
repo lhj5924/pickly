@@ -439,7 +439,7 @@ export default function MyPage() {
         </ReviewGrid>
 
         <WriteButtonWrapper>
-          <Button as={Link} href="/review/write" rightIcon={<ArrowRight size={18} />}>
+          <Button variant="cta" as={Link} href="/review/write" rightIcon={<ArrowRight size={24} />}>
             내가 읽은 책 리뷰 쓰러 가기
           </Button>
         </WriteButtonWrapper>
