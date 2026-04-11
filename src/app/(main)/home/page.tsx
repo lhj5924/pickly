@@ -258,7 +258,7 @@ const BooksSection = styled.section`
 const BooksScroll = styled.div`
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.25rem;
   overflow-x: auto;
   padding-bottom: 2.5rem;
 
