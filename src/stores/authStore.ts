@@ -29,11 +29,29 @@ const initialSignupData: SignupData = {
   favoriteCategories: [],
 };
 
+// TODO: 실제 API 연동 후 제거
+const mockUser: User = {
+  id: 'mock_user_1',
+  email: 'pickly@example.com',
+  nickname: '빨리_읽는_다람쥐',
+  provider: 'kakao',
+  preferences: {
+    favoriteCategories: [
+      { id: 2, name: '로맨스' },
+      { id: 1, name: '소설' },
+      { id: 5, name: '미스터리/스릴러' },
+      { id: 8, name: '시/에세이' },
+      { id: 15, name: '예술' },
+    ],
+  },
+  createdAt: '2025-01-15T09:00:00.000Z',
+};
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      user: null,
-      isAuthenticated: false,
+      user: mockUser,
+      isAuthenticated: true,
       signupStep: 'login',
       signupData: initialSignupData,
 

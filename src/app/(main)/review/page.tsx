@@ -1,19 +1,20 @@
 'use client';
 
 import styled from 'styled-components';
-import { Button } from '@/components/common';
+import { Button, ReviewCard } from '@/components/common';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { mockReviews } from '@/data/mockData';
 
 const Container = styled.div`
   max-width: 900px;
-  margin: 0 auto;
+  margin: 1rem auto;
   padding: 2rem 1.5rem 4rem;
+  box-shadow: 0px 20px 44px 0px #dadada40;
 `;
 
 const Title = styled.h1`
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.primary};
   margin-bottom: 1.5rem;
@@ -22,50 +23,12 @@ const Title = styled.h1`
 const ReviewGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  
+  gap: 5rem 1.5rem;
+  padding-top: 4rem;
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-`;
-
-const ReviewCard = styled.div`
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    box-shadow: ${({ theme }) => theme.shadows.sm};
-  }
-`;
-
-const BookCover = styled.img`
-  width: 100%;
-  height: 180px;
-  object-fit: contain;
-  margin-bottom: 1rem;
-`;
-
-const BookTitle = styled.h3`
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 0.75rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const ReviewContent = styled.p`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 `;
 
 const WriteButtonWrapper = styled.div`
@@ -74,19 +37,19 @@ const WriteButtonWrapper = styled.div`
   margin-top: 2rem;
 `;
 
-// Data from centralized mock data (replace with API calls later)
-
 export default function ReviewPage() {
   return (
     <Container>
       <Title>내가 작성한 리뷰</Title>
       <ReviewGrid>
-        {mockReviews.map((review) => (
-          <ReviewCard key={review.id}>
-            <BookCover src={review.book.coverImage} alt={review.book.title} />
-            <BookTitle>{review.book.title}</BookTitle>
-            <ReviewContent>{review.content}</ReviewContent>
-          </ReviewCard>
+        {mockReviews.map(review => (
+          <ReviewCard
+            key={review.id}
+            id={review.id}
+            bookTitle={review.book.title}
+            bookCoverImage={review.book.coverImage}
+            content={review.content}
+          />
         ))}
       </ReviewGrid>
       <WriteButtonWrapper>
