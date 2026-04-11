@@ -252,7 +252,7 @@ const CtaButtonWrapper = styled.div`
 
 // Books Section
 const BooksSection = styled.section`
-  margin-bottom: 2.5rem;
+  // margin-bottom: 2.5rem;
 `;
 
 const BooksScroll = styled.div`
@@ -260,7 +260,7 @@ const BooksScroll = styled.div`
   justify-content: space-between;
   gap: 1rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding-bottom: 2.5rem;
 
   &::-webkit-scrollbar {
     height: 4px;

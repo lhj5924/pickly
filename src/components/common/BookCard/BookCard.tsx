@@ -18,9 +18,12 @@ interface BookCardProps {
 // SM size card wrapper - vertical layout with white info section
 const SmCardWrapper = styled.div`
   width: 220px;
+  height: 330px;
   background: white;
   border-radius: 1rem;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
 `;
@@ -28,7 +31,8 @@ const SmCardWrapper = styled.div`
 const SmCoverWrapper = styled.div`
   position: relative;
   width: 100%;
-  aspect-ratio: 3/4;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 `;
 
@@ -39,11 +43,12 @@ const SmCoverImage = styled.img`
 `;
 
 const SmInfoSection = styled.div`
-  padding: 1rem 1.25rem;
+  padding: 1.25rem 1.25rem;
   background: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 `;
 
 const SmBookInfo = styled.div`
@@ -101,7 +106,8 @@ const MdStatusOverlay = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
+  box-shadow: 10px 10px 34px 0px #54545440;
+
   display: flex;
   flex-direction: column;
   align-items: center;
