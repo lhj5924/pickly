@@ -2,7 +2,8 @@
 
 import styled, { keyframes } from 'styled-components';
 import { BookCard, Button } from '@/components/common';
-import { ChevronLeft, ChevronRight, ArrowRight, Book, Calendar, BarChart3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuthStore, useBookStore } from '@/stores';
@@ -144,7 +145,7 @@ const StatInfo = styled.div`
 `;
 
 const StatLabel = styled.p`
-  font-size: 0.875rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text.quinary};
   margin-bottom: 0.5rem;
@@ -175,7 +176,7 @@ const ChartSection = styled.div`
 `;
 
 const ChartTitle = styled.h3`
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.quaternary};
   margin-bottom: 1.5rem;
@@ -559,7 +560,7 @@ export default function HomePage() {
                 )}
               </StatInfo>
               <StatIcon>
-                <Book size={24} />
+                <OpenedBookIcon size={24} />
               </StatIcon>
             </StatCard>
             <StatCard>
@@ -572,7 +573,7 @@ export default function HomePage() {
                 )}
               </StatInfo>
               <StatIcon>
-                <Calendar size={24} />
+                <CalendarIcon size={24} />
               </StatIcon>
             </StatCard>
             <StatCard>
@@ -585,7 +586,7 @@ export default function HomePage() {
                 )}
               </StatInfo>
               <StatIcon>
-                <BarChart3 size={24} />
+                <BooksIcon size={24} />
               </StatIcon>
             </StatCard>
           </StatsGrid>
