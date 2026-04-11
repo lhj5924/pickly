@@ -81,7 +81,10 @@ export const allBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/124857283/XL',
     description: '별과 우주에 관한 가장 인간적인 이야기',
     pageCount: 280,
-    categories: [{ id: 12, name: '자연과학' }, { id: 11, name: '천문학' }],
+    categories: [
+      { id: 12, name: '자연과학' },
+      { id: 11, name: '천문학' },
+    ],
     status: 'completed',
   },
   {
@@ -93,7 +96,10 @@ export const allBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/125698547/XL',
     description: 'SF 소설',
     pageCount: 320,
-    categories: [{ id: 1, name: '소설' }, { id: 4, name: 'SF' }],
+    categories: [
+      { id: 1, name: '소설' },
+      { id: 4, name: 'SF' },
+    ],
     status: 'completed',
   },
   {
@@ -117,7 +123,10 @@ export const allBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/90309531/XL',
     description: '나쁜 습관을 끊는 과학적 방법',
     pageCount: 320,
-    categories: [{ id: 12, name: '과학' }, { id: 9, name: '자기계발' }],
+    categories: [
+      { id: 12, name: '과학' },
+      { id: 9, name: '자기계발' },
+    ],
     status: 'reading',
     progress: 36,
   },
@@ -130,7 +139,10 @@ export const allBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/90309531/XL',
     description: '나쁜 습관을 끊는 과학적 방법',
     pageCount: 320,
-    categories: [{ id: 12, name: '과학' }, { id: 9, name: '자기계발' }],
+    categories: [
+      { id: 12, name: '과학' },
+      { id: 9, name: '자기계발' },
+    ],
     status: 'reading',
     progress: 65,
   },
@@ -143,7 +155,10 @@ export const allBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/90309531/XL',
     description: '나쁜 습관을 끊는 과학적 방법',
     pageCount: 320,
-    categories: [{ id: 12, name: '과학' }, { id: 9, name: '자기계발' }],
+    categories: [
+      { id: 12, name: '과학' },
+      { id: 9, name: '자기계발' },
+    ],
     status: 'reading',
     progress: 42,
   },
@@ -156,7 +171,10 @@ export const allBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/90309531/XL',
     description: '나쁜 습관을 끊는 과학적 방법',
     pageCount: 320,
-    categories: [{ id: 12, name: '과학' }, { id: 9, name: '자기계발' }],
+    categories: [
+      { id: 12, name: '과학' },
+      { id: 9, name: '자기계발' },
+    ],
     status: 'reading',
     progress: 80,
   },
@@ -169,7 +187,10 @@ export const allBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/90309531/XL',
     description: '나쁜 습관을 끊는 과학적 방법',
     pageCount: 320,
-    categories: [{ id: 12, name: '과학' }, { id: 9, name: '자기계발' }],
+    categories: [
+      { id: 12, name: '과학' },
+      { id: 9, name: '자기계발' },
+    ],
     status: 'reading',
     progress: 55,
   },
@@ -182,14 +203,61 @@ export const allBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/77091141/XL',
     description: 'SF 소설',
     pageCount: 272,
-    categories: [{ id: 4, name: 'SF' }, { id: 1, name: '소설' }],
+    categories: [
+      { id: 4, name: 'SF' },
+      { id: 1, name: '소설' },
+    ],
     status: 'wishlist',
+  },
+  {
+    id: '10',
+    title: '다읽은_우리가 빛의 속도로 갈 수 없다면',
+    author: '김초엽',
+    publisher: '허블',
+    publishDate: '2019년 06월 24일',
+    coverImage: 'https://image.yes24.com/goods/77091141/XL',
+    description: 'SF 소설',
+    pageCount: 272,
+    categories: [
+      { id: 4, name: 'SF' },
+      { id: 1, name: '소설' },
+    ],
+    status: 'completed',
+  },
+  {
+    id: '11',
+    title: '다읽은1_우리가 빛의 속도로 갈 수 없다면',
+    author: '김초엽',
+    publisher: '허블',
+    publishDate: '2019년 06월 24일',
+    coverImage: 'https://image.yes24.com/goods/77091141/XL',
+    description: 'SF 소설',
+    pageCount: 272,
+    categories: [
+      { id: 4, name: 'SF' },
+      { id: 1, name: '소설' },
+    ],
+    status: 'completed',
+  },
+  {
+    id: '12',
+    title: '다읽은2_우리가 빛의 속도로 갈 수 없다면',
+    author: '김초엽',
+    publisher: '허블',
+    publishDate: '2019년 06월 24일',
+    coverImage: 'https://image.yes24.com/goods/77091141/XL',
+    description: 'SF 소설',
+    pageCount: 272,
+    categories: [
+      { id: 4, name: 'SF' },
+      { id: 1, name: '소설' },
+    ],
+    status: 'completed',
   },
 ];
 
 // Helper functions to filter books by status
-export const getBooksByStatus = (status: Book['status']) =>
-  allBooks.filter(book => book.status === status);
+export const getBooksByStatus = (status: Book['status']) => allBooks.filter(book => book.status === status);
 
 export const getCompletedBooks = () => getBooksByStatus('completed');
 export const getReadingBooks = () => getBooksByStatus('reading');
@@ -204,28 +272,44 @@ export const aiRecommendations: Book[] = [
     title: '서해는 모든 것을 알았다',
     author: '정세랑',
     coverImage: 'https://image.yes24.com/goods/125698547/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
   {
     id: 'rec-2',
     title: '우리는 모두 천문학자로 태어난다',
     author: '지웅배',
     coverImage: 'https://image.yes24.com/goods/124857283/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
   {
     id: 'rec-3',
     title: '서해는 모든 것을 알았다',
     author: '정세랑',
     coverImage: 'https://image.yes24.com/goods/125698547/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
   {
     id: 'rec-4',
     title: '우리는 모두 천문학자로 태어난다',
     author: '지웅배',
     coverImage: 'https://image.yes24.com/goods/124857283/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
 ];
 
@@ -235,35 +319,55 @@ export const similarBooks: Book[] = [
     title: '당연하게도 나는 너를',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
   {
     id: 'sim-2',
     title: '당연하게도 나는 너를',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
   {
     id: 'sim-3',
     title: '당연하게도 나는 너를',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
   {
     id: 'sim-4',
     title: '당연하게도 나는 너를',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
   {
     id: 'sim-5',
     title: '당연하게도 나는 너를',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
-    description: '', publisher: '', publishDate: '', pageCount: 0, categories: [],
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
   },
 ];
 
@@ -274,42 +378,50 @@ export const mockReviews = [
   {
     id: '1',
     book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' },
-    content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
+    content:
+      '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
   },
   {
     id: '2',
     book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' },
-    content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
+    content:
+      '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
   },
   {
     id: '3',
     book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' },
-    content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
+    content:
+      '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
   },
   {
     id: '4',
     book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' },
-    content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
+    content:
+      '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
   },
   {
     id: '5',
     book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' },
-    content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
+    content:
+      '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
   },
   {
     id: '6',
     book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' },
-    content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
+    content:
+      '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
   },
   {
     id: '7',
     book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' },
-    content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
+    content:
+      '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
   },
   {
     id: '8',
     book: { title: '중독된 뇌를 어떻게 바꾸는가', coverImage: 'https://image.yes24.com/goods/90309531/XL' },
-    content: '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
+    content:
+      '아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 아무튼 리뷰 리뷰..',
   },
 ];
 
@@ -337,20 +449,61 @@ export const staleReadingBooks = [
 // Recommend page data
 // ===========================
 export const genreRecommendBooks = [
-  { id: 'gr-1', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'gr-2', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'gr-3', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  {
+    id: 'gr-1',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    subtitle: '당연하게도 나는 너를',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+  },
+  {
+    id: 'gr-2',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    subtitle: '당연하게도 나는 너를',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+  },
+  {
+    id: 'gr-3',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    subtitle: '당연하게도 나는 너를',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+  },
 ];
 
 export const popularBooks = [
-  { id: 'pop-1', title: '"나가 했던 어느 날에" 의', subtitle: '비슷한 작품이에요!', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'pop-2', title: '"나가 했던 어느 날에" 의', subtitle: '비슷한 작품이에요!', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'pop-3', title: '"나가 했던 어느 날에" 의', subtitle: '비슷한 작품이에요!', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+  {
+    id: 'pop-1',
+    title: '"나가 했던 어느 날에" 의',
+    subtitle: '비슷한 작품이에요!',
+    coverImage: 'https://image.yes24.com/goods/125698547/XL',
+  },
+  {
+    id: 'pop-2',
+    title: '"나가 했던 어느 날에" 의',
+    subtitle: '비슷한 작품이에요!',
+    coverImage: 'https://image.yes24.com/goods/125698547/XL',
+  },
+  {
+    id: 'pop-3',
+    title: '"나가 했던 어느 날에" 의',
+    subtitle: '비슷한 작품이에요!',
+    coverImage: 'https://image.yes24.com/goods/125698547/XL',
+  },
 ];
 
 export const hiddenTasteBooks = [
-  { id: 'ht-1', coverImage: 'https://image.yes24.com/goods/125698547/XL', quote: '"어선원지가 내 번채 평에서 만났던 분들 세는 사업가를 가이미시닙요?"' },
-  { id: 'ht-2', coverImage: 'https://image.yes24.com/goods/124857283/XL', quote: '"어선원지가 내 번채 평에서 만났던 분들 세는 사업가를 가이미시닙요?"' },
+  {
+    id: 'ht-1',
+    coverImage: 'https://image.yes24.com/goods/125698547/XL',
+    quote: '"어선원지가 내 번채 평에서 만났던 분들 세는 사업가를 가이미시닙요?"',
+  },
+  {
+    id: 'ht-2',
+    coverImage: 'https://image.yes24.com/goods/124857283/XL',
+    quote: '"어선원지가 내 번채 평에서 만났던 분들 세는 사업가를 가이미시닙요?"',
+  },
 ];
 
 // ===========================
@@ -393,7 +546,10 @@ export const searchableBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/124857283/XL',
     description: '별과 우주에 관한 가장 인간적인 이야기',
     pageCount: 280,
-    categories: [{ id: 12, name: '자연과학' }, { id: 11, name: '천문학' }],
+    categories: [
+      { id: 12, name: '자연과학' },
+      { id: 11, name: '천문학' },
+    ],
   },
   {
     id: '2',
@@ -404,7 +560,10 @@ export const searchableBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/77091141/XL',
     description: 'SF 소설',
     pageCount: 272,
-    categories: [{ id: 4, name: 'SF' }, { id: 1, name: '소설' }],
+    categories: [
+      { id: 4, name: 'SF' },
+      { id: 1, name: '소설' },
+    ],
   },
   {
     id: '3',
@@ -415,6 +574,9 @@ export const searchableBooks: Book[] = [
     coverImage: 'https://image.yes24.com/goods/90309531/XL',
     description: '나쁜 습관을 끊는 과학적 방법',
     pageCount: 320,
-    categories: [{ id: 12, name: '과학' }, { id: 9, name: '자기계발' }],
+    categories: [
+      { id: 12, name: '과학' },
+      { id: 9, name: '자기계발' },
+    ],
   },
 ];
