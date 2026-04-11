@@ -53,7 +53,7 @@ const LeftPanel = styled.div`
 `;
 
 const Logo = styled.h1`
-  font-size: 110px;
+  font-size: 96px;
   font-weight: 400;
   color: #57824c;
   font-family: 'Titan One', cursive;
@@ -61,7 +61,7 @@ const Logo = styled.h1`
   line-height: 1;
 
   @media (max-width: 768px) {
-    font-size: 60px;
+    font-size: 48px;
     margin-bottom: 0.5rem;
   }
 `;
@@ -97,18 +97,18 @@ const RightPanel = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.primary};
   margin-bottom: 0.75rem;
 
   @media (max-width: 768px) {
-    font-size: 1.5rem;
+    font-size: 1rem;
   }
 `;
 
 const Subtitle = styled.p`
-  font-size: 1.5rem;
+  font-size: 1rem;
   color: ${({ theme }) => theme.colors.text.primary};
   margin-bottom: 2rem;
 `;
@@ -116,7 +116,7 @@ const Subtitle = styled.p`
 const CategoryGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-bottom: 2rem;
 
   @media (max-width: 1024px) {
@@ -131,7 +131,7 @@ const CategoryGrid = styled.div`
 const CategoryChip = styled.button<{ $selected: boolean }>`
   padding: 24px 42px;
   border-radius: 10px;
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 700;
   border: 1.5px solid ${({ theme, $selected }) => ($selected ? theme.colors.primary[500] : theme.colors.border.default)};
   background: ${({ theme, $selected }) => ($selected ? theme.colors.primary[50] : 'white')};
@@ -148,6 +148,42 @@ const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: auto;
+`;
+
+const TooltipContainer = styled.div`
+  position: relative;
+`;
+
+const Tooltip = styled.span`
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: ${({ theme }) => theme.colors.text.primary};
+  color: white;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: ${({ theme }) => theme.colors.text.primary};
+  }
+
+  ${TooltipContainer}:hover & {
+    visibility: visible;
+    opacity: 1;
+  }
 `;
 
 export default function PreferencesPage() {
@@ -216,14 +252,17 @@ export default function PreferencesPage() {
           </CategoryGrid>
 
           <ButtonWrapper>
-            <Button
-              size="lg"
-              disabled={!isValid || isSubmitting}
-              onClick={handleComplete}
-              rightIcon={<ArrowRight size={20} />}
-            >
-              {isSubmitting ? '처리 중...' : '피클리 시작하기'}
-            </Button>
+            <TooltipContainer>
+              {!isValid && <Tooltip>선호하는 장르를 최소 3개 이상 선택해주세요.</Tooltip>}
+              <Button
+                size="lg"
+                disabled={!isValid || isSubmitting}
+                onClick={handleComplete}
+                rightIcon={<ArrowRight size={20} />}
+              >
+                {isSubmitting ? '처리 중...' : '피클리 시작하기'}
+              </Button>
+            </TooltipContainer>
           </ButtonWrapper>
         </RightPanel>
       </Container>
