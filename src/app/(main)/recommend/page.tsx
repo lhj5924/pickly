@@ -246,47 +246,6 @@ const HiddenQuoteText = styled.p`
   line-height: 1.6;
 `;
 
-// Footer
-const Footer = styled.footer`
-  text-align: center;
-  padding: 2rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const FooterLogo = styled.p`
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: ${({ theme }) => theme.colors.primary[600]};
-  font-family: 'Titan One', 'Georgia', serif;
-  margin-bottom: 0.75rem;
-`;
-
-const FooterSubLinks = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const SocialIcons = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-`;
-
-const SocialIcon = styled.span`
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: ${({ theme }) => theme.colors.neutral[800]};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.625rem;
-`;
 
 // Data from centralized mock data (replace with API calls later)
 const similarBooks = similarBooksData;
@@ -389,19 +348,6 @@ export default function RecommendPage() {
         </HiddenGrid>
       </HiddenSection>
 
-      <Footer>
-        <FooterLogo>pickly</FooterLogo>
-        <FooterSubLinks>
-          <span>고객센터</span>
-          <span>CONTACT US</span>
-        </FooterSubLinks>
-        <SocialIcons>
-          <SocialIcon>Y</SocialIcon>
-          <SocialIcon>@</SocialIcon>
-          <SocialIcon>X</SocialIcon>
-          <SocialIcon>♪</SocialIcon>
-        </SocialIcons>
-      </Footer>
     </Container>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { GNB } from '@/components/layout';
+import { GNB, Footer } from '@/components/layout';
 
 export default function MainLayout({
   children,
@@ -11,6 +11,7 @@ export default function MainLayout({
     <>
       <GNB />
       <main>{children}</main>
+      <Footer />
     </>
   );
 }
