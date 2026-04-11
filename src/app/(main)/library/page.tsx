@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import styled from 'styled-components';
-import { BookCard, StatsGrid, StatCard } from '@/components/common';
+import { BookCard, StatsGrid, StatCard, ShowMoreToggle } from '@/components/common';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { readingStats, getCompletedBooks, getReadingBooks, getWishlistBooks } from '@/data/mockData';
 
@@ -16,14 +17,14 @@ const StatsGridMargin = styled.div`
 `;
 
 const Section = styled.section`
-  margin-bottom: 3rem;
+  margin-bottom: 6rem;
 `;
 
 const SectionTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
 `;
 
 const BookGrid = styled.div`
@@ -44,27 +45,6 @@ const BookGrid = styled.div`
   }
 `;
 
-const BooksScroll = styled.div`
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: ${({ theme }) => theme.colors.neutral[100]};
-    border-radius: 2px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.neutral[300]};
-    border-radius: 2px;
-  }
-`;
-
 const EmptyState = styled.div`
   text-align: center;
   padding: 3rem 2rem;
@@ -79,11 +59,18 @@ const FooterNav = styled.div`
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
+const FIRST_ROW_COUNT = 5;
+const LOAD_MORE_COUNT = 10;
+
 export default function LibraryPage() {
   const completedBooks = getCompletedBooks();
   const readingBooks = getReadingBooks();
   const wishlistBooks = getWishlistBooks();
   const totalRead = readingStats.totalBooks;
+
+  const [completedVisible, setCompletedVisible] = useState(FIRST_ROW_COUNT);
+  const [readingVisible, setReadingVisible] = useState(FIRST_ROW_COUNT);
+  const [wishlistVisible, setWishlistVisible] = useState(FIRST_ROW_COUNT);
 
   return (
     <Container>
@@ -102,43 +89,73 @@ export default function LibraryPage() {
       </StatsGridMargin>
 
       {/* Completed Books */}
-      <Section>
-        <BookGrid>
-          {completedBooks.map(book => (
-            <BookCard key={book.id} book={book} size="sm" />
-          ))}
-        </BookGrid>
-      </Section>
+      {totalRead > 0 ? (
+        <Section>
+          <BookGrid>
+            {completedBooks.slice(0, completedVisible).map(book => (
+              <BookCard key={book.id} book={book} size="sm" />
+            ))}
+          </BookGrid>
+          {completedBooks.length > FIRST_ROW_COUNT && (
+            <ShowMoreToggle
+              expanded={completedVisible >= completedBooks.length}
+              onToggle={() =>
+                setCompletedVisible(prev => (prev >= completedBooks.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT))
+              }
+            />
+          )}
+        </Section>
+      ) : (
+        <EmptyState>아직 완독한 책이 없어요. 읽고 싶은 책을 추가해보세요!</EmptyState>
+      )}
 
       {/* Reading Books */}
       <Section>
-        <SectionTitle>보는 중인 작품이 {readingBooks.length}개에요 한 개부터 차근차근 읽어볼까요?</SectionTitle>
+        <SectionTitle>보고 있는 작품이 {readingBooks.length}권이에요. 한 권부터 차근차근 읽어볼까요?</SectionTitle>
         {readingBooks.length > 0 ? (
-          <BooksScroll>
-            {readingBooks.map(book => (
-              <BookCard key={book.id} book={book} size="sm" showProgress />
-            ))}
-          </BooksScroll>
+          <>
+            <BookGrid>
+              {readingBooks.slice(0, readingVisible).map(book => (
+                <BookCard key={book.id} book={book} size="sm" showProgress />
+              ))}
+            </BookGrid>
+            {readingBooks.length > FIRST_ROW_COUNT && (
+              <ShowMoreToggle
+                expanded={readingVisible >= readingBooks.length}
+                onToggle={() =>
+                  setReadingVisible(prev => (prev >= readingBooks.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT))
+                }
+              />
+            )}
+          </>
         ) : (
-          <EmptyState>아직 읽고 있는 책이 없어요</EmptyState>
+          <EmptyState>아직 읽고 있는 책이 없어요.</EmptyState>
         )}
       </Section>
 
       {/* Wishlist Books */}
       <Section>
-        <SectionTitle>보고 싶어요가 {wishlistBooks.length}개 쌓였어요 지금 시작해볼 작품을 골라보세요</SectionTitle>
+        <SectionTitle>'보고 싶어요'가 {wishlistBooks.length}권 쌓였어요. 지금 시작해볼 작품을 골라보세요</SectionTitle>
         {wishlistBooks.length > 0 ? (
-          <BookGrid>
-            {wishlistBooks.map(book => (
-              <BookCard key={book.id} book={book} size="md" />
-            ))}
-          </BookGrid>
+          <>
+            <BookGrid>
+              {wishlistBooks.slice(0, wishlistVisible).map(book => (
+                <BookCard key={book.id} book={book} size="sm" />
+              ))}
+            </BookGrid>
+            {wishlistBooks.length > FIRST_ROW_COUNT && (
+              <ShowMoreToggle
+                expanded={wishlistVisible >= wishlistBooks.length}
+                onToggle={() =>
+                  setWishlistVisible(prev => (prev >= wishlistBooks.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT))
+                }
+              />
+            )}
+          </>
         ) : (
-          <EmptyState>보고 싶은 책을 추가해보세요</EmptyState>
+          <EmptyState>보고 싶은 책을 추가해보세요.</EmptyState>
         )}
       </Section>
-
-      <FooterNav>1 / 1</FooterNav>
     </Container>
   );
 }
