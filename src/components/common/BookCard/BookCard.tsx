@@ -17,10 +17,13 @@ interface BookCardProps {
 
 // SM size card wrapper - vertical layout with white info section
 const SmCardWrapper = styled.div`
-  width: 220px;
+  width: 100%;
+  aspect-ratio: 2 / 3;
   background: white;
   border-radius: 1rem;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
 `;
@@ -28,8 +31,13 @@ const SmCardWrapper = styled.div`
 const SmCoverWrapper = styled.div`
   position: relative;
   width: 100%;
-  aspect-ratio: 3/4;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
+
+  &:hover .status-overlay {
+    opacity: 1;
+  }
 `;
 
 const SmCoverImage = styled.img`
@@ -39,11 +47,12 @@ const SmCoverImage = styled.img`
 `;
 
 const SmInfoSection = styled.div`
-  padding: 1rem 1.25rem;
+  padding: 1.25rem 1.25rem;
   background: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-shrink: 0;
 `;
 
 const SmBookInfo = styled.div`
@@ -68,6 +77,49 @@ const SmProgressText = styled.span`
   color: ${({ theme }) => theme.colors.text.primary};
   margin-left: 1rem;
   flex-shrink: 0;
+`;
+
+const SmStatusOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0000004d;
+  box-shadow: 10px 10px 34px 0px #54545440;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+`;
+
+const SmStatusRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.375rem 0;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const SmStatusIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+`;
+
+const SmStatusLabel = styled.span`
+  color: white;
 `;
 
 // MD size card wrapper - cover only with hover overlay
@@ -101,12 +153,13 @@ const MdStatusOverlay = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
+  background: #0000004d;
+  box-shadow: 10px 10px 34px 0px #54545440;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
   opacity: 0;
   transition: opacity 0.2s ease;
 `;
@@ -116,7 +169,7 @@ const MdStatusRow = styled.div`
   align-items: center;
   gap: 0.75rem;
   color: white;
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 500;
   cursor: pointer;
   padding: 0.5rem 0;
@@ -278,6 +331,41 @@ export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = f
       <SmCardWrapper onClick={handleCardClick}>
         <SmCoverWrapper>
           <SmCoverImage src={book.coverImage} alt={book.title} />
+          <SmStatusOverlay className="status-overlay">
+            <SmStatusRow onClick={e => handleStatusClick(e, 'reading')}>
+              <SmStatusLabel>읽는 중</SmStatusLabel>
+              <SmStatusIcon>
+                <Image
+                  src={statusState.reading ? '/icons/reading-color.png' : '/icons/reading-white.png'}
+                  alt="읽는 중"
+                  width={20}
+                  height={20}
+                />
+              </SmStatusIcon>
+            </SmStatusRow>
+            <SmStatusRow onClick={e => handleStatusClick(e, 'wishlist')}>
+              <SmStatusLabel>보고 싶어요</SmStatusLabel>
+              <SmStatusIcon>
+                <Image
+                  src={statusState.wishlist ? '/icons/heart-color.png' : '/icons/heart-white.png'}
+                  alt="보고 싶어요"
+                  width={20}
+                  height={20}
+                />
+              </SmStatusIcon>
+            </SmStatusRow>
+            <SmStatusRow onClick={e => handleStatusClick(e, 'completed')}>
+              <SmStatusLabel>독서 완료</SmStatusLabel>
+              <SmStatusIcon>
+                <Image
+                  src={statusState.completed ? '/icons/complete-color.png' : '/icons/complete-white.png'}
+                  alt="독서 완료"
+                  width={20}
+                  height={20}
+                />
+              </SmStatusIcon>
+            </SmStatusRow>
+          </SmStatusOverlay>
         </SmCoverWrapper>
         <SmInfoSection>
           <SmBookInfo>

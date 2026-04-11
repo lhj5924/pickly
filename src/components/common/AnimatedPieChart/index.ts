@@ -1,0 +1,1 @@
+export { AnimatedPieChart } from './AnimatedPieChart';

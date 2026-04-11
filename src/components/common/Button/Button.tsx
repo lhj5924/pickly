@@ -3,7 +3,7 @@
 import styled, { css } from 'styled-components';
 import { ButtonHTMLAttributes, forwardRef, ElementType } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'kakao' | 'google' | 'stats';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'kakao' | 'google' | 'stats' | 'cta';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -93,6 +93,19 @@ const variantStyles = {
     color: white;
     font-size: 1.5rem;
     font-weight: 700;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(90deg, #fedca1 0%, #a0d995 100%);
+    }
+  `,
+  cta: css`
+    padding: 24px 72px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(90deg, #fec893 0%, #90cf80 100%);
+    border-radius: 16px;
+    color: white;
 
     &:hover:not(:disabled) {
       background: linear-gradient(90deg, #fedca1 0%, #a0d995 100%);
