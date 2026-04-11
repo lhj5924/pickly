@@ -1,14 +1,9 @@
 'use client';
 
 import styled from 'styled-components';
-import { BookCard } from '@/components/common';
-import { Book, Calendar, BarChart3 } from 'lucide-react';
-import {
-  readingStats,
-  getCompletedBooks,
-  getReadingBooks,
-  getWishlistBooks,
-} from '@/data/mockData';
+import { BookCard, StatsGrid, StatCard } from '@/components/common';
+import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
+import { readingStats, getCompletedBooks, getReadingBooks, getWishlistBooks } from '@/data/mockData';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -16,53 +11,8 @@ const Container = styled.div`
   padding: 2rem 1.5rem 4rem;
 `;
 
-const PageTitle = styled.h1`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1.5rem;
-`;
-
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+const StatsGridMargin = styled.div`
   margin-bottom: 2.5rem;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const StatCard = styled.div`
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
-
-const StatInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const StatLabel = styled.p`
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.quinary};
-`;
-
-const StatValue = styled.p`
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const StatIcon = styled.div`
-  color: ${({ theme }) => theme.colors.primary[500]};
 `;
 
 const Section = styled.section`
@@ -70,10 +20,10 @@ const Section = styled.section`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 `;
 
 const BookGrid = styled.div`
@@ -137,49 +87,35 @@ export default function LibraryPage() {
 
   return (
     <Container>
-      <PageTitle>지금까지 총 {totalRead}권의 책을 읽었어요!</PageTitle>
-
-      <StatsGrid>
-        <StatCard>
-          <StatInfo>
-            <StatLabel>총 읽은 책 수</StatLabel>
-            <StatValue>{readingStats.totalBooks}권</StatValue>
-          </StatInfo>
-          <StatIcon><Book size={24} /></StatIcon>
-        </StatCard>
-        <StatCard>
-          <StatInfo>
-            <StatLabel>평균 독서 기간</StatLabel>
-            <StatValue>{readingStats.averageReadingDays}일</StatValue>
-          </StatInfo>
-          <StatIcon><Calendar size={24} /></StatIcon>
-        </StatCard>
-        <StatCard>
-          <StatInfo>
-            <StatLabel>월 평균 권 수</StatLabel>
-            <StatValue>{readingStats.monthlyAverage}권</StatValue>
-          </StatInfo>
-          <StatIcon><BarChart3 size={24} /></StatIcon>
-        </StatCard>
-      </StatsGrid>
+      {/* Stats Section */}
+      <SectionTitle>지금까지 총 {totalRead}권의 책을 읽었어요!</SectionTitle>
+      <StatsGridMargin>
+        <StatsGrid>
+          <StatCard label="총 읽은 책 수" value={`${readingStats.totalBooks}권`} icon={<OpenedBookIcon size={24} />} />
+          <StatCard
+            label="평균 독서 기간"
+            value={`${readingStats.averageReadingDays}일`}
+            icon={<CalendarIcon size={24} />}
+          />
+          <StatCard label="월 평균 권 수" value={`${readingStats.monthlyAverage}권`} icon={<BooksIcon size={24} />} />
+        </StatsGrid>
+      </StatsGridMargin>
 
       {/* Completed Books */}
       <Section>
         <BookGrid>
-          {completedBooks.map((book) => (
-            <BookCard key={book.id} book={book} size="md" />
+          {completedBooks.map(book => (
+            <BookCard key={book.id} book={book} size="sm" />
           ))}
         </BookGrid>
       </Section>
 
       {/* Reading Books */}
       <Section>
-        <SectionTitle>
-          보는 중인 작품이 {readingBooks.length}개에요 한 개부터 차근차근 읽어볼까요?
-        </SectionTitle>
+        <SectionTitle>보는 중인 작품이 {readingBooks.length}개에요 한 개부터 차근차근 읽어볼까요?</SectionTitle>
         {readingBooks.length > 0 ? (
           <BooksScroll>
-            {readingBooks.map((book) => (
+            {readingBooks.map(book => (
               <BookCard key={book.id} book={book} size="sm" showProgress />
             ))}
           </BooksScroll>
@@ -190,12 +126,10 @@ export default function LibraryPage() {
 
       {/* Wishlist Books */}
       <Section>
-        <SectionTitle>
-          보고 싶어요가 {wishlistBooks.length}개 쌓였어요 지금 시작해볼 작품을 골라보세요
-        </SectionTitle>
+        <SectionTitle>보고 싶어요가 {wishlistBooks.length}개 쌓였어요 지금 시작해볼 작품을 골라보세요</SectionTitle>
         {wishlistBooks.length > 0 ? (
           <BookGrid>
-            {wishlistBooks.map((book) => (
+            {wishlistBooks.map(book => (
               <BookCard key={book.id} book={book} size="md" />
             ))}
           </BookGrid>

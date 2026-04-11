@@ -1,7 +1,7 @@
 'use client';
 
 import styled, { keyframes } from 'styled-components';
-import { BookCard, Button, AnimatedPieChart } from '@/components/common';
+import { BookCard, Button, AnimatedPieChart, StatsGrid, StatCard } from '@/components/common';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { useState, useEffect, useRef } from 'react';
@@ -116,65 +116,8 @@ const SectionTitle = styled.h2`
   margin-bottom: 1rem;
 `;
 
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+const StatsGridMargin = styled.div`
   margin-bottom: 1.5rem;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const StatCard = styled.div`
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  box-shadow: ${({ theme }) => theme.shadows.md};
-`;
-
-const StatHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const StatInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const StatLabel = styled.p`
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.quinary};
-`;
-
-const StatValue = styled.p`
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const StatIcon = styled.div`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #f0ffe0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.primary[500]};
-`;
-
-const EmptyStatValue = styled.p`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
 // Chart Section
@@ -412,53 +355,25 @@ export default function HomePage() {
         <StatsSection>
           <SectionTitle>나는 어떤 책을 얼마나 읽었을까?</SectionTitle>
 
-          <StatsGrid>
-            <StatCard>
-              <StatHeader>
-                <StatLabel>총 읽은 책 수</StatLabel>
-                <StatIcon>
-                  <OpenedBookIcon size={24} />
-                </StatIcon>
-              </StatHeader>
-              <StatInfo>
-                {hasData ? (
-                  <StatValue>{readingStats.totalBooks}권</StatValue>
-                ) : (
-                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
-                )}
-              </StatInfo>
-            </StatCard>
-            <StatCard>
-              <StatHeader>
-                <StatLabel>평균 독서 기간</StatLabel>
-                <StatIcon>
-                  <CalendarIcon size={24} />
-                </StatIcon>
-              </StatHeader>
-              <StatInfo>
-                {hasData ? (
-                  <StatValue>{readingStats.averageReadingDays}일</StatValue>
-                ) : (
-                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
-                )}
-              </StatInfo>
-            </StatCard>
-            <StatCard>
-              <StatHeader>
-                <StatLabel>월 평균 권 수</StatLabel>
-                <StatIcon>
-                  <BooksIcon size={24} />
-                </StatIcon>
-              </StatHeader>
-              <StatInfo>
-                {hasData ? (
-                  <StatValue>{readingStats.monthlyAverage}권</StatValue>
-                ) : (
-                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
-                )}
-              </StatInfo>
-            </StatCard>
-          </StatsGrid>
+          <StatsGridMargin>
+            <StatsGrid>
+              <StatCard
+                label="총 읽은 책 수"
+                value={hasData ? `${readingStats.totalBooks}권` : undefined}
+                icon={<OpenedBookIcon size={24} />}
+              />
+              <StatCard
+                label="평균 독서 기간"
+                value={hasData ? `${readingStats.averageReadingDays}일` : undefined}
+                icon={<CalendarIcon size={24} />}
+              />
+              <StatCard
+                label="월 평균 권 수"
+                value={hasData ? `${readingStats.monthlyAverage}권` : undefined}
+                icon={<BooksIcon size={24} />}
+              />
+            </StatsGrid>
+          </StatsGridMargin>
 
           <ChartSection ref={chartRef}>
             <ChartTitle>당신은 로맨스 중심의 소설을 가장 많이 소비해요</ChartTitle>
