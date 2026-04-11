@@ -133,23 +133,27 @@ const StatCard = styled.div`
   border-radius: 0.75rem;
   padding: 1.25rem 1.5rem;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 1rem;
   box-shadow: ${({ theme }) => theme.shadows.md};
 `;
 
+const StatHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 const StatInfo = styled.div`
-  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 0.5rem;
 `;
 
 const StatLabel = styled.p`
   font-size: 1.25rem;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text.quinary};
-  margin-bottom: 0.5rem;
 `;
 
 const StatValue = styled.p`
@@ -159,8 +163,14 @@ const StatValue = styled.p`
 `;
 
 const StatIcon = styled.div`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #F0FFE0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: ${({ theme }) => theme.colors.primary[500]};
-  margin-top: 0.3rem;
 `;
 
 const EmptyStatValue = styled.p`
@@ -558,43 +568,49 @@ export default function HomePage() {
 
           <StatsGrid>
             <StatCard>
-              <StatInfo>
+              <StatHeader>
                 <StatLabel>총 읽은 책 수</StatLabel>
+                <StatIcon>
+                  <OpenedBookIcon size={24} />
+                </StatIcon>
+              </StatHeader>
+              <StatInfo>
                 {hasData ? (
                   <StatValue>{readingStats.totalBooks}권</StatValue>
                 ) : (
                   <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
                 )}
               </StatInfo>
-              <StatIcon>
-                <OpenedBookIcon size={24} />
-              </StatIcon>
             </StatCard>
             <StatCard>
-              <StatInfo>
+              <StatHeader>
                 <StatLabel>평균 독서 기간</StatLabel>
+                <StatIcon>
+                  <CalendarIcon size={24} />
+                </StatIcon>
+              </StatHeader>
+              <StatInfo>
                 {hasData ? (
                   <StatValue>{readingStats.averageReadingDays}일</StatValue>
                 ) : (
                   <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
                 )}
               </StatInfo>
-              <StatIcon>
-                <CalendarIcon size={24} />
-              </StatIcon>
             </StatCard>
             <StatCard>
-              <StatInfo>
+              <StatHeader>
                 <StatLabel>월 평균 권 수</StatLabel>
+                <StatIcon>
+                  <BooksIcon size={24} />
+                </StatIcon>
+              </StatHeader>
+              <StatInfo>
                 {hasData ? (
                   <StatValue>{readingStats.monthlyAverage}권</StatValue>
                 ) : (
                   <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
                 )}
               </StatInfo>
-              <StatIcon>
-                <BooksIcon size={24} />
-              </StatIcon>
             </StatCard>
           </StatsGrid>
 
