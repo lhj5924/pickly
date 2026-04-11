@@ -1,7 +1,7 @@
 'use client';
 
 import styled from 'styled-components';
-import { Button } from '@/components/common';
+import { Button, ReviewCard } from '@/components/common';
 import { Pencil, ArrowRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -18,8 +18,9 @@ const Container = styled.div`
 
 // Profile Section
 const ProfileCard = styled.div`
-  padding: 2rem 0;
+  padding: 2rem 4rem;
   margin-bottom: 1.5rem;
+  box-shadow: 0px 20px 44px 0px #dadada40;
 `;
 
 const ProfileHeader = styled.div`
@@ -33,16 +34,12 @@ const ProfileHeader = styled.div`
   }
 `;
 
-const Avatar = styled.div`
+const Avatar = styled.img`
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: ${({ theme }) => theme.colors.neutral[200]};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  color: ${({ theme }) => theme.colors.neutral[400]};
+  background: #f7f7f7;
+  object-fit: cover;
   flex-shrink: 0;
 `;
 
@@ -110,13 +107,40 @@ const GenreRow = styled.div`
   }
 `;
 
-const GenreTag = styled.span<{ $highlight?: boolean }>`
+const GENRE_COLORS: Record<number, { bg: string; text: string }> = {
+  1: { bg: '#FFF0F0', text: '#D14343' }, // 소설
+  2: { bg: '#FFF0F5', text: '#C93892' }, // 로맨스
+  3: { bg: '#F0F0FF', text: '#5B5BD6' }, // 판타지
+  4: { bg: '#E8F4FF', text: '#2B7BB9' }, // SF
+  5: { bg: '#F5F0FF', text: '#7C3AED' }, // 미스터리/스릴러
+  6: { bg: '#F4F0F7', text: '#6B3FA0' }, // 호러
+  7: { bg: '#FFF5EB', text: '#B35C1E' }, // 역사소설
+  8: { bg: '#FDF6EC', text: '#A67C2E' }, // 시/에세이
+  9: { bg: '#ECFDF5', text: '#1E8A5E' }, // 자기계발
+  10: { bg: '#EEF6FF', text: '#2E6DA4' }, // 경제/경영
+  11: { bg: '#FFF8F0', text: '#B86E2B' }, // 인문학
+  12: { bg: '#E8FFF0', text: '#1A7A42' }, // 과학
+  13: { bg: '#FAF0E6', text: '#8B6914' }, // 역사
+  14: { bg: '#F0F4F8', text: '#4A6785' }, // 사회
+  15: { bg: '#FFF0FB', text: '#B03A8E' }, // 예술
+  16: { bg: '#E6F9F5', text: '#148A6E' }, // 여행
+  17: { bg: '#FFF7E6', text: '#C07A1A' }, // 요리
+  18: { bg: '#EAFFF0', text: '#2D8C4E' }, // 건강
+  19: { bg: '#F5F0FF', text: '#6E4AB5' }, // 종교/영성
+  20: { bg: '#FFF0E8', text: '#D4602C' }, // 만화/웹툰
+  21: { bg: '#F0F8FF', text: '#3B7FC4' }, // 라이트노벨
+  22: { bg: '#FFF8F5', text: '#C95B3C' }, // 아동/청소년
+};
+
+const DEFAULT_GENRE_COLOR = { bg: '#F5F5F5', text: '#6B6B6B' };
+
+const GenreTag = styled.span<{ $bg: string; $color: string }>`
   padding: 0.375rem 0.75rem;
-  background: ${({ theme, $highlight }) => ($highlight ? theme.colors.primary[100] : theme.colors.neutral[100])};
-  color: ${({ theme, $highlight }) => ($highlight ? theme.colors.primary[600] : theme.colors.text.secondary)};
-  border: 1px solid ${({ theme, $highlight }) => ($highlight ? theme.colors.primary[300] : 'transparent')};
-  border-radius: 0.375rem;
+  background: ${({ $bg }) => $bg};
+  color: ${({ $color }) => $color};
+  border-radius: 100rem;
   font-size: 0.875rem;
+  font-weight: 600;
 `;
 
 // Reviews Section
@@ -124,6 +148,7 @@ const ReviewSection = styled.div`
   background: ${({ theme }) => theme.colors.neutral[50]};
   border-radius: 1rem;
   padding: 2rem;
+  box-shadow: 0px 20px 44px 0px #dadada40;
 `;
 
 const SectionHeader = styled.div`
@@ -151,42 +176,12 @@ const SeeMoreLink = styled(Link)`
 const ReviewGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+  gap: 4rem 1.5rem;
+  padding-top: 4rem;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-`;
-
-const ReviewCard = styled.div`
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-`;
-
-const ReviewBookCover = styled.img`
-  width: 100%;
-  height: 180px;
-  object-fit: contain;
-  margin-bottom: 1rem;
-`;
-
-const ReviewBookTitle = styled.h3`
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 0.75rem;
-  text-align: center;
-`;
-
-const ReviewContent = styled.p`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 `;
 
 const WriteButtonWrapper = styled.div`
@@ -373,18 +368,26 @@ export default function MyPage() {
   };
 
   if (isLoading) {
-    return <Container><p style={{ textAlign: 'center', padding: '4rem 0' }}>불러오는 중...</p></Container>;
+    return (
+      <Container>
+        <p style={{ textAlign: 'center', padding: '4rem 0' }}>불러오는 중...</p>
+      </Container>
+    );
   }
 
   if (isError) {
-    return <Container><p style={{ textAlign: 'center', padding: '4rem 0' }}>정보를 불러오지 못했습니다.</p></Container>;
+    return (
+      <Container>
+        <p style={{ textAlign: 'center', padding: '4rem 0' }}>정보를 불러오지 못했습니다.</p>
+      </Container>
+    );
   }
 
   return (
     <Container>
       <ProfileCard>
         <ProfileHeader>
-          <Avatar>👤</Avatar>
+          <Avatar src="/images/default-user.svg" alt="프로필" />
           <ProfileInfo>
             <NicknameRow>
               {isEditingNickname ? (
@@ -409,11 +412,14 @@ export default function MyPage() {
             </NicknameRow>
             <Email>{displayEmail}</Email>
             <GenreRow>
-              {selectedCategories.slice(0, 3).map((cat, index) => (
-                <GenreTag key={cat.id} $highlight={index === 1}>
-                  {cat.name}
-                </GenreTag>
-              ))}
+              {selectedCategories.slice(0, 3).map(cat => {
+                const color = GENRE_COLORS[cat.id] ?? DEFAULT_GENRE_COLOR;
+                return (
+                  <GenreTag key={cat.id} $bg={color.bg} $color={color.text}>
+                    {cat.name}
+                  </GenreTag>
+                );
+              })}
               <EditButton onClick={handleOpenGenreModal}>
                 <Pencil size={16} />
               </EditButton>
@@ -430,11 +436,13 @@ export default function MyPage() {
 
         <ReviewGrid>
           {mockReviews.map(review => (
-            <ReviewCard key={review.id}>
-              <ReviewBookCover src={review.book.coverImage} alt={review.book.title} />
-              <ReviewBookTitle>{review.book.title}</ReviewBookTitle>
-              <ReviewContent>{review.content}</ReviewContent>
-            </ReviewCard>
+            <ReviewCard
+              key={review.id}
+              id={review.id}
+              bookTitle={review.book.title}
+              bookCoverImage={review.book.coverImage}
+              content={review.content}
+            />
           ))}
         </ReviewGrid>
 
