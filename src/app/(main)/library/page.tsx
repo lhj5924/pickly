@@ -52,12 +52,6 @@ const EmptyState = styled.div`
   font-size: 0.9375rem;
 `;
 
-const FooterNav = styled.div`
-  text-align: center;
-  padding: 2rem 0;
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
 
 const FIRST_ROW_COUNT = 5;
 const LOAD_MORE_COUNT = 10;
@@ -111,7 +105,7 @@ export default function LibraryPage() {
 
       {/* Reading Books */}
       <Section>
-        <SectionTitle>보고 있는 작품이 {readingBooks.length}권이에요. 한 권부터 차근차근 읽어볼까요?</SectionTitle>
+        <SectionTitle>읽고 있는 작품이 {readingBooks.length}권이에요. 한 권부터 차근차근 읽어볼까요?</SectionTitle>
         {readingBooks.length > 0 ? (
           <>
             <BookGrid>
@@ -135,7 +129,7 @@ export default function LibraryPage() {
 
       {/* Wishlist Books */}
       <Section>
-        <SectionTitle>'보고 싶어요'가 {wishlistBooks.length}권 쌓였어요. 지금 시작해볼 작품을 골라보세요</SectionTitle>
+        <SectionTitle>'보고 싶어요'가 {wishlistBooks.length}권 쌓였어요. 지금 시작해볼 작품을 골라보세요.</SectionTitle>
         {wishlistBooks.length > 0 ? (
           <>
             <BookGrid>
