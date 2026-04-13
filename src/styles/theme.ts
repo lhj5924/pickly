@@ -41,6 +41,7 @@ export const theme = {
       tertiary: '#a3a3a3',
       quaternary: '#4C4C4C',
       quinary: '#646464',
+      sextary: '#7F7F7F',
     },
     border: {
       light: '#e5e5e5',

@@ -226,7 +226,6 @@ const EmptyBooks = styled.div`
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
-
 // Data from centralized mock data (replace with API calls later)
 const mockReadingBooks = getReadingBooks();
 const mockRecommendations = aiRecommendations;

@@ -24,7 +24,7 @@ const SmCardWrapper = styled.div`
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 5px 5px 30px 0px #9e9e9e40;
   cursor: pointer;
 `;
 
@@ -367,12 +367,16 @@ export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = f
             </SmStatusRow>
           </SmStatusOverlay>
         </SmCoverWrapper>
-        <SmInfoSection>
-          <SmBookInfo>
-            <SmBookTitle>{book.title}</SmBookTitle>
-          </SmBookInfo>
-          {showProgress && book.progress !== undefined && <SmProgressText>{book.progress}%</SmProgressText>}
-        </SmInfoSection>
+        {(showTitle || showProgress) && (
+          <SmInfoSection>
+            {showTitle && (
+              <SmBookInfo>
+                <SmBookTitle>{book.title}</SmBookTitle>
+              </SmBookInfo>
+            )}
+            {showProgress && book.progress !== undefined && <SmProgressText>{book.progress}%</SmProgressText>}
+          </SmInfoSection>
+        )}
       </SmCardWrapper>
     );
   }
