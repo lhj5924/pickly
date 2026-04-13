@@ -367,12 +367,16 @@ export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = f
             </SmStatusRow>
           </SmStatusOverlay>
         </SmCoverWrapper>
-        <SmInfoSection>
-          <SmBookInfo>
-            <SmBookTitle>{book.title}</SmBookTitle>
-          </SmBookInfo>
-          {showProgress && book.progress !== undefined && <SmProgressText>{book.progress}%</SmProgressText>}
-        </SmInfoSection>
+        {(showTitle || showProgress) && (
+          <SmInfoSection>
+            {showTitle && (
+              <SmBookInfo>
+                <SmBookTitle>{book.title}</SmBookTitle>
+              </SmBookInfo>
+            )}
+            {showProgress && book.progress !== undefined && <SmProgressText>{book.progress}%</SmProgressText>}
+          </SmInfoSection>
+        )}
       </SmCardWrapper>
     );
   }

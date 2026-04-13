@@ -1,10 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import styled from 'styled-components';
 import { BookCard } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
-import { Book } from '@/types';
 import {
   similarBooks as similarBooksData,
   genreRecommendBooks as genreBooksData,
@@ -27,7 +27,7 @@ const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 `;
 
 const SectionTitle = styled.h2`
@@ -45,44 +45,108 @@ const SeeMoreLink = styled.button`
   }
 `;
 
-const NavButtons = styled.div`
+const SimilarBooksLayout = styled.div`
   display: flex;
+  gap: 3rem;
+  align-items: stretch;
+`;
+
+const FeaturedBookColumn = styled.div`
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+
+  & > div:first-child {
+    width: 100%;
+  }
+`;
+
+const FeaturedTextWrapper = styled.div`
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
 `;
 
+const FeaturedTitle = styled.p`
+  font-family: 'Pretendard Variable';
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const FeaturedSubtitle = styled.p`
+  font-family: 'Pretendard Variable';
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 160%;
+  letter-spacing: 0;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const SmallBooksColumn = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
+`;
+
+const SmallBooksGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+`;
+
+const SmallBookItem = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const SmallBookTextWrapper = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const SmallBookTitle = styled.p`
+  font-family: 'Pretendard Variable';
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const NavButtons = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+`;
+
 const NavButton = styled.button`
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: #000000;
+  box-shadow: 0px 4.44px 31.06px 0px #b8b8b840;
 
-  &:hover {
-    background: ${({ theme }) => theme.colors.neutral[50]};
-  }
-`;
-
-const HorizontalScroll = styled.div`
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: ${({ theme }) => theme.colors.neutral[100]};
-    border-radius: 2px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.neutral[300]};
-    border-radius: 2px;
+  &:disabled {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    cursor: not-allowed;
   }
 `;
 
@@ -295,9 +359,21 @@ const aiBooks = aiRecommendations;
 const popularBooks = popularBooksData;
 const hiddenBooks = hiddenBooksData;
 
+const SMALL_BOOKS_PAGE_SIZE = 4;
+
 export default function RecommendPage() {
   const { user } = useAuthStore();
   const nickname = user?.nickname?.split('_')[0] || '빨리';
+
+  const smallBooks = similarBooks.slice(1);
+  const [smallBooksPage, setSmallBooksPage] = useState(0);
+  const smallBooksMaxPage = Math.max(0, Math.ceil(smallBooks.length / SMALL_BOOKS_PAGE_SIZE) - 1);
+  const canGoPrevSmallBooks = smallBooksPage > 0;
+  const canGoNextSmallBooks = smallBooksPage < smallBooksMaxPage;
+  const visibleSmallBooks = smallBooks.slice(
+    smallBooksPage * SMALL_BOOKS_PAGE_SIZE,
+    (smallBooksPage + 1) * SMALL_BOOKS_PAGE_SIZE,
+  );
 
   return (
     <Container>
@@ -305,20 +381,46 @@ export default function RecommendPage() {
       <Section>
         <SectionHeader>
           <SectionTitle>&lt;내가 했던 어느 날에&gt; 와 비슷한 책</SectionTitle>
-          <NavButtons>
-            <NavButton>
-              <ChevronLeft size={18} />
-            </NavButton>
-            <NavButton>
-              <ChevronRight size={18} />
-            </NavButton>
-          </NavButtons>
         </SectionHeader>
-        <HorizontalScroll>
-          {similarBooks.map(book => (
-            <BookCard key={book.id} book={book} size="md" />
-          ))}
-        </HorizontalScroll>
+        <SimilarBooksLayout>
+          {similarBooks.length > 0 && (
+            <FeaturedBookColumn>
+              <BookCard book={similarBooks[0]} size="md" />
+              <FeaturedTextWrapper>
+                <FeaturedTitle>{similarBooks[0].title}</FeaturedTitle>
+                <FeaturedSubtitle>{similarBooks[0].author}</FeaturedSubtitle>
+              </FeaturedTextWrapper>
+            </FeaturedBookColumn>
+          )}
+          <SmallBooksColumn>
+            <SmallBooksGrid>
+              {visibleSmallBooks.map(book => (
+                <SmallBookItem key={book.id}>
+                  <BookCard book={book} size="sm" showTitle={false} />
+                  <SmallBookTextWrapper>
+                    <SmallBookTitle>{book.title}</SmallBookTitle>
+                  </SmallBookTextWrapper>
+                </SmallBookItem>
+              ))}
+            </SmallBooksGrid>
+            <NavButtons>
+              <NavButton
+                onClick={() => setSmallBooksPage(p => Math.max(0, p - 1))}
+                disabled={!canGoPrevSmallBooks}
+                aria-label="이전"
+              >
+                <ChevronLeft size={20} />
+              </NavButton>
+              <NavButton
+                onClick={() => setSmallBooksPage(p => Math.min(smallBooksMaxPage, p + 1))}
+                disabled={!canGoNextSmallBooks}
+                aria-label="다음"
+              >
+                <ChevronRight size={20} />
+              </NavButton>
+            </NavButtons>
+          </SmallBooksColumn>
+        </SimilarBooksLayout>
       </Section>
 
       {/* 장르 기반 추천 */}
