@@ -1,10 +1,10 @@
 'use client';
 
 import styled from 'styled-components';
-import { BookCard, Input } from '@/components/common';
+import { BookCard } from '@/components/common';
 import { Search, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { Book } from '@/types';
+import { useBookSearch } from '@/api/useBook';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -143,20 +143,11 @@ const RecentTag = styled.button`
   }
 `;
 
-const mockBooks: Book[] = [
-  { id: '1', title: '우리는 모두 천문학자로 태어난다', author: '지웅배', coverImage: 'https://image.yes24.com/goods/124857283/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '2', title: '우리가 빛의 속도로 갈 수 없다면', author: '김초엽', coverImage: 'https://image.yes24.com/goods/77091141/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '3', title: '중독된 뇌를 어떻게 바꾸는가', author: '저드슨 브루어', coverImage: 'https://image.yes24.com/goods/90309531/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '4', title: '서해는 모든 것을 알았다', author: '정세랑', coverImage: 'https://image.yes24.com/goods/125698547/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-  { id: '5', title: '당연하게도 나는 너를', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL', description: '', publisher: '', publishDate: '', pageCount: 0, categories: [] },
-];
-
 const recentSearches = ['우리는', '천문학', '로맨스 소설', '김초엽', '에세이'];
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Book[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -166,19 +157,16 @@ export default function SearchPage() {
   }, []);
 
   useEffect(() => {
-    if (query.length > 0) {
-      const filtered = mockBooks.filter(
-        (book) =>
-          book.title.toLowerCase().includes(query.toLowerCase()) ||
-          book.author.toLowerCase().includes(query.toLowerCase())
-      );
-      setResults(filtered);
-      setHasSearched(true);
-    } else {
-      setResults([]);
-      setHasSearched(false);
-    }
+    const t = setTimeout(() => setDebouncedQuery(query.trim()), 250);
+    return () => clearTimeout(t);
   }, [query]);
+
+  const { data: searchData, isFetching } = useBookSearch(
+    { query: debouncedQuery, size: 20 },
+    debouncedQuery.length > 0,
+  );
+  const results = searchData?.books ?? [];
+  const hasSearched = debouncedQuery.length > 0;
 
   const handleRecentClick = (term: string) => {
     setQuery(term);
@@ -186,7 +174,6 @@ export default function SearchPage() {
 
   const handleClear = () => {
     setQuery('');
-    setHasSearched(false);
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -214,13 +201,14 @@ export default function SearchPage() {
       {hasSearched ? (
         <>
           <ResultInfo>
-            "<HighlightText>{query}</HighlightText>" 검색 결과 {results.length}건
+            &quot;<HighlightText>{debouncedQuery}</HighlightText>&quot; 검색 결과{' '}
+            {isFetching ? '불러오는 중…' : `${results.length}건`}
           </ResultInfo>
 
           {results.length > 0 ? (
             <BookGrid>
-              {results.map((book) => (
-                <BookCard key={book.id} book={book} size="md" />
+              {results.map(book => (
+                <BookCard key={book.uuid} book={book} size="md" />
               ))}
             </BookGrid>
           ) : (

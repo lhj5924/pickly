@@ -1,4 +1,4 @@
-import { Category } from './book';
+import type { GenreInfo } from './genre';
 
 export type SocialProvider = 'google' | 'kakao';
 
@@ -13,7 +13,8 @@ export interface User {
 }
 
 export interface UserPreferences {
-  favoriteCategories: Category[];
+  /** 스웨거 기준 — 사용자의 선호 장르 */
+  preferredGenres: GenreInfo[];
 }
 
 export type SignupStep = 'login' | 'terms' | 'preferences' | 'complete';
@@ -22,7 +23,7 @@ export interface SignupData {
   provider: SocialProvider;
   email: string;
   termsAgreed: boolean;
-  favoriteCategories: Category[];
+  preferredGenres: GenreInfo[];
 }
 
 // 랜덤 닉네임 생성

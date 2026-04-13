@@ -7,14 +7,60 @@ import styled from 'styled-components';
 import { BookCard } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
-import { Book } from '@/types';
-import {
-  similarBooks as similarBooksData,
-  genreRecommendBooks as genreBooksData,
-  aiRecommendations,
-  popularBooks as popularBooksData,
-  hiddenTasteBooks as hiddenBooksData,
-} from '@/data/mockData';
+
+// --- 추천 섹션 로컬 목업 (서버 추천 API 추가 전까지 로컬 유지) ---
+interface RecommendBook {
+  id: string;
+  title: string;
+  subtitle?: string;
+  author?: string;
+  coverImage: string;
+}
+interface HiddenBookData {
+  id: string;
+  coverImage: string;
+  quote: string;
+  title: string;
+}
+
+const similarBooksData: RecommendBook[] = [
+  { id: 'sim-1', title: '당연하게도 나는 너를1', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  { id: 'sim-2', title: '당연하게도 나는 너를2', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  { id: 'sim-3', title: '당연하게도 나는 너를3', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  { id: 'sim-4', title: '당연하게도 나는 너를4', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  { id: 'sim-5', title: '당연하게도 나는 너를5', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  { id: 'sim-6', title: '당연하게도 나는 너를6', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+];
+
+const genreBooksData: RecommendBook[] = [
+  { id: 'gr-1', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  { id: 'gr-2', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  { id: 'gr-3', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+  { id: 'gr-4', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
+];
+
+const aiRecommendations: RecommendBook[] = [
+  { id: 'rec-1', title: '서해는 모든 것을 알았다', author: '정세랑', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+  { id: 'rec-2', title: '우리는 모두 천문학자로 태어난다', author: '지웅배', coverImage: 'https://image.yes24.com/goods/124857283/XL' },
+  { id: 'rec-3', title: '서해는 모든 것을 알았다', author: '정세랑', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+  { id: 'rec-4', title: '우리는 모두 천문학자로 태어난다', author: '지웅배', coverImage: 'https://image.yes24.com/goods/124857283/XL' },
+];
+
+const popularBooksData: RecommendBook[] = [
+  { id: 'pop-1', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+  { id: 'pop-2', title: '내가 없던 어느 밤', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+  { id: 'pop-3', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+  { id: 'pop-4', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+  { id: 'pop-5', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+  { id: 'pop-6', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
+];
+
+const hiddenBooksData: HiddenBookData[] = [
+  { id: 'ht-1', title: '', coverImage: 'https://image.yes24.com/goods/125698547/XL', quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?' },
+  { id: 'ht-2', title: '', coverImage: 'https://image.yes24.com/goods/124857283/XL', quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?' },
+  { id: 'ht-3', title: '', coverImage: 'https://image.yes24.com/goods/124857283/XL', quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?' },
+  { id: 'ht-4', title: '', coverImage: 'https://image.yes24.com/goods/124857283/XL', quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?' },
+];
 
 const Container = styled.div`
   max-width: 1200px;
@@ -428,7 +474,7 @@ const HiddenBookCard = ({ book }: { book: HiddenBook }) => {
   return (
     <HiddenCard style={{ background }} onClick={() => router.push(`/book/${book.id}`)}>
       <HiddenBookCoverWrapper>
-        <BookCard book={book as unknown as Book} size="md" />
+        <BookCard book={book} size="md" />
       </HiddenBookCoverWrapper>
       <HiddenQuoteText>"{book.quote}"</HiddenQuoteText>
     </HiddenCard>
@@ -524,7 +570,7 @@ export default function RecommendPage() {
           {genre.items.map(book => (
             <VerticalBookCard key={book.id} onClick={() => router.push(`/book/${book.id}`)}>
               <VerticalBookCoverWrapper>
-                <BookCard book={book as unknown as Book} size="sm" showTitle={false} />
+                <BookCard book={book} size="sm" showTitle={false} />
               </VerticalBookCoverWrapper>
               <VerticalBookTitle>{book.title}</VerticalBookTitle>
               <VerticalBookSubTitle>{book.subtitle}</VerticalBookSubTitle>
@@ -561,7 +607,7 @@ export default function RecommendPage() {
           {popular.items.map(book => (
             <VerticalBookCard key={book.id} onClick={() => router.push(`/book/${book.id}`)}>
               <PopularCoverWrapper>
-                <BookCard book={book as unknown as Book} size="md" />
+                <BookCard book={book} size="md" />
               </PopularCoverWrapper>
               <div>
                 <Image src="/icons/shootingstar.svg" alt="" width={24} height={24} />

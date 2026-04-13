@@ -6,15 +6,38 @@ import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useAuthStore, useBookStore } from '@/stores';
-import {
-  readingStats,
-  genreChartData,
-  keywordChartData,
-  bannerData,
-  getReadingBooks,
-  aiRecommendations,
-} from '@/data/mockData';
+import { useAuthStore } from '@/stores';
+import { useMyLibraries } from '@/api/useLibrary';
+// UI-only 차트/배너 데이터는 아직 서버 API가 없어 로컬 상수로 유지합니다 (Stage 3).
+const genreChartData = [
+  { name: '소설', value: 54 },
+  { name: '에세이', value: 34 },
+  { name: '경제경영', value: 12 },
+];
+
+const keywordChartData = [
+  { name: '로맨스', value: 40 },
+  { name: '성장', value: 35 },
+  { name: '힐링', value: 25 },
+];
+
+const bannerData = [
+  {
+    id: 1,
+    book: { title: '나나 올리브에게', coverImage: 'https://image.yes24.com/goods/109933559/XL' },
+    quote: '서운해하지는 마세요. 물건들에게도 계절이 있다면, 긴 겨울이 지나 봄이 온 것뿐이에요.',
+  },
+  {
+    id: 2,
+    book: { title: '배너 2', coverImage: '' },
+    quote: '',
+  },
+  {
+    id: 3,
+    book: { title: '배너 3', coverImage: '' },
+    quote: '',
+  },
+];
 
 const PageWrapper = styled.div`
   position: relative;
@@ -226,14 +249,12 @@ const EmptyBooks = styled.div`
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
-// Data from centralized mock data (replace with API calls later)
-const mockReadingBooks = getReadingBooks();
-const mockRecommendations = aiRecommendations;
-
 export default function HomePage() {
   const { user } = useAuthStore();
+  const { data: readingLibrary = [] } = useMyLibraries('READING');
+  const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
+  const hasData = completedLibrary.length > 0;
   const [currentBanner, setCurrentBanner] = useState(0);
-  const [hasData, setHasData] = useState(true); // 데이터 유무 상태
   const [chartAnimated, setChartAnimated] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
 
@@ -298,17 +319,17 @@ export default function HomePage() {
             <StatsGrid>
               <StatCard
                 label="총 읽은 책 수"
-                value={hasData ? `${readingStats.totalBooks}권` : undefined}
+                value={hasData ? `${completedLibrary.length}권` : undefined}
                 icon={<OpenedBookIcon size={24} />}
               />
               <StatCard
-                label="평균 독서 기간"
-                value={hasData ? `${readingStats.averageReadingDays}일` : undefined}
+                label="읽는 중"
+                value={`${readingLibrary.length}권`}
                 icon={<CalendarIcon size={24} />}
               />
               <StatCard
                 label="월 평균 권 수"
-                value={hasData ? `${readingStats.monthlyAverage}권` : undefined}
+                value={hasData ? `${Math.round((completedLibrary.length / 12) * 10) / 10}권` : undefined}
                 icon={<BooksIcon size={24} />}
               />
             </StatsGrid>
@@ -346,10 +367,10 @@ export default function HomePage() {
         {/* Reading Books */}
         <BooksSection>
           <SectionTitle>내가 지금 읽고 있는 책</SectionTitle>
-          {mockReadingBooks.length > 0 ? (
+          {readingLibrary.length > 0 ? (
             <BooksScroll>
-              {mockReadingBooks.map(book => (
-                <BookCard key={book.id} book={book} size="sm" showProgress />
+              {readingLibrary.map(item => (
+                <BookCard key={item.uuid} book={item.book} size="sm" initialStatus="reading" />
               ))}
             </BooksScroll>
           ) : (
@@ -357,14 +378,10 @@ export default function HomePage() {
           )}
         </BooksSection>
 
-        {/* AI Recommendations */}
+        {/* AI Recommendations - TODO: 서버에 추천 API가 추가되면 연동 */}
         <BooksSection>
           <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
-          <BooksScroll>
-            {mockRecommendations.map(book => (
-              <BookCard key={book.id} book={book} size="md" />
-            ))}
-          </BooksScroll>
+          <EmptyBooks>곧 AI 추천 책을 보여드릴 예정이에요.</EmptyBooks>
         </BooksSection>
       </Container>
     </PageWrapper>

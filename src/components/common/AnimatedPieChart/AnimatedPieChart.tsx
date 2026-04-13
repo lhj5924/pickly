@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useId } from 'react';
 import { useTheme } from 'styled-components';
-import type { ChartSegment } from '@/data/mockData';
+
+export interface ChartSegment {
+  name: string;
+  value: number;
+}
 
 interface AnimatedPieChartProps {
   data: ChartSegment[];

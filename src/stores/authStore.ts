@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, SignupStep, SignupData, SocialProvider, generateRandomNickname, Category } from '@/types';
+import type {
+  GenreInfo,
+  SignupStep,
+  SignupData,
+  SocialProvider,
+  User,
+} from '@/types';
+import { generateRandomNickname } from '@/types';
 import type { LoginResponse, UserResponse } from '@/types/api';
 
 interface AuthState {
@@ -18,7 +25,7 @@ interface AuthState {
   updateSignupData: (data: Partial<SignupData>) => void;
   completeSignup: () => void;
   updateNickname: (nickname: string) => void;
-  updateFavoriteCategories: (categories: Category[]) => void;
+  updatePreferredGenres: (genres: GenreInfo[]) => void;
   resetSignup: () => void;
 }
 
@@ -26,32 +33,14 @@ const initialSignupData: SignupData = {
   provider: 'kakao',
   email: '',
   termsAgreed: false,
-  favoriteCategories: [],
-};
-
-// TODO: 실제 API 연동 후 제거
-const mockUser: User = {
-  id: 'mock_user_1',
-  email: 'pickly@example.com',
-  nickname: '빨리_읽는_다람쥐',
-  provider: 'kakao',
-  preferences: {
-    favoriteCategories: [
-      { id: 2, name: '로맨스' },
-      { id: 1, name: '소설' },
-      { id: 5, name: '미스터리/스릴러' },
-      { id: 8, name: '시/에세이' },
-      { id: 15, name: '예술' },
-    ],
-  },
-  createdAt: '2025-01-15T09:00:00.000Z',
+  preferredGenres: [],
 };
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      user: mockUser,
-      isAuthenticated: true,
+      user: null,
+      isAuthenticated: false,
       signupStep: 'login',
       signupData: initialSignupData,
 
@@ -74,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
           nickname: apiUser.nickname,
           profileImage: apiUser.profileImageUrl,
           provider,
-          preferences: { favoriteCategories: [] },
+          preferences: { preferredGenres: apiUser.preferredGenres ?? [] },
           createdAt: new Date().toISOString(),
         };
 
@@ -94,7 +83,7 @@ export const useAuthStore = create<AuthState>()(
           nickname: apiUser.nickname,
           profileImage: apiUser.profileImageUrl,
           provider,
-          preferences: { favoriteCategories: [] },
+          preferences: { preferredGenres: apiUser.preferredGenres ?? [] },
           createdAt: new Date().toISOString(),
         };
         set({ user: newUser });
@@ -111,27 +100,36 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      setSignupStep: (step) => {
+      setSignupStep: step => {
         set({ signupStep: step });
       },
 
-      updateSignupData: (data) => {
+      updateSignupData: data => {
         set({ signupData: { ...get().signupData, ...data } });
       },
 
       completeSignup: () => {
-        const { signupData } = get();
+        const { signupData, user } = get();
+        if (user) {
+          set({
+            user: {
+              ...user,
+              preferences: { preferredGenres: signupData.preferredGenres },
+            },
+            signupStep: 'complete',
+            signupData: initialSignupData,
+          });
+          return;
+        }
+        // 로컬 전용 fallback (서버 user 없이 온보딩 완료된 경우)
         const newUser: User = {
           id: `user_${Date.now()}`,
           email: signupData.email,
           nickname: generateRandomNickname(),
           provider: signupData.provider,
-          preferences: {
-            favoriteCategories: signupData.favoriteCategories,
-          },
+          preferences: { preferredGenres: signupData.preferredGenres },
           createdAt: new Date().toISOString(),
         };
-        
         set({
           user: newUser,
           isAuthenticated: true,
@@ -140,20 +138,20 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      updateNickname: (nickname) => {
+      updateNickname: nickname => {
         const { user } = get();
         if (user) {
           set({ user: { ...user, nickname } });
         }
       },
 
-      updateFavoriteCategories: (categories) => {
+      updatePreferredGenres: genres => {
         const { user } = get();
         if (user) {
           set({
             user: {
               ...user,
-              preferences: { ...user.preferences, favoriteCategories: categories },
+              preferences: { ...user.preferences, preferredGenres: genres },
             },
           });
         }
@@ -168,6 +166,6 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'pickly-auth',
-    }
-  )
+    },
+  ),
 );
