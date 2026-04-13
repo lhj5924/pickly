@@ -1,8 +1,9 @@
 'use client';
 
 import styled, { keyframes } from 'styled-components';
-import { BookCard, Button } from '@/components/common';
-import { ChevronLeft, ChevronRight, ArrowRight, Book, Calendar, BarChart3 } from 'lucide-react';
+import { BookCard, Button, AnimatedPieChart, StatsGrid, StatCard } from '@/components/common';
+import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuthStore, useBookStore } from '@/stores';
@@ -13,7 +14,6 @@ import {
   bannerData,
   getReadingBooks,
   aiRecommendations,
-  type ChartSegment,
 } from '@/data/mockData';
 
 const PageWrapper = styled.div`
@@ -116,54 +116,8 @@ const SectionTitle = styled.h2`
   margin-bottom: 1rem;
 `;
 
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+const StatsGridMargin = styled.div`
   margin-bottom: 1.5rem;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const StatCard = styled.div`
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
-
-const StatInfo = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-`;
-
-const StatLabel = styled.p`
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.quinary};
-  margin-bottom: 0.5rem;
-`;
-
-const StatValue = styled.p`
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const StatIcon = styled.div`
-  color: ${({ theme }) => theme.colors.primary[500]};
-  margin-top: 0.3rem;
-`;
-
-const EmptyStatValue = styled.p`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
 // Chart Section
@@ -172,12 +126,13 @@ const ChartSection = styled.div`
   border-radius: 1rem;
   padding: 2.5rem 3rem;
   margin-bottom: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.md};
 `;
 
 const ChartTitle = styled.h3`
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.colors.text.quaternary};
+  color: ${({ theme }) => theme.colors.text.quinary};
   margin-bottom: 1.5rem;
   text-align: left;
 `;
@@ -233,17 +188,22 @@ const EmptyChart = styled.div`
   font-size: 0.875rem;
 `;
 
+const CtaButtonWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
 // Books Section
 const BooksSection = styled.section`
-  margin-bottom: 2.5rem;
+  // margin-bottom: 2.5rem;
 `;
 
 const BooksScroll = styled.div`
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.25rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding-bottom: 2.5rem;
 
   &::-webkit-scrollbar {
     height: 4px;
@@ -265,220 +225,6 @@ const EmptyBooks = styled.div`
   padding: 3rem;
   color: ${({ theme }) => theme.colors.text.tertiary};
 `;
-
-// Footer
-const Footer = styled.footer`
-  position: relative;
-  z-index: 1;
-  border-top: 1px solid ${({ theme }) => theme.colors.border.light};
-  padding: 3rem 1.5rem;
-  margin-top: 4rem;
-  text-align: center;
-`;
-
-const FooterLogo = styled.p`
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: ${({ theme }) => theme.colors.primary[600]};
-  font-family: 'Pretendard Variable', sans-serif;
-  margin-bottom: 1rem;
-`;
-
-const FooterLinks = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-`;
-
-const FooterLink = styled.a`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.primary[600]};
-  }
-`;
-
-const FooterSubLinks = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const SocialLinks = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-`;
-
-const SocialIcon = styled.a`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: ${({ theme }) => theme.colors.neutral[800]};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.75rem;
-`;
-
-// Animated Pie Chart Component
-const AnimatedPieChart = ({ data, animate }: { data: ChartSegment[]; animate: boolean }) => {
-  const [animationComplete, setAnimationComplete] = useState(false);
-  const size = 220;
-  const strokeWidth = 110;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const center = size / 2;
-
-  // Mark animation as complete after it finishes
-  useEffect(() => {
-    if (animate && !animationComplete) {
-      const timer = setTimeout(() => {
-        setAnimationComplete(true);
-      }, 1500); // Animation duration + delays
-      return () => clearTimeout(timer);
-    }
-  }, [animate, animationComplete]);
-
-  // Calculate segment positions
-  let accumulatedPercentage = 0;
-  const segments = data.map((segment, index) => {
-    const percentage = segment.value;
-    const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-    const strokeDashoffset = -(accumulatedPercentage / 100) * circumference;
-
-    // Calculate label position (middle of segment)
-    const segmentMiddle = accumulatedPercentage + percentage / 2;
-    const angle = (segmentMiddle / 100) * 2 * Math.PI - Math.PI / 2;
-    const labelRadius = radius + strokeWidth / 2 + 30;
-    const labelX = center + Math.cos(angle) * labelRadius;
-    const labelY = center + Math.sin(angle) * labelRadius;
-
-    // Line start point (edge of pie)
-    const lineStartRadius = radius + strokeWidth / 2;
-    const lineStartX = center + Math.cos(angle) * lineStartRadius;
-    const lineStartY = center + Math.sin(angle) * lineStartRadius;
-
-    // Determine text anchor based on position
-    const isLeftSide = labelX < center;
-    const textAnchor: 'end' | 'start' = isLeftSide ? 'end' : 'start';
-    const labelOffset = isLeftSide ? -10 : 10;
-
-    accumulatedPercentage += percentage;
-
-    return {
-      ...segment,
-      strokeDasharray,
-      strokeDashoffset,
-      labelX: labelX + labelOffset,
-      labelY,
-      lineStartX,
-      lineStartY,
-      lineEndX: labelX,
-      lineEndY: labelY,
-      textAnchor,
-      delay: 1 + index * 0.2,
-    };
-  });
-
-  return (
-    <svg width={size + 100} height={size + 40} style={{ overflow: 'visible' }}>
-      <g transform={`translate(50, 20)`}>
-        {/* Pie segments */}
-        <g style={{ transform: 'rotate(-90deg)', transformOrigin: `${center}px ${center}px` }}>
-          {segments.map((segment, index) => (
-            <circle
-              key={index}
-              cx={center}
-              cy={center}
-              r={radius}
-              fill="none"
-              stroke={segment.color}
-              strokeWidth={strokeWidth}
-              strokeDasharray={
-                animationComplete ? segment.strokeDasharray : animate ? `0 ${circumference}` : segment.strokeDasharray
-              }
-              strokeDashoffset={segment.strokeDashoffset}
-              style={{
-                transition: animate && !animationComplete ? 'none' : undefined,
-                animation:
-                  animate && !animationComplete ? `pieSegment${index} 1s ease-out ${index * 0.1}s forwards` : undefined,
-              }}
-            />
-          ))}
-        </g>
-
-        {/* Labels with lines */}
-        {segments.map((segment, index) => (
-          <g key={`label-${index}`}>
-            {/* Connection line */}
-            <line
-              x1={segment.lineStartX}
-              y1={segment.lineStartY}
-              x2={segment.lineEndX}
-              y2={segment.lineEndY}
-              stroke="#999"
-              strokeWidth={1}
-              style={{
-                opacity: animationComplete ? 1 : animate ? 0 : 1,
-                animation:
-                  animate && !animationComplete ? `fadeIn 0.3s ease-out ${segment.delay}s forwards` : undefined,
-              }}
-            />
-            {/* Label text */}
-            <text
-              x={segment.labelX}
-              y={segment.labelY}
-              textAnchor={segment.textAnchor}
-              dominantBaseline="middle"
-              fontSize="14"
-              fontWeight="500"
-              fill="#333"
-              style={{
-                opacity: animationComplete ? 1 : animate ? 0 : 1,
-                transform: 'translateY(0)',
-                animation:
-                  animate && !animationComplete ? `fadeInUp 0.5s ease-out ${segment.delay + 0.1}s forwards` : undefined,
-              }}
-            >
-              {segment.name} {segment.value}%
-            </text>
-          </g>
-        ))}
-      </g>
-
-      {/* CSS animations */}
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          ${segments
-            .map(
-              (segment, index) => `
-            @keyframes pieSegment${index} {
-              from { stroke-dasharray: 0 ${circumference}; }
-              to { stroke-dasharray: ${segment.strokeDasharray}; }
-            }
-          `,
-            )
-            .join('')}
-        `}
-      </style>
-    </svg>
-  );
-};
 
 // Data from centralized mock data (replace with API calls later)
 const mockReadingBooks = getReadingBooks();
@@ -548,47 +294,25 @@ export default function HomePage() {
         <StatsSection>
           <SectionTitle>나는 어떤 책을 얼마나 읽었을까?</SectionTitle>
 
-          <StatsGrid>
-            <StatCard>
-              <StatInfo>
-                <StatLabel>총 읽은 책 수</StatLabel>
-                {hasData ? (
-                  <StatValue>{readingStats.totalBooks}권</StatValue>
-                ) : (
-                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
-                )}
-              </StatInfo>
-              <StatIcon>
-                <Book size={24} />
-              </StatIcon>
-            </StatCard>
-            <StatCard>
-              <StatInfo>
-                <StatLabel>평균 독서 기간</StatLabel>
-                {hasData ? (
-                  <StatValue>{readingStats.averageReadingDays}일</StatValue>
-                ) : (
-                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
-                )}
-              </StatInfo>
-              <StatIcon>
-                <Calendar size={24} />
-              </StatIcon>
-            </StatCard>
-            <StatCard>
-              <StatInfo>
-                <StatLabel>월 평균 권 수</StatLabel>
-                {hasData ? (
-                  <StatValue>{readingStats.monthlyAverage}권</StatValue>
-                ) : (
-                  <EmptyStatValue>아직 데이터가 없습니다</EmptyStatValue>
-                )}
-              </StatInfo>
-              <StatIcon>
-                <BarChart3 size={24} />
-              </StatIcon>
-            </StatCard>
-          </StatsGrid>
+          <StatsGridMargin>
+            <StatsGrid>
+              <StatCard
+                label="총 읽은 책 수"
+                value={hasData ? `${readingStats.totalBooks}권` : undefined}
+                icon={<OpenedBookIcon size={24} />}
+              />
+              <StatCard
+                label="평균 독서 기간"
+                value={hasData ? `${readingStats.averageReadingDays}일` : undefined}
+                icon={<CalendarIcon size={24} />}
+              />
+              <StatCard
+                label="월 평균 권 수"
+                value={hasData ? `${readingStats.monthlyAverage}권` : undefined}
+                icon={<BooksIcon size={24} />}
+              />
+            </StatsGrid>
+          </StatsGridMargin>
 
           <ChartSection ref={chartRef}>
             <ChartTitle>당신은 로맨스 중심의 소설을 가장 많이 소비해요</ChartTitle>
@@ -612,9 +336,11 @@ export default function HomePage() {
             )}
           </ChartSection>
 
-          <Button variant="stats" as={Link} href="/stats" fullWidth rightIcon={<ArrowRight size={18} />}>
-            전체 통계 보러가기
-          </Button>
+          <CtaButtonWrapper>
+            <Button variant="cta" as={Link} href="/stats" rightIcon={<ArrowRight size={24} />}>
+              전체 통계 보러가기
+            </Button>
+          </CtaButtonWrapper>
         </StatsSection>
 
         {/* Reading Books */}
@@ -641,25 +367,6 @@ export default function HomePage() {
           </BooksScroll>
         </BooksSection>
       </Container>
-
-      {/* Footer */}
-      <Footer>
-        <FooterLogo>pickly</FooterLogo>
-        <FooterLinks>
-          <FooterLink href="#">고객센터</FooterLink>
-          <FooterLink href="#">CONTACT US</FooterLink>
-        </FooterLinks>
-        <FooterSubLinks>
-          <span>이용약관</span>
-          <span>개인정보처리방침</span>
-        </FooterSubLinks>
-        <SocialLinks>
-          <SocialIcon href="#">Y</SocialIcon>
-          <SocialIcon href="#">@</SocialIcon>
-          <SocialIcon href="#">X</SocialIcon>
-          <SocialIcon href="#">♪</SocialIcon>
-        </SocialLinks>
-      </Footer>
     </PageWrapper>
   );
 }

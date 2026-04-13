@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { Logo } from '@/components/common';
 
 const Header = styled.header`
   position: sticky;
@@ -22,13 +23,6 @@ const Container = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-`;
-
-const Logo = styled(Link)`
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: ${({ theme }) => theme.colors.primary[600]};
-  font-family: 'Titan One', 'Georgia', serif;
 `;
 
 const Nav = styled.nav`
@@ -110,7 +104,7 @@ export const GNB = () => {
   return (
     <Header>
       <Container>
-        <Logo href="/home">pickly</Logo>
+        <Logo href="/home" />
 
         <Nav>
           {navItems.map(item => (

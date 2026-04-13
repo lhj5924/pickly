@@ -30,7 +30,7 @@ export const theme = {
       900: '#171717',
     },
     background: {
-      primary: '#ffffff',
+      primary: '#FAFAFA',
       secondary: '#f5f5f5',
       card: '#ffffff',
       gradient: 'linear-gradient(180deg, #f5f6e8 0%, #e8ebd8 50%, #d4e4c4 100%)',
@@ -41,6 +41,7 @@ export const theme = {
       tertiary: '#a3a3a3',
       quaternary: '#4C4C4C',
       quinary: '#646464',
+      sextary: '#7F7F7F',
     },
     border: {
       light: '#e5e5e5',
@@ -51,6 +52,7 @@ export const theme = {
       wishlist: '#ef4444',
       completed: '#22c55e',
     },
+    chart: ['#DEFFD6', '#D1FBC6', '#BDF0AF', '#A3DC94', '#9AD18B', '#8EC680'] as string[],
     error: '#ef4444',
     success: '#22c55e',
     warning: '#f59e0b',

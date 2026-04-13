@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import { BookCard } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -16,7 +19,10 @@ import {
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 2rem 1.5rem 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
 `;
 
 const Section = styled.section`
@@ -27,13 +33,13 @@ const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 3rem;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.colors.text.quaternary};
 `;
 
 const SeeMoreLink = styled.button`
@@ -43,46 +49,119 @@ const SeeMoreLink = styled.button`
   &:hover {
     color: ${({ theme }) => theme.colors.primary[600]};
   }
+
+  &:disabled {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    cursor: not-allowed;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.neutral[300]};
+    }
+  }
+`;
+
+const SimilarBooksLayout = styled.div`
+  display: flex;
+  gap: 3rem;
+  align-items: stretch;
+`;
+
+const FeaturedBookColumn = styled.div`
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+
+  & > div:first-child {
+    width: 100%;
+  }
+`;
+
+const FeaturedTextWrapper = styled.div`
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const FeaturedTitle = styled.p`
+  font-family: 'Pretendard Variable';
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const FeaturedSubtitle = styled.p`
+  font-family: 'Pretendard Variable';
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 160%;
+  letter-spacing: 0;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+const SmallBooksColumn = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.5rem;
+`;
+
+const SmallBooksGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+`;
+
+const SmallBookItem = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const SmallBookTextWrapper = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const SmallBookTitle = styled.p`
+  font-family: 'Pretendard Variable';
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 const NavButtons = styled.div`
   display: flex;
-  gap: 0.5rem;
+  justify-content: flex-end;
+  gap: 0.75rem;
 `;
 
 const NavButton = styled.button`
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: #000000;
+  box-shadow: 0px 4.44px 31.06px 0px #b8b8b840;
 
-  &:hover {
-    background: ${({ theme }) => theme.colors.neutral[50]};
-  }
-`;
-
-const HorizontalScroll = styled.div`
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: ${({ theme }) => theme.colors.neutral[100]};
-    border-radius: 2px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: ${({ theme }) => theme.colors.neutral[300]};
-    border-radius: 2px;
+  &:disabled {
+    color: ${({ theme }) => theme.colors.neutral[300]};
+    cursor: not-allowed;
   }
 `;
 
@@ -102,61 +181,73 @@ const VerticalGrid = styled.div`
 
 const VerticalBookCard = styled.div`
   text-align: center;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 0px 10px 44px rgba(194, 194, 194, 0.25);
+  border-radius: 20px;
+  padding: 32px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.03);
+  }
 `;
 
-const VerticalBookCover = styled.img`
+const PopularCoverWrapper = styled.div`
+  width: 100%;
+  margin: 0 auto 1rem;
+
+  & > div:first-child {
+    width: 100%;
+  }
+`;
+
+const VerticalBookCoverWrapper = styled.div`
   width: 100%;
   max-width: 180px;
-  aspect-ratio: 2/3;
-  object-fit: cover;
-  border-radius: 0.5rem;
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  margin-bottom: 1rem;
+  margin: 0 auto 1rem;
 `;
 
 const VerticalBookTitle = styled.p`
-  font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
   color: ${({ theme }) => theme.colors.text.primary};
   margin-bottom: 0.25rem;
 `;
 
-const VerticalBookMeta = styled.p`
-  font-size: 0.8125rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
+const VerticalBookSubTitle = styled.p`
+  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-family: Pretendard Variable;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const VerticalBookAuthor = styled.p`
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.sextary};
+  margin-top: 0.5rem;
 `;
 
 // AI 추천 섹션
-const AIRecommendSection = styled.div`
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 1rem;
-  padding: 2rem;
-  margin-bottom: 3rem;
-`;
-
 const AIRecommendTitle = styled.h2`
   font-size: 1.25rem;
   font-weight: 700;
-  color: white;
   margin-bottom: 1.5rem;
 `;
 
 const AIBookGrid = styled.div`
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-`;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
 
-const AIBookCard = styled.div`
-  flex-shrink: 0;
-  width: 160px;
-`;
-
-const AIBookCover = styled.img`
-  width: 100%;
-  aspect-ratio: 2/3;
-  object-fit: cover;
-  border-radius: 0.5rem;
+  & > div {
+    width: 100%;
+  }
 `;
 
 // 인기 책 섹션
@@ -172,36 +263,6 @@ const PopularGrid = styled.div`
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-`;
-
-const PopularCard = styled.div`
-  text-align: center;
-`;
-
-const PopularBookCover = styled.img`
-  width: 160px;
-  height: 230px;
-  object-fit: cover;
-  border-radius: 0.5rem;
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  margin-bottom: 1rem;
-`;
-
-const PopularLabel = styled.p`
-  font-size: 0.8125rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-bottom: 0.25rem;
-`;
-
-const PopularBookTitle = styled.p`
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const PopularBookSubtitle = styled.p`
-  font-size: 0.8125rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
 // 숨겨진 취향 탐색
@@ -220,72 +281,28 @@ const HiddenGrid = styled.div`
 `;
 
 const HiddenCard = styled.div`
-  border-radius: 1rem;
+  border-radius: 1.5rem;
   overflow: hidden;
   position: relative;
+  padding: 64px 128px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.03);
+  }
 `;
 
-const HiddenBookCover = styled.img`
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-`;
-
-const HiddenQuote = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  color: white;
+const HiddenBookCoverWrapper = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const HiddenQuoteText = styled.p`
-  font-size: 0.875rem;
-  line-height: 1.6;
-`;
-
-// Footer
-const Footer = styled.footer`
-  text-align: center;
-  padding: 2rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const FooterLogo = styled.p`
+  margin-top: 3rem;
   font-size: 1.25rem;
-  font-weight: 800;
-  color: ${({ theme }) => theme.colors.primary[600]};
-  font-family: 'Titan One', 'Georgia', serif;
-  margin-bottom: 0.75rem;
-`;
-
-const FooterSubLinks = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const SocialIcons = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-`;
-
-const SocialIcon = styled.span`
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: ${({ theme }) => theme.colors.neutral[800]};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.625rem;
+  text-align: center;
+  word-break: keep-all;
 `;
 
 // Data from centralized mock data (replace with API calls later)
@@ -295,78 +312,267 @@ const aiBooks = aiRecommendations;
 const popularBooks = popularBooksData;
 const hiddenBooks = hiddenBooksData;
 
+const SIMILAR_BOOKS_PAGE_SIZE = 5;
+const GENRE_BOOKS_PAGE_SIZE = 3;
+const AI_BOOKS_PAGE_SIZE = 4;
+const POPULAR_BOOKS_PAGE_SIZE = 3;
+const HIDDEN_BOOKS_PAGE_SIZE = 2;
+
+const useShowMore = <T,>(items: T[], pageSize: number) => {
+  const [visibleCount, setVisibleCount] = useState(pageSize);
+  const canExpand = items.length > pageSize;
+  const isFullyExpanded = canExpand && visibleCount >= items.length;
+  return {
+    items: items.slice(0, visibleCount),
+    label: isFullyExpanded ? '접기' : '더보기',
+    isDisabled: !canExpand,
+    toggle: () => {
+      if (!canExpand) return;
+      setVisibleCount(count => (count >= items.length ? pageSize : count + pageSize));
+    },
+  };
+};
+
+const PASTEL_FALLBACK_PALETTES: string[][] = [
+  ['#FFE5E5', '#FFD6E8', '#E8F4FF', '#F4E5FF'],
+  ['#FFF4D6', '#FFE5B4', '#FFD6CC', '#FFEFE0'],
+  ['#E5F7E5', '#D6F0E0', '#C8EBE0', '#E8FAF0'],
+  ['#E0F0FF', '#CCE5FF', '#D6DCFF', '#E5E8FF'],
+  ['#FFE8F0', '#FFDDE6', '#FFE0CC', '#FFF0E0'],
+];
+
+const hashStringToInt = (value: string) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+};
+
+const toPastel = (r: number, g: number, b: number) => {
+  const blend = (channel: number) => Math.round((channel + 255 * 2) / 3);
+  return `rgb(${blend(r)}, ${blend(g)}, ${blend(b)})`;
+};
+
+const useImagePalette = (src: string, fallback: string[]) => {
+  const [palette, setPalette] = useState<string[]>(fallback);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let cancelled = false;
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      if (cancelled) return;
+      try {
+        const canvas = document.createElement('canvas');
+        const size = 50;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, size, size);
+        const { data } = ctx.getImageData(0, 0, size, size);
+        const buckets = new Map<string, { r: number; g: number; b: number; n: number }>();
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const key = `${r >> 5}-${g >> 5}-${b >> 5}`;
+          const bucket = buckets.get(key);
+          if (bucket) {
+            bucket.r += r;
+            bucket.g += g;
+            bucket.b += b;
+            bucket.n += 1;
+          } else {
+            buckets.set(key, { r, g, b, n: 1 });
+          }
+        }
+        const dominant = [...buckets.values()].sort((a, b) => b.n - a.n).slice(0, 4);
+        const colors = dominant.map(c => toPastel(c.r / c.n, c.g / c.n, c.b / c.n));
+        if (colors.length && !cancelled) setPalette(colors);
+      } catch {
+        // CORS-tainted canvas — keep fallback
+      }
+    };
+    img.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
+  return palette;
+};
+
+type HiddenBook = (typeof hiddenBooksData)[number];
+
+const HiddenBookCard = ({ book }: { book: HiddenBook }) => {
+  const router = useRouter();
+  const seed = hashStringToInt(book.id);
+  const fallback = PASTEL_FALLBACK_PALETTES[seed % PASTEL_FALLBACK_PALETTES.length];
+  const palette = useImagePalette(book.coverImage, fallback);
+  const colors = [...palette, ...palette];
+  const [c1, c2, c3, c4] = colors;
+  const angle = seed % 360;
+  const x1 = (seed % 60) + 20;
+  const y1 = ((seed >> 3) % 60) + 20;
+  const x2 = ((seed >> 6) % 60) + 20;
+  const y2 = ((seed >> 9) % 60) + 20;
+  const background = [
+    `radial-gradient(circle at ${x1}% ${y1}%, ${c2} 0%, transparent 55%)`,
+    `radial-gradient(circle at ${x2}% ${y2}%, ${c3} 0%, transparent 60%)`,
+    `linear-gradient(${angle}deg, ${c1} 0%, ${c4 || c1} 100%)`,
+  ].join(', ');
+
+  return (
+    <HiddenCard style={{ background }} onClick={() => router.push(`/book/${book.id}`)}>
+      <HiddenBookCoverWrapper>
+        <BookCard book={book as unknown as Book} size="md" />
+      </HiddenBookCoverWrapper>
+      <HiddenQuoteText>"{book.quote}"</HiddenQuoteText>
+    </HiddenCard>
+  );
+};
+
+const getKoreanObjectParticle = (word: string, withJongseong: string, withoutJongseong: string) => {
+  const lastChar = word.trim().slice(-1);
+  const code = lastChar.charCodeAt(0);
+  const isHangulSyllable = code >= 0xac00 && code <= 0xd7a3;
+  if (!isHangulSyllable) return withoutJongseong;
+  return (code - 0xac00) % 28 !== 0 ? withJongseong : withoutJongseong;
+};
+
 export default function RecommendPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const nickname = user?.nickname?.split('_')[0] || '빨리';
+
+  const [similarBooksPage, setSimilarBooksPage] = useState(0);
+  const similarBooksMaxPage = Math.max(0, Math.ceil(similarBooks.length / SIMILAR_BOOKS_PAGE_SIZE) - 1);
+  const canGoPrevSimilarBooks = similarBooksPage > 0;
+  const canGoNextSimilarBooks = similarBooksPage < similarBooksMaxPage;
+  const visibleSimilarBooks = similarBooks.slice(
+    similarBooksPage * SIMILAR_BOOKS_PAGE_SIZE,
+    (similarBooksPage + 1) * SIMILAR_BOOKS_PAGE_SIZE,
+  );
+  const featuredSimilarBook = visibleSimilarBooks[0];
+  const visibleSmallSimilarBooks = visibleSimilarBooks.slice(1);
+
+  const genre = useShowMore(genreBooks, GENRE_BOOKS_PAGE_SIZE);
+  const ai = useShowMore(aiBooks, AI_BOOKS_PAGE_SIZE);
+  const popular = useShowMore(popularBooks, POPULAR_BOOKS_PAGE_SIZE);
+  const hidden = useShowMore(hiddenBooks, HIDDEN_BOOKS_PAGE_SIZE);
 
   return (
     <Container>
       {/* 비슷한 책 */}
       <Section>
         <SectionHeader>
-          <SectionTitle>&lt;내가 했던 어느 날에&gt; 와 비슷한 책</SectionTitle>
-          <NavButtons>
-            <NavButton>
-              <ChevronLeft size={18} />
-            </NavButton>
-            <NavButton>
-              <ChevronRight size={18} />
-            </NavButton>
-          </NavButtons>
+          <SectionTitle>&lt;내가 없던 어느 밤에&gt; 와 비슷한 책</SectionTitle>
         </SectionHeader>
-        <HorizontalScroll>
-          {similarBooks.map(book => (
-            <BookCard key={book.id} book={book} size="md" />
-          ))}
-        </HorizontalScroll>
+        <SimilarBooksLayout>
+          {featuredSimilarBook && (
+            <FeaturedBookColumn>
+              <BookCard book={featuredSimilarBook} size="md" />
+              <FeaturedTextWrapper>
+                <FeaturedTitle>{featuredSimilarBook.title}</FeaturedTitle>
+                <FeaturedSubtitle>{featuredSimilarBook.author}</FeaturedSubtitle>
+              </FeaturedTextWrapper>
+            </FeaturedBookColumn>
+          )}
+          <SmallBooksColumn>
+            <SmallBooksGrid>
+              {visibleSmallSimilarBooks.map(book => (
+                <SmallBookItem key={book.id}>
+                  <BookCard book={book} size="sm" showTitle={false} />
+                  <SmallBookTextWrapper>
+                    <SmallBookTitle>{book.title}</SmallBookTitle>
+                  </SmallBookTextWrapper>
+                </SmallBookItem>
+              ))}
+            </SmallBooksGrid>
+            <NavButtons>
+              <NavButton
+                onClick={() => setSimilarBooksPage(p => Math.max(0, p - 1))}
+                disabled={!canGoPrevSimilarBooks}
+                aria-label="이전"
+              >
+                <ChevronLeft size={20} />
+              </NavButton>
+              <NavButton
+                onClick={() => setSimilarBooksPage(p => Math.min(similarBooksMaxPage, p + 1))}
+                disabled={!canGoNextSimilarBooks}
+                aria-label="다음"
+              >
+                <ChevronRight size={20} />
+              </NavButton>
+            </NavButtons>
+          </SmallBooksColumn>
+        </SimilarBooksLayout>
       </Section>
 
       {/* 장르 기반 추천 */}
       <Section>
         <SectionHeader>
           <SectionTitle>가장 최근 읽은 장르 기반 추천</SectionTitle>
-          <SeeMoreLink>더보기</SeeMoreLink>
+          <SeeMoreLink onClick={genre.toggle} disabled={genre.isDisabled}>
+            {genre.label}
+          </SeeMoreLink>
         </SectionHeader>
         <VerticalGrid>
-          {genreBooks.map(book => (
-            <VerticalBookCard key={book.id}>
-              <VerticalBookCover src={book.coverImage} alt={book.title} />
+          {genre.items.map(book => (
+            <VerticalBookCard key={book.id} onClick={() => router.push(`/book/${book.id}`)}>
+              <VerticalBookCoverWrapper>
+                <BookCard book={book as unknown as Book} size="sm" showTitle={false} />
+              </VerticalBookCoverWrapper>
               <VerticalBookTitle>{book.title}</VerticalBookTitle>
-              <VerticalBookMeta>{book.subtitle}</VerticalBookMeta>
+              <VerticalBookSubTitle>{book.subtitle}</VerticalBookSubTitle>
+              <VerticalBookAuthor>{book.author}</VerticalBookAuthor>
             </VerticalBookCard>
           ))}
         </VerticalGrid>
       </Section>
 
       {/* AI 추천 */}
-      <AIRecommendSection>
+      <Section>
         <SectionHeader>
-          <AIRecommendTitle>{nickname}님의 독서 취향 기반 AI 추천</AIRecommendTitle>
-          <SeeMoreLink style={{ color: '#a3a3a3' }}>더보기</SeeMoreLink>
+          <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
+          <SeeMoreLink style={{ color: '#a3a3a3' }} onClick={ai.toggle} disabled={ai.isDisabled}>
+            {ai.label}
+          </SeeMoreLink>
         </SectionHeader>
         <AIBookGrid>
-          {aiBooks.map(book => (
-            <AIBookCard key={book.id}>
-              <AIBookCover src={book.coverImage} alt={book.title} />
-            </AIBookCard>
+          {ai.items.map(book => (
+            <BookCard key={book.id} book={book} size="md" />
           ))}
         </AIBookGrid>
-      </AIRecommendSection>
+      </Section>
 
       {/* 인기 책 */}
       <PopularSection>
         <SectionHeader>
           <SectionTitle>요즘엔 이런 책이 인기있어요</SectionTitle>
-          <SeeMoreLink>더보기</SeeMoreLink>
+          <SeeMoreLink onClick={popular.toggle} disabled={popular.isDisabled}>
+            {popular.label}
+          </SeeMoreLink>
         </SectionHeader>
         <PopularGrid>
-          {popularBooks.map(book => (
-            <PopularCard key={book.id}>
-              <PopularBookCover src={book.coverImage} alt="" />
-              <PopularLabel>{nickname}님이 읽은</PopularLabel>
-              <PopularBookTitle>{book.title}</PopularBookTitle>
-              <PopularBookSubtitle>{book.subtitle}</PopularBookSubtitle>
-            </PopularCard>
+          {popular.items.map(book => (
+            <VerticalBookCard key={book.id} onClick={() => router.push(`/book/${book.id}`)}>
+              <PopularCoverWrapper>
+                <BookCard book={book as unknown as Book} size="md" />
+              </PopularCoverWrapper>
+              <div>
+                <Image src="/icons/shootingstar.svg" alt="" width={24} height={24} />
+              </div>
+              {`${nickname}님이 읽은`}
+              <div>
+                <VerticalBookTitle as="span">&quot;{book.title}&quot;</VerticalBookTitle>
+                {getKoreanObjectParticle(book.title, '과', '와')}
+              </div>
+              비슷한 작품이에요!
+            </VerticalBookCard>
           ))}
         </PopularGrid>
       </PopularSection>
@@ -375,33 +581,16 @@ export default function RecommendPage() {
       <HiddenSection>
         <SectionHeader>
           <SectionTitle>숨겨진 취향 탐색 - 이런 책은 어때요?</SectionTitle>
-          <SeeMoreLink>더보기</SeeMoreLink>
+          <SeeMoreLink onClick={hidden.toggle} disabled={hidden.isDisabled}>
+            {hidden.label}
+          </SeeMoreLink>
         </SectionHeader>
         <HiddenGrid>
-          {hiddenBooks.map(book => (
-            <HiddenCard key={book.id}>
-              <HiddenBookCover src={book.coverImage} alt="" />
-              <HiddenQuote>
-                <HiddenQuoteText>{book.quote}</HiddenQuoteText>
-              </HiddenQuote>
-            </HiddenCard>
+          {hidden.items.map(book => (
+            <HiddenBookCard key={book.id} book={book} />
           ))}
         </HiddenGrid>
       </HiddenSection>
-
-      <Footer>
-        <FooterLogo>pickly</FooterLogo>
-        <FooterSubLinks>
-          <span>고객센터</span>
-          <span>CONTACT US</span>
-        </FooterSubLinks>
-        <SocialIcons>
-          <SocialIcon>Y</SocialIcon>
-          <SocialIcon>@</SocialIcon>
-          <SocialIcon>X</SocialIcon>
-          <SocialIcon>♪</SocialIcon>
-        </SocialIcons>
-      </Footer>
     </Container>
   );
 }
