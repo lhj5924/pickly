@@ -1,18 +1,13 @@
 'use client';
 
 import styled from 'styled-components';
-import { BookCard, Button } from '@/components/common';
-import { Eye, Heart, Check, ChevronDown, ArrowRight } from 'lucide-react';
-import { useRouter, useParams } from 'next/navigation';
+import { Button } from '@/components/common';
+import { ChevronDown, ArrowRight } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
-import type { LegacyBook as Book, LegacyBookStatus as BookStatus } from '@/types';
 import Link from 'next/link';
-import { useBookStore } from '@/stores';
-import {
-  bookDetailData,
-  authorDescription as authorDesc,
-  similarBooks as similarBooksData,
-} from '@/data/mockData';
+import { useBook } from '@/api/useBook';
+import { useBookReviews } from '@/api/useReview';
 
 const Container = styled.div`
   max-width: 900px;
@@ -225,93 +220,64 @@ const SimilarBooksGrid = styled.div`
   padding-bottom: 0.5rem;
 `;
 
-// Data from centralized mock data (replace with API calls later)
-const mockBook = bookDetailData;
-const authorDescription = authorDesc;
-const similarBooks = similarBooksData;
-
-// Mock review (set to null to show empty state)
-const mockReview: { hashtags: string; content: string } | null = null;
-// const mockReview = {
-//   hashtags: '#우리는모두천문학자로태어난다 #사시오매미가 #지갈해',
-//   content: `* 이 책은 카시오매아어원셔 로부터 제공한할이에서 죽절 있고 저성한 주관적 서럼합니다.
-// 도쁘에 관심 륭을 뭐야 프로오스나 프르오스나 뱌에 삶아이 나지 않는 나책,
-// 아 책하길큐 유해 관싱이 따는 제솜 않는 거어도 출중핸상화하곰 좋응 수 있은 원화 도왜준다고 자니다하게 푸점할 수 있다.
-// 저가는 구독사 26(만)명의 시작합 '우주접나의 인사렵이인'서 강은 유무류와 잘시에 천문학에 대한 이야기를 정업이며 내중들이 나누고 있는 현문학자 이어지도 하다.
-// 현재는 서울대하곤 자연천성학반의 조교수로 일하고 있다.
-// 지시은 "남마마다 우주 한 조각" "알 수 없지만 알 수 있는" "고책을냄배다시리즈" 가 있다.`,
-// };
-
 export default function BookDetailPage() {
   const params = useParams();
-  const router = useRouter();
-  const { updateBookStatus } = useBookStore();
-  const [status, setStatus] = useState<BookStatus>(null);
+  const bookUuid = Array.isArray(params?.id) ? params.id[0] : (params?.id as string | undefined);
+  const { data: book, isLoading, isError } = useBook(bookUuid);
+  const { data: reviewsPage } = useBookReviews(bookUuid, { page: 0, size: 1 });
+  const myReview = reviewsPage?.content?.[0] ?? null;
   const [descExpanded, setDescExpanded] = useState(false);
   const [authorExpanded, setAuthorExpanded] = useState(false);
 
-  const handleStatusClick = (newStatus: BookStatus) => {
-    const finalStatus = status === newStatus ? null : newStatus;
-    setStatus(finalStatus);
-    updateBookStatus(mockBook.id, finalStatus);
-  };
+  if (isLoading) {
+    return (
+      <Container>
+        <p style={{ textAlign: 'center', padding: '4rem 0' }}>책 정보를 불러오는 중…</p>
+      </Container>
+    );
+  }
+
+  if (isError || !book) {
+    return (
+      <Container>
+        <p style={{ textAlign: 'center', padding: '4rem 0' }}>책 정보를 불러오지 못했습니다.</p>
+      </Container>
+    );
+  }
+
+  const authorText = book.authors.join(', ');
 
   return (
     <Container>
       <BookHeader>
         <BookCover>
-          <img src={mockBook.coverImage} alt={mockBook.title} />
+          <img src={book.thumbnailUrl} alt={book.title} />
         </BookCover>
         <BookInfo>
-          <BookTitle>{mockBook.title}</BookTitle>
-          <BookSubtitle>별과 우주에 관한 가장 인간적인 이야기</BookSubtitle>
+          <BookTitle>{book.title}</BookTitle>
+          {book.subtitle && <BookSubtitle>{book.subtitle}</BookSubtitle>}
           <BookMeta>
-            저자 : {mockBook.author} | 출판사 : {mockBook.publisher} | 발행일 : {mockBook.publishDate}
+            저자 : {authorText} | 출판사 : {book.publisher} | 발행일 : {book.publishedDate}
           </BookMeta>
           <CategoryLabel>카테고리</CategoryLabel>
           <TagList>
-            {mockBook.categories.map(cat => (
-              <Tag key={cat.id}>{cat.name}</Tag>
+            {book.genres.map(genre => (
+              <Tag key={genre.code}>{genre.name}</Tag>
             ))}
           </TagList>
-          <StatusButtons>
-            <StatusButton $active={status === 'reading'} $color="#3b82f6" onClick={() => handleStatusClick('reading')}>
-              <Eye size={18} fill={status === 'reading' ? 'currentColor' : 'none'} />
-              읽는 중
-            </StatusButton>
-            <StatusButton
-              $active={status === 'wishlist'}
-              $color="#ef4444"
-              onClick={() => handleStatusClick('wishlist')}
-            >
-              <Heart size={18} fill={status === 'wishlist' ? 'currentColor' : 'none'} />
-              보고싶어요
-            </StatusButton>
-            <StatusButton
-              $active={status === 'completed'}
-              $color="#22c55e"
-              onClick={() => handleStatusClick('completed')}
-            >
-              <Check size={18} />
-              독서 완료
-            </StatusButton>
-          </StatusButtons>
         </BookInfo>
       </BookHeader>
 
       {/* My Review */}
       <Section>
         <SectionTitle>나의 리뷰</SectionTitle>
-        {mockReview ? (
-          <>
-            <ReviewHashtags>{mockReview.hashtags}</ReviewHashtags>
-            <ReviewContent>{mockReview.content}</ReviewContent>
-          </>
+        {myReview ? (
+          <ReviewContent>{myReview.content}</ReviewContent>
         ) : (
           <ReviewEmpty>
             <ReviewEmptyText>아직 작성한 리뷰가 없어요.</ReviewEmptyText>
             <ReviewEmptySubtext>이 책을 읽으셨다면 리뷰를 작성해볼까요?</ReviewEmptySubtext>
-            <Button as={Link} href={`/review/write?bookId=${mockBook.id}`} rightIcon={<ArrowRight size={18} />}>
+            <Button as={Link} href={`/review/write?bookUuid=${book.uuid}`} rightIcon={<ArrowRight size={18} />}>
               이 책 리뷰 쓰러 가기
             </Button>
           </ReviewEmpty>
@@ -321,7 +287,7 @@ export default function BookDetailPage() {
       {/* Book Description */}
       <Section>
         <SectionTitle>책 소개</SectionTitle>
-        <DescriptionContent $expanded={descExpanded}>{mockBook.description}</DescriptionContent>
+        <DescriptionContent $expanded={descExpanded}>{book.description}</DescriptionContent>
         <ExpandButton onClick={() => setDescExpanded(!descExpanded)}>
           {descExpanded ? '접기' : '펼쳐 보기'}
           <ChevronDown size={16} style={{ transform: descExpanded ? 'rotate(180deg)' : 'none' }} />
@@ -331,22 +297,14 @@ export default function BookDetailPage() {
       {/* Author Description */}
       <Section>
         <SectionTitle>저자 소개</SectionTitle>
-        <AuthorName>{mockBook.author}</AuthorName>
-        <DescriptionContent $expanded={authorExpanded}>{authorDescription}</DescriptionContent>
+        <AuthorName>{authorText}</AuthorName>
+        <DescriptionContent $expanded={authorExpanded}>
+          저자 소개 정보가 아직 없습니다.
+        </DescriptionContent>
         <ExpandButton onClick={() => setAuthorExpanded(!authorExpanded)}>
           {authorExpanded ? '접기' : '펼쳐 보기'}
           <ChevronDown size={16} style={{ transform: authorExpanded ? 'rotate(180deg)' : 'none' }} />
         </ExpandButton>
-      </Section>
-
-      {/* Similar Books */}
-      <Section>
-        <SectionTitle>이 책과 비슷한 책</SectionTitle>
-        <SimilarBooksGrid>
-          {similarBooks.map(book => (
-            <BookCard key={book.id} book={book} size="sm" />
-          ))}
-        </SimilarBooksGrid>
       </Section>
     </Container>
   );

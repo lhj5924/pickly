@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Button, ReviewCard } from '@/components/common';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { mockReviews } from '@/data/mockData';
+import { useMyReviews } from '@/api/useReview';
 
 const Container = styled.div`
   max-width: 900px;
@@ -38,19 +38,23 @@ const WriteButtonWrapper = styled.div`
 `;
 
 export default function ReviewPage() {
+  const { data: reviews = [], isLoading } = useMyReviews();
+
   return (
     <Container>
       <Title>내가 작성한 리뷰</Title>
       <ReviewGrid>
-        {mockReviews.map(review => (
-          <ReviewCard
-            key={review.id}
-            id={review.id}
-            bookTitle={review.book.title}
-            bookCoverImage={review.book.coverImage}
-            content={review.content}
-          />
-        ))}
+        {isLoading && <p>리뷰를 불러오는 중입니다…</p>}
+        {!isLoading &&
+          reviews.map(review => (
+            <ReviewCard
+              key={review.uuid}
+              id={review.uuid}
+              bookTitle={review.book.title}
+              bookCoverImage={review.book.thumbnailUrl}
+              content={review.content}
+            />
+          ))}
       </ReviewGrid>
       <WriteButtonWrapper>
         <Button variant="cta" as={Link} href="/review/write" rightIcon={<ArrowRight size={24} />}>

@@ -1,23 +1,41 @@
 'use client';
 
 import styled from 'styled-components';
-import type { LegacyBook, LegacyBookStatus } from '@/types';
-
-// Stage 1 transitional alias — Stage 2에서 BookSummary 기반으로 교체
-type Book = LegacyBook;
-type BookStatus = LegacyBookStatus;
 import { Eye, Heart, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useBookStore } from '@/stores';
 import { useState } from 'react';
 import Image from 'next/image';
 
+/**
+ * BookCard는 서버의 BookSummary/Book 형태 및 (추천 페이지 등) 로컬 mock 데이터의 느슨한 형태 모두를 받습니다.
+ * uuid/thumbnailUrl/authors 우선, 없으면 id/coverImage/author로 폴백합니다.
+ */
+export interface BookCardData {
+  uuid?: string;
+  id?: string;
+  title: string;
+  thumbnailUrl?: string;
+  coverImage?: string;
+  authors?: string[];
+  author?: string;
+  progress?: number;
+}
+
+type StatusKey = 'reading' | 'wishlist' | 'completed';
+
 interface BookCardProps {
-  book: Book;
+  book: BookCardData;
   size?: 'sm' | 'md' | 'lg';
   showTitle?: boolean;
   showProgress?: boolean;
+  /** 오버레이에서 상태 변경 시 부모가 라이브러리 mutation을 수행하도록 콜백 전달 */
+  onStatusChange?: (status: StatusKey | null) => void;
+  initialStatus?: StatusKey | null;
 }
+
+const pickId = (book: BookCardData) => book.uuid ?? book.id ?? '';
+const pickCover = (book: BookCardData) => book.thumbnailUrl ?? book.coverImage ?? '';
+const pickAuthor = (book: BookCardData) => book.authors?.[0] ?? book.author ?? '';
 
 // SM size card wrapper - vertical layout with white info section
 const SmCardWrapper = styled.div`
@@ -302,31 +320,40 @@ interface StatusState {
   completed: boolean;
 }
 
-export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = false }: BookCardProps) => {
+export const BookCard = ({
+  book,
+  size = 'md',
+  showTitle = true,
+  showProgress = false,
+  onStatusChange,
+  initialStatus = null,
+}: BookCardProps) => {
   const router = useRouter();
-  const { updateBookStatus } = useBookStore();
+  const bookId = pickId(book);
+  const coverSrc = pickCover(book);
+  const authorText = pickAuthor(book);
   const [statusState, setStatusState] = useState<StatusState>({
-    reading: book.status === 'reading',
-    wishlist: book.status === 'wishlist',
-    completed: book.status === 'completed',
+    reading: initialStatus === 'reading',
+    wishlist: initialStatus === 'wishlist',
+    completed: initialStatus === 'completed',
   });
 
-  const handleStatusClick = (e: React.MouseEvent, status: 'reading' | 'wishlist' | 'completed') => {
+  const handleStatusClick = (e: React.MouseEvent, status: StatusKey) => {
     e.stopPropagation();
+    const nextActive = !statusState[status];
     setStatusState(prev => ({
       ...prev,
-      [status]: !prev[status],
+      [status]: nextActive,
     }));
-    // For store compatibility, we still call updateBookStatus
-    updateBookStatus(book.id, statusState[status] ? null : status);
+    onStatusChange?.(nextActive ? status : null);
   };
 
   const handleCardClick = () => {
-    router.push(`/book/${book.id}`);
+    if (bookId) router.push(`/book/${bookId}`);
   };
 
   const handleTitleClick = () => {
-    router.push(`/book/${book.id}`);
+    if (bookId) router.push(`/book/${bookId}`);
   };
 
   // SM size layout - vertical card with white info section
@@ -334,7 +361,7 @@ export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = f
     return (
       <SmCardWrapper onClick={handleCardClick}>
         <SmCoverWrapper>
-          <SmCoverImage src={book.coverImage} alt={book.title} />
+          <SmCoverImage src={coverSrc} alt={book.title} />
           <SmStatusOverlay className="status-overlay">
             <SmStatusRow onClick={e => handleStatusClick(e, 'reading')}>
               <SmStatusLabel>읽는 중</SmStatusLabel>
@@ -390,7 +417,7 @@ export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = f
     return (
       <MdCardWrapper>
         <MdCoverWrapper onClick={handleCardClick}>
-          <MdCoverImage src={book.coverImage} alt={book.title} />
+          <MdCoverImage src={coverSrc} alt={book.title} />
           <MdStatusOverlay className="status-overlay">
             <MdStatusRow onClick={e => handleStatusClick(e, 'reading')}>
               <MdStatusLabel>읽는 중</MdStatusLabel>
@@ -435,7 +462,7 @@ export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = f
   return (
     <CardWrapper $size={size}>
       <CoverWrapper onClick={handleCardClick}>
-        <CoverImage src={book.coverImage} alt={book.title} />
+        <CoverImage src={coverSrc} alt={book.title} />
         <StatusOverlay className="status-overlay">
           <StatusButton
             $active={statusState.reading}
@@ -467,7 +494,7 @@ export const BookCard = ({ book, size = 'md', showTitle = true, showProgress = f
       {showTitle && (
         <div onClick={handleTitleClick}>
           <BookTitle>{book.title}</BookTitle>
-          <BookAuthor>{book.author}</BookAuthor>
+          <BookAuthor>{authorText}</BookAuthor>
         </div>
       )}
 
