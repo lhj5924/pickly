@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 import { BookCard } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
+import { Book } from '@/types';
 import {
   similarBooks as similarBooksData,
   genreRecommendBooks as genreBooksData,
@@ -17,6 +19,9 @@ const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
 `;
 
 const Section = styled.section`
@@ -27,13 +32,13 @@ const SectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.colors.text.quaternary};
 `;
 
 const SeeMoreLink = styled.button`
@@ -166,61 +171,65 @@ const VerticalGrid = styled.div`
 
 const VerticalBookCard = styled.div`
   text-align: center;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 2px solid #ffffff;
+  box-shadow: 0px 10px 44px rgba(194, 194, 194, 0.25);
+  border-radius: 20px;
+  padding: 56px 80px 36px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.03);
+  }
 `;
 
-const VerticalBookCover = styled.img`
+const VerticalBookCoverWrapper = styled.div`
   width: 100%;
   max-width: 180px;
-  aspect-ratio: 2/3;
-  object-fit: cover;
-  border-radius: 0.5rem;
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  margin-bottom: 1rem;
+  margin: 0 auto 1rem;
 `;
 
 const VerticalBookTitle = styled.p`
-  font-size: 0.9375rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text.primary};
   margin-bottom: 0.25rem;
 `;
 
-const VerticalBookMeta = styled.p`
-  font-size: 0.8125rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
+const VerticalBookSubTitle = styled.p`
+  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-family: Pretendard Variable;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const VerticalBookAuthor = styled.p`
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.sextary};
+  margin-top: 0.5rem;
 `;
 
 // AI 추천 섹션
-const AIRecommendSection = styled.div`
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 1rem;
-  padding: 2rem;
-  margin-bottom: 3rem;
-`;
-
 const AIRecommendTitle = styled.h2`
   font-size: 1.25rem;
   font-weight: 700;
-  color: white;
   margin-bottom: 1.5rem;
 `;
 
 const AIBookGrid = styled.div`
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-`;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
 
-const AIBookCard = styled.div`
-  flex-shrink: 0;
-  width: 160px;
-`;
-
-const AIBookCover = styled.img`
-  width: 100%;
-  aspect-ratio: 2/3;
-  object-fit: cover;
-  border-radius: 0.5rem;
+  & > div {
+    width: 100%;
+  }
 `;
 
 // 인기 책 섹션
@@ -362,6 +371,7 @@ const hiddenBooks = hiddenBooksData;
 const SMALL_BOOKS_PAGE_SIZE = 4;
 
 export default function RecommendPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const nickname = user?.nickname?.split('_')[0] || '빨리';
 
@@ -431,29 +441,30 @@ export default function RecommendPage() {
         </SectionHeader>
         <VerticalGrid>
           {genreBooks.map(book => (
-            <VerticalBookCard key={book.id}>
-              <VerticalBookCover src={book.coverImage} alt={book.title} />
+            <VerticalBookCard key={book.id} onClick={() => router.push(`/book/${book.id}`)}>
+              <VerticalBookCoverWrapper>
+                <BookCard book={book as unknown as Book} size="sm" showTitle={false} />
+              </VerticalBookCoverWrapper>
               <VerticalBookTitle>{book.title}</VerticalBookTitle>
-              <VerticalBookMeta>{book.subtitle}</VerticalBookMeta>
+              <VerticalBookSubTitle>{book.subtitle}</VerticalBookSubTitle>
+              <VerticalBookAuthor>{book.author}</VerticalBookAuthor>
             </VerticalBookCard>
           ))}
         </VerticalGrid>
       </Section>
 
       {/* AI 추천 */}
-      <AIRecommendSection>
+      <Section>
         <SectionHeader>
-          <AIRecommendTitle>{nickname}님의 독서 취향 기반 AI 추천</AIRecommendTitle>
+          <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
           <SeeMoreLink style={{ color: '#a3a3a3' }}>더보기</SeeMoreLink>
         </SectionHeader>
         <AIBookGrid>
-          {aiBooks.map(book => (
-            <AIBookCard key={book.id}>
-              <AIBookCover src={book.coverImage} alt={book.title} />
-            </AIBookCard>
+          {aiBooks.slice(0, 4).map(book => (
+            <BookCard key={book.id} book={book} size="md" />
           ))}
         </AIBookGrid>
-      </AIRecommendSection>
+      </Section>
 
       {/* 인기 책 */}
       <PopularSection>
