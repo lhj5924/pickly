@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
@@ -19,7 +19,7 @@ import {
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 2rem 1.5rem 15rem;
   display: flex;
   flex-direction: column;
   gap: 4rem;
@@ -281,30 +281,28 @@ const HiddenGrid = styled.div`
 `;
 
 const HiddenCard = styled.div`
-  border-radius: 1rem;
+  border-radius: 1.5rem;
   overflow: hidden;
   position: relative;
+  padding: 64px 128px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.03);
+  }
 `;
 
-const HiddenBookCover = styled.img`
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-`;
-
-const HiddenQuote = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  color: white;
+const HiddenBookCoverWrapper = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const HiddenQuoteText = styled.p`
-  font-size: 0.875rem;
-  line-height: 1.6;
+  margin-top: 3rem;
+  font-size: 1.25rem;
+  text-align: center;
+  word-break: keep-all;
 `;
 
 // Data from centralized mock data (replace with API calls later)
@@ -333,6 +331,108 @@ const useShowMore = <T,>(items: T[], pageSize: number) => {
       setVisibleCount(count => (count >= items.length ? pageSize : count + pageSize));
     },
   };
+};
+
+const PASTEL_FALLBACK_PALETTES: string[][] = [
+  ['#FFE5E5', '#FFD6E8', '#E8F4FF', '#F4E5FF'],
+  ['#FFF4D6', '#FFE5B4', '#FFD6CC', '#FFEFE0'],
+  ['#E5F7E5', '#D6F0E0', '#C8EBE0', '#E8FAF0'],
+  ['#E0F0FF', '#CCE5FF', '#D6DCFF', '#E5E8FF'],
+  ['#FFE8F0', '#FFDDE6', '#FFE0CC', '#FFF0E0'],
+];
+
+const hashStringToInt = (value: string) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+};
+
+const toPastel = (r: number, g: number, b: number) => {
+  const blend = (channel: number) => Math.round((channel + 255 * 2) / 3);
+  return `rgb(${blend(r)}, ${blend(g)}, ${blend(b)})`;
+};
+
+const useImagePalette = (src: string, fallback: string[]) => {
+  const [palette, setPalette] = useState<string[]>(fallback);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let cancelled = false;
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      if (cancelled) return;
+      try {
+        const canvas = document.createElement('canvas');
+        const size = 50;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, size, size);
+        const { data } = ctx.getImageData(0, 0, size, size);
+        const buckets = new Map<string, { r: number; g: number; b: number; n: number }>();
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const key = `${r >> 5}-${g >> 5}-${b >> 5}`;
+          const bucket = buckets.get(key);
+          if (bucket) {
+            bucket.r += r;
+            bucket.g += g;
+            bucket.b += b;
+            bucket.n += 1;
+          } else {
+            buckets.set(key, { r, g, b, n: 1 });
+          }
+        }
+        const dominant = [...buckets.values()].sort((a, b) => b.n - a.n).slice(0, 4);
+        const colors = dominant.map(c => toPastel(c.r / c.n, c.g / c.n, c.b / c.n));
+        if (colors.length && !cancelled) setPalette(colors);
+      } catch {
+        // CORS-tainted canvas — keep fallback
+      }
+    };
+    img.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
+  return palette;
+};
+
+type HiddenBook = (typeof hiddenBooksData)[number];
+
+const HiddenBookCard = ({ book }: { book: HiddenBook }) => {
+  const router = useRouter();
+  const seed = hashStringToInt(book.id);
+  const fallback = PASTEL_FALLBACK_PALETTES[seed % PASTEL_FALLBACK_PALETTES.length];
+  const palette = useImagePalette(book.coverImage, fallback);
+  const colors = [...palette, ...palette];
+  const [c1, c2, c3, c4] = colors;
+  const angle = seed % 360;
+  const x1 = (seed % 60) + 20;
+  const y1 = ((seed >> 3) % 60) + 20;
+  const x2 = ((seed >> 6) % 60) + 20;
+  const y2 = ((seed >> 9) % 60) + 20;
+  const background = [
+    `radial-gradient(circle at ${x1}% ${y1}%, ${c2} 0%, transparent 55%)`,
+    `radial-gradient(circle at ${x2}% ${y2}%, ${c3} 0%, transparent 60%)`,
+    `linear-gradient(${angle}deg, ${c1} 0%, ${c4 || c1} 100%)`,
+  ].join(', ');
+
+  return (
+    <HiddenCard style={{ background }} onClick={() => router.push(`/book/${book.id}`)}>
+      <HiddenBookCoverWrapper>
+        <BookCard book={book as unknown as Book} size="md" />
+      </HiddenBookCoverWrapper>
+      <HiddenQuoteText>"{book.quote}"</HiddenQuoteText>
+    </HiddenCard>
+  );
 };
 
 const getKoreanObjectParticle = (word: string, withJongseong: string, withoutJongseong: string) => {
@@ -438,11 +538,7 @@ export default function RecommendPage() {
       <Section>
         <SectionHeader>
           <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
-          <SeeMoreLink
-            style={{ color: '#a3a3a3' }}
-            onClick={ai.toggle}
-            disabled={ai.isDisabled}
-          >
+          <SeeMoreLink style={{ color: '#a3a3a3' }} onClick={ai.toggle} disabled={ai.isDisabled}>
             {ai.label}
           </SeeMoreLink>
         </SectionHeader>
@@ -491,12 +587,7 @@ export default function RecommendPage() {
         </SectionHeader>
         <HiddenGrid>
           {hidden.items.map(book => (
-            <HiddenCard key={book.id}>
-              <HiddenBookCover src={book.coverImage} alt="" />
-              <HiddenQuote>
-                <HiddenQuoteText>{book.quote}</HiddenQuoteText>
-              </HiddenQuote>
-            </HiddenCard>
+            <HiddenBookCard key={book.id} book={book} />
           ))}
         </HiddenGrid>
       </HiddenSection>
