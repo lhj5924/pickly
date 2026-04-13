@@ -1,19 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import styled from 'styled-components';
+import { Logo } from '@/components/common';
 
 const FooterWrapper = styled.footer`
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
   padding: 3rem 1.5rem;
   text-align: center;
-`;
-
-const FooterLogo = styled.p`
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: ${({ theme }) => theme.colors.primary[600]};
-  font-family: 'Pretendard Variable', sans-serif;
-  margin-bottom: 1rem;
 `;
 
 const FooterLinks = styled.div`
@@ -25,46 +19,59 @@ const FooterLinks = styled.div`
 
 const FooterLink = styled.a`
   font-size: 0.875rem;
+  font-weight: 500;
   color: ${({ theme }) => theme.colors.text.secondary};
+  margin: 1rem 0;
 
   &:hover {
     color: ${({ theme }) => theme.colors.primary[600]};
   }
 `;
 
+const Divider = styled.span`
+  width: 1px;
+  height: 0.875rem;
+  transform: translateY(1.25rem);
+  border-left: 1px solid ${({ theme }) => theme.colors.border.default};
+`;
+
 const FooterSubLinks = styled.div`
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2.5rem;
   font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
 `;
 
 const SocialLinks = styled.div`
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.625rem;
 `;
 
 const SocialIcon = styled.a`
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: ${({ theme }) => theme.colors.neutral[800]};
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 0.75rem;
 `;
+
+const socialLinks = [
+  { name: 'youtube', src: '/icons/social-youtube.svg', label: 'YouTube' },
+  { name: 'instagram', src: '/icons/social-instagram.svg', label: 'Instagram' },
+  { name: 'x', src: '/icons/social-x.svg', label: 'X' },
+  { name: 'tiktok', src: '/icons/social-tiktok.svg', label: 'TikTok' },
+];
 
 export function Footer() {
   return (
     <FooterWrapper>
-      <FooterLogo>pickly</FooterLogo>
+      <Logo />
       <FooterLinks>
         <FooterLink href="#">고객센터</FooterLink>
+        <Divider />
         <FooterLink href="#">CONTACT US</FooterLink>
       </FooterLinks>
       <FooterSubLinks>
@@ -72,10 +79,11 @@ export function Footer() {
         <span>개인정보처리방침</span>
       </FooterSubLinks>
       <SocialLinks>
-        <SocialIcon href="#">Y</SocialIcon>
-        <SocialIcon href="#">@</SocialIcon>
-        <SocialIcon href="#">X</SocialIcon>
-        <SocialIcon href="#">♪</SocialIcon>
+        {socialLinks.map(({ name, src, label }) => (
+          <SocialIcon key={name} href="#" aria-label={label}>
+            <Image src={src} alt={label} width={24} height={24} />
+          </SocialIcon>
+        ))}
       </SocialLinks>
     </FooterWrapper>
   );
