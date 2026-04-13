@@ -7,6 +7,13 @@ import type { UserResponse } from '@/types/api';
 
 // Mock the API module
 jest.mock('@/api/user');
+jest.mock('@/stores', () => ({
+  useAuthStore: Object.assign(
+    (selector: (state: Record<string, unknown>) => unknown) =>
+      selector({ user: { id: 'test-uuid' } }),
+    { getState: () => ({ user: { id: 'test-uuid' } }) },
+  ),
+}));
 
 const mockUser: UserResponse = {
   uuid: 'test-uuid',
@@ -16,6 +23,7 @@ const mockUser: UserResponse = {
   provider: 'KAKAO',
   gender: 'MALE',
   ageGroup: 'TWENTIES',
+  preferredGenres: [],
   isOnboarded: true,
 };
 
@@ -92,7 +100,7 @@ describe('useUpdateMe', () => {
     const { queryClient, wrapper } = createWrapper();
 
     // Pre-populate cache
-    queryClient.setQueryData(userKeys.me(), mockUser);
+    queryClient.setQueryData(userKeys.me('test-uuid'), mockUser);
 
     const { result } = renderHook(() => useUpdateMe(), { wrapper });
 
@@ -103,7 +111,7 @@ describe('useUpdateMe', () => {
     });
 
     // Optimistic update should have been applied
-    const cachedData = queryClient.getQueryData<UserResponse>(userKeys.me());
+    const cachedData = queryClient.getQueryData<UserResponse>(userKeys.me('test-uuid'));
     expect(cachedData?.nickname).toBe('새닉네임');
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -118,7 +126,7 @@ describe('useUpdateMe', () => {
     const { queryClient, wrapper } = createWrapper();
 
     // Pre-populate cache with original data
-    queryClient.setQueryData(userKeys.me(), mockUser);
+    queryClient.setQueryData(userKeys.me('test-uuid'), mockUser);
 
     const { result } = renderHook(() => useUpdateMe(), { wrapper });
 
@@ -130,7 +138,7 @@ describe('useUpdateMe', () => {
 
     // Should rollback to original data
     await waitFor(() => {
-      const cachedData = queryClient.getQueryData<UserResponse>(userKeys.me());
+      const cachedData = queryClient.getQueryData<UserResponse>(userKeys.me('test-uuid'));
       expect(cachedData?.nickname).toBe('테스트유저');
     });
   });
@@ -148,7 +156,7 @@ describe('useDeleteMe', () => {
     (userApi.deleteMe as jest.Mock).mockResolvedValue(undefined);
 
     const { queryClient, wrapper } = createWrapper();
-    queryClient.setQueryData(userKeys.me(), mockUser);
+    queryClient.setQueryData(userKeys.me('test-uuid'), mockUser);
 
     const { result } = renderHook(() => useDeleteMe(), { wrapper });
 
@@ -166,6 +174,6 @@ describe('useDeleteMe', () => {
     expect(localStorage.getItem('refreshToken')).toBeNull();
 
     // Verify query cache was cleared
-    expect(queryClient.getQueryData(userKeys.me())).toBeUndefined();
+    expect(queryClient.getQueryData(userKeys.me('test-uuid'))).toBeUndefined();
   });
 });

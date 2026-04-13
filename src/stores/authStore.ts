@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User, SignupStep, SignupData, SocialProvider, generateRandomNickname, Category } from '@/types';
+import { User, SignupStep, SignupData, SocialProvider, generateRandomNickname, LegacyCategory as Category } from '@/types';
 import type { LoginResponse, UserResponse } from '@/types/api';
 
 interface AuthState {
@@ -26,6 +26,7 @@ const initialSignupData: SignupData = {
   provider: 'kakao',
   email: '',
   termsAgreed: false,
+  preferredGenres: [],
   favoriteCategories: [],
 };
 
@@ -36,6 +37,7 @@ const mockUser: User = {
   nickname: '빨리_읽는_다람쥐',
   provider: 'kakao',
   preferences: {
+    preferredGenres: [],
     favoriteCategories: [
       { id: 2, name: '로맨스' },
       { id: 1, name: '소설' },
@@ -74,7 +76,7 @@ export const useAuthStore = create<AuthState>()(
           nickname: apiUser.nickname,
           profileImage: apiUser.profileImageUrl,
           provider,
-          preferences: { favoriteCategories: [] },
+          preferences: { preferredGenres: [], favoriteCategories: [] },
           createdAt: new Date().toISOString(),
         };
 
@@ -94,7 +96,7 @@ export const useAuthStore = create<AuthState>()(
           nickname: apiUser.nickname,
           profileImage: apiUser.profileImageUrl,
           provider,
-          preferences: { favoriteCategories: [] },
+          preferences: { preferredGenres: [], favoriteCategories: [] },
           createdAt: new Date().toISOString(),
         };
         set({ user: newUser });
@@ -127,7 +129,8 @@ export const useAuthStore = create<AuthState>()(
           nickname: generateRandomNickname(),
           provider: signupData.provider,
           preferences: {
-            favoriteCategories: signupData.favoriteCategories,
+            preferredGenres: signupData.preferredGenres ?? [],
+            favoriteCategories: signupData.favoriteCategories ?? [],
           },
           createdAt: new Date().toISOString(),
         };

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { BookCard, Input } from '@/components/common';
 import { Search, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { Book } from '@/types';
+import type { LegacyBook as Book } from '@/types';
 
 const Container = styled.div`
   max-width: 1200px;

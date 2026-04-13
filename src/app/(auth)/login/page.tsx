@@ -274,7 +274,7 @@ export default function LoginPage() {
     <PageWrapper>
       <Container>
         <LeftPanel>
-          <Logo>pickly</Logo>
+          <Logo>Pickly</Logo>
           <JarImage>
             <Image src="/pickly-jar.png" alt="Pickly Jar" width={174} height={280} priority />
           </JarImage>

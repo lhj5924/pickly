@@ -5,7 +5,7 @@ import { BookCard, Button } from '@/components/common';
 import { Eye, Heart, Check, ChevronDown, ArrowRight } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useState } from 'react';
-import { BookStatus, Book } from '@/types';
+import type { LegacyBook as Book, LegacyBookStatus as BookStatus } from '@/types';
 import Link from 'next/link';
 import { useBookStore } from '@/stores';
 import {

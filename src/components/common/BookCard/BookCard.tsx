@@ -1,7 +1,11 @@
 'use client';
 
 import styled from 'styled-components';
-import { Book, BookStatus } from '@/types';
+import type { LegacyBook, LegacyBookStatus } from '@/types';
+
+// Stage 1 transitional alias — Stage 2에서 BookSummary 기반으로 교체
+type Book = LegacyBook;
+type BookStatus = LegacyBookStatus;
 import { Eye, Heart, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useBookStore } from '@/stores';

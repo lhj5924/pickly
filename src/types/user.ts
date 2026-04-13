@@ -1,4 +1,5 @@
-import { Category } from './book';
+import type { GenreInfo } from './genre';
+import type { LegacyCategory } from './book';
 
 export type SocialProvider = 'google' | 'kakao';
 
@@ -13,7 +14,10 @@ export interface User {
 }
 
 export interface UserPreferences {
-  favoriteCategories: Category[];
+  /** 스웨거 기준 — 사용자의 선호 장르 */
+  preferredGenres: GenreInfo[];
+  /** @deprecated Stage 2 마이그레이션 이후 제거 예정 (기존 페이지 하위호환용) */
+  favoriteCategories?: LegacyCategory[];
 }
 
 export type SignupStep = 'login' | 'terms' | 'preferences' | 'complete';
@@ -22,7 +26,9 @@ export interface SignupData {
   provider: SocialProvider;
   email: string;
   termsAgreed: boolean;
-  favoriteCategories: Category[];
+  preferredGenres: GenreInfo[];
+  /** @deprecated Stage 2 마이그레이션 이후 제거 예정 */
+  favoriteCategories?: LegacyCategory[];
 }
 
 // 랜덤 닉네임 생성

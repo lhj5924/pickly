@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { BookCard } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
-import { Book } from '@/types';
+import type { LegacyBook as Book } from '@/types';
 import {
   similarBooks as similarBooksData,
   genreRecommendBooks as genreBooksData,

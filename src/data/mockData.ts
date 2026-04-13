@@ -1,4 +1,8 @@
-import { Book, Review, ReadingStats, GenreStats } from '@/types';
+import type { LegacyBook, LegacyReview, ReadingStats, GenreStats } from '@/types';
+
+// Stage 1 transitional alias — Stage 2에서 실제 API로 교체 시 제거
+type Book = LegacyBook;
+type Review = LegacyReview;
 
 // ===========================
 // Reading Statistics
@@ -316,7 +320,7 @@ export const aiRecommendations: Book[] = [
 export const similarBooks: Book[] = [
   {
     id: 'sim-1',
-    title: '당연하게도 나는 너를',
+    title: '당연하게도 나는 너를1',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
     description: '',
@@ -327,7 +331,7 @@ export const similarBooks: Book[] = [
   },
   {
     id: 'sim-2',
-    title: '당연하게도 나는 너를',
+    title: '당연하게도 나는 너를2',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
     description: '',
@@ -338,7 +342,7 @@ export const similarBooks: Book[] = [
   },
   {
     id: 'sim-3',
-    title: '당연하게도 나는 너를',
+    title: '당연하게도 나는 너를3',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
     description: '',
@@ -349,7 +353,7 @@ export const similarBooks: Book[] = [
   },
   {
     id: 'sim-4',
-    title: '당연하게도 나는 너를',
+    title: '당연하게도 나는 너를4',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
     description: '',
@@ -360,7 +364,18 @@ export const similarBooks: Book[] = [
   },
   {
     id: 'sim-5',
-    title: '당연하게도 나는 너를',
+    title: '당연하게도 나는 너를5',
+    author: '이꽃',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+    description: '',
+    publisher: '',
+    publishDate: '',
+    pageCount: 0,
+    categories: [],
+  },
+  {
+    id: 'sim-6',
+    title: '당연하게도 나는 너를6',
     author: '이꽃',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
     description: '',
@@ -470,25 +485,44 @@ export const genreRecommendBooks = [
     subtitle: '당연하게도 나는 너를',
     coverImage: 'https://image.yes24.com/goods/119564892/XL',
   },
+  {
+    id: 'gr-4',
+    title: '당연하게도 나는 너를',
+    author: '이꽃',
+    subtitle: '당연하게도 나는 너를',
+    coverImage: 'https://image.yes24.com/goods/119564892/XL',
+  },
 ];
 
 export const popularBooks = [
   {
     id: 'pop-1',
-    title: '"나가 했던 어느 날에" 의',
-    subtitle: '비슷한 작품이에요!',
+    title: '내가 없던 어느 밤에',
     coverImage: 'https://image.yes24.com/goods/125698547/XL',
   },
   {
     id: 'pop-2',
-    title: '"나가 했던 어느 날에" 의',
-    subtitle: '비슷한 작품이에요!',
+    title: '내가 없던 어느 밤',
     coverImage: 'https://image.yes24.com/goods/125698547/XL',
   },
   {
     id: 'pop-3',
-    title: '"나가 했던 어느 날에" 의',
-    subtitle: '비슷한 작품이에요!',
+    title: '내가 없던 어느 밤에',
+    coverImage: 'https://image.yes24.com/goods/125698547/XL',
+  },
+  {
+    id: 'pop-4',
+    title: '내가 없던 어느 밤에',
+    coverImage: 'https://image.yes24.com/goods/125698547/XL',
+  },
+  {
+    id: 'pop-5',
+    title: '내가 없던 어느 밤에',
+    coverImage: 'https://image.yes24.com/goods/125698547/XL',
+  },
+  {
+    id: 'pop-6',
+    title: '내가 없던 어느 밤에',
     coverImage: 'https://image.yes24.com/goods/125698547/XL',
   },
 ];
@@ -497,12 +531,22 @@ export const hiddenTasteBooks = [
   {
     id: 'ht-1',
     coverImage: 'https://image.yes24.com/goods/125698547/XL',
-    quote: '"어선원지가 내 번채 평에서 만났던 분들 세는 사업가를 가이미시닙요?"',
+    quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?',
   },
   {
     id: 'ht-2',
     coverImage: 'https://image.yes24.com/goods/124857283/XL',
-    quote: '"어선원지가 내 번채 평에서 만났던 분들 세는 사업가를 가이미시닙요?"',
+    quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?',
+  },
+  {
+    id: 'ht-3',
+    coverImage: 'https://image.yes24.com/goods/124857283/XL',
+    quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?',
+  },
+  {
+    id: 'ht-4',
+    coverImage: 'https://image.yes24.com/goods/124857283/XL',
+    quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?',
   },
 ];
 

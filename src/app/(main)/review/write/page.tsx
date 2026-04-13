@@ -5,7 +5,7 @@ import { Button, StarRating } from '@/components/common';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Book } from '@/types';
+import type { LegacyBook as Book } from '@/types';
 import { useBookStore } from '@/stores';
 import { searchableBooks } from '@/data/mockData';
 

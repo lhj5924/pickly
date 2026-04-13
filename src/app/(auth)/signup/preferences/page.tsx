@@ -167,7 +167,9 @@ const Tooltip = styled.span`
   font-size: 0.8rem;
   padding: 8px 12px;
   border-radius: 8px;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
   pointer-events: none;
 
   &::after {
@@ -229,7 +231,7 @@ export default function PreferencesPage() {
     <PageWrapper>
       <Container>
         <LeftPanel>
-          <Logo>pickly</Logo>
+          <Logo>Pickly</Logo>
           <JarImage>
             <Image src="/pickly-jar.png" alt="Pickly Jar" width={174} height={280} priority />
           </JarImage>

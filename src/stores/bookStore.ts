@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Book, BookStatus, Review } from '@/types';
+import type { LegacyBook, LegacyBookStatus, LegacyReview } from '@/types';
+
+// Stage 1 transitional alias — Stage 2에서 bookStore 전면 대체 시 제거
+type Book = LegacyBook;
+type BookStatus = LegacyBookStatus;
+type Review = LegacyReview;
 
 interface BookState {
   books: Book[];

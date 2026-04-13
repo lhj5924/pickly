@@ -3,6 +3,8 @@
 // 공통 타입 & Pickly API 전체 타입 정의
 // ============================================================
 
+import type { GenreInfo } from './genre';
+
 // --- 공통 ---
 export interface ApiError {
   code: string;
@@ -24,6 +26,7 @@ export interface UserResponse {
   provider: OAuthProvider;
   gender: Gender;
   ageGroup: AgeGroup;
+  preferredGenres: GenreInfo[];
   isOnboarded: boolean;
 }
 
