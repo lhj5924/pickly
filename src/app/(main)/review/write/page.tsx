@@ -5,9 +5,8 @@ import { Button, StarRating } from '@/components/common';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Book } from '@/types';
-import { useBookStore } from '@/stores';
-import { searchableBooks } from '@/data/mockData';
+import { useReviewAvailableBooks, useCreateReview } from '@/api/useReview';
+import type { LibraryItem } from '@/types';
 
 const Container = styled.div`
   max-width: 700px;
@@ -298,57 +297,57 @@ const SubmitButton = styled(Button)`
   background: linear-gradient(135deg, ${({ theme }) => theme.colors.primary[400]} 0%, ${({ theme }) => theme.colors.primary[500]} 100%);
 `;
 
-// Data from centralized mock data (replace with API calls later)
-const mockBooks = searchableBooks;
-
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
 function ReviewWriteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { addReview } = useBookStore();
-  
+  const { data: availableBooks = [] } = useReviewAvailableBooks();
+  const { mutate: createReview, isPending: isSubmitting } = useCreateReview();
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Book[]>([]);
+  const [searchResults, setSearchResults] = useState<LibraryItem[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  
+  const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
+
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [showCalendar, setShowCalendar] = useState<'start' | 'end' | null>(null);
   const [calendarDate, setCalendarDate] = useState(new Date());
-  
+
   const [rating, setRating] = useState(3);
   const [reviewContent, setReviewContent] = useState('');
-  
+
   const searchRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const bookId = searchParams.get('bookId');
-    if (bookId) {
-      const book = mockBooks.find(b => b.id === bookId);
-      if (book) {
-        setSelectedBook(book);
-        setSearchQuery(book.title);
+    const libraryUuid = searchParams.get('libraryUuid');
+    if (libraryUuid && availableBooks.length > 0) {
+      const item = availableBooks.find(b => b.uuid === libraryUuid);
+      if (item) {
+        setSelectedItem(item);
+        setSearchQuery(item.book.title);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, availableBooks]);
 
   useEffect(() => {
-    if (searchQuery.length > 0 && !selectedBook) {
-      const results = mockBooks.filter(book =>
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    if (searchQuery.length > 0 && !selectedItem) {
+      const results = availableBooks.filter(item => {
+        const title = item.book.title.toLowerCase();
+        const authors = item.book.authors.join(' ').toLowerCase();
+        const q = searchQuery.toLowerCase();
+        return title.includes(q) || authors.includes(q);
+      });
       setSearchResults(results);
       setShowResults(results.length > 0);
     } else {
       setSearchResults([]);
       setShowResults(false);
     }
-  }, [searchQuery, selectedBook]);
+  }, [searchQuery, selectedItem, availableBooks]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -380,9 +379,9 @@ function ReviewWriteContent() {
     }
   };
 
-  const handleSelectBook = (book: Book) => {
-    setSelectedBook(book);
-    setSearchQuery(book.title);
+  const handleSelectBook = (item: LibraryItem) => {
+    setSelectedItem(item);
+    setSearchQuery(item.book.title);
     setShowResults(false);
     setHighlightedIndex(-1);
   };
@@ -424,22 +423,27 @@ function ReviewWriteContent() {
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
   };
 
+  const toApiDate = (d: Date) => d.toISOString().slice(0, 10);
+
   const handleSubmit = () => {
-    if (!selectedBook || !startDate || !endDate || !reviewContent) {
+    if (!selectedItem || !startDate || !endDate || !reviewContent) {
       alert('모든 항목을 입력해주세요.');
       return;
     }
-    
-    addReview({
-      bookId: selectedBook.id,
-      book: selectedBook,
-      content: reviewContent,
-      rating,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-    });
-    
-    router.push('/review');
+
+    createReview(
+      {
+        libraryUuid: selectedItem.uuid,
+        rating,
+        content: reviewContent,
+        startDate: toApiDate(startDate),
+        endDate: toApiDate(endDate),
+      },
+      {
+        onSuccess: () => router.push('/review'),
+        onError: () => alert('리뷰 저장에 실패했어요. 다시 시도해주세요.'),
+      },
+    );
   };
 
   return (
@@ -452,42 +456,36 @@ function ReviewWriteContent() {
           <SearchWrapper ref={searchRef}>
             <SearchInput
               value={searchQuery}
-              onChange={(e) => {
+              onChange={e => {
                 setSearchQuery(e.target.value);
-                if (selectedBook) setSelectedBook(null);
+                if (selectedItem) setSelectedItem(null);
               }}
               onKeyDown={handleKeyDown}
-              placeholder="책 제목을 입력하세요"
+              placeholder="완독한 책에서 검색하세요"
             />
             <SearchResults $show={showResults}>
-              {searchResults.map((book, index) => (
+              {searchResults.map((item, index) => (
                 <SearchResultItem
-                  key={book.id}
+                  key={item.uuid}
                   $highlighted={index === highlightedIndex}
-                  onClick={() => handleSelectBook(book)}
+                  onClick={() => handleSelectBook(item)}
                 >
-                  <ResultCover src={book.coverImage} alt={book.title} />
+                  <ResultCover src={item.book.thumbnailUrl} alt={item.book.title} />
                   <ResultInfo>
-                    <ResultTitle>{book.title}</ResultTitle>
-                    <ResultAuthor>{book.author}</ResultAuthor>
+                    <ResultTitle>{item.book.title}</ResultTitle>
+                    <ResultAuthor>{item.book.authors.join(', ')}</ResultAuthor>
                   </ResultInfo>
                 </SearchResultItem>
               ))}
             </SearchResults>
           </SearchWrapper>
-          
-          {selectedBook && (
+
+          {selectedItem && (
             <SelectedBookCard>
-              <SelectedBookCover src={selectedBook.coverImage} alt={selectedBook.title} />
+              <SelectedBookCover src={selectedItem.book.thumbnailUrl} alt={selectedItem.book.title} />
               <SelectedBookInfo>
-                <SelectedBookTitle>{selectedBook.title}</SelectedBookTitle>
-                <SelectedBookSubtitle>{selectedBook.description}</SelectedBookSubtitle>
-                <CategoryLabel>카테고리</CategoryLabel>
-                <CategoryTags>
-                  {selectedBook.categories.map(cat => (
-                    <CategoryTag key={cat.id}>{cat.name}</CategoryTag>
-                  ))}
-                </CategoryTags>
+                <SelectedBookTitle>{selectedItem.book.title}</SelectedBookTitle>
+                <SelectedBookSubtitle>{selectedItem.book.authors.join(', ')}</SelectedBookSubtitle>
               </SelectedBookInfo>
             </SelectedBookCard>
           )}
@@ -558,8 +556,8 @@ function ReviewWriteContent() {
         </FormGroup>
       </FormCard>
       
-      <SubmitButton size="lg" onClick={handleSubmit}>
-        리뷰 작성 완료
+      <SubmitButton size="lg" onClick={handleSubmit} disabled={isSubmitting}>
+        {isSubmitting ? '저장 중…' : '리뷰 작성 완료'}
       </SubmitButton>
     </Container>
   );

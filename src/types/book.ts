@@ -1,62 +1,63 @@
-export interface Category {
-  id: number;
-  name: string;
-}
+// ============================================================
+// Book 관련 타입 (스웨거 스키마 기준)
+// ============================================================
 
-export const BOOK_CATEGORIES: Category[] = [
-  { id: 1, name: '소설' },
-  { id: 2, name: '로맨스' },
-  { id: 3, name: '판타지' },
-  { id: 4, name: 'SF' },
-  { id: 5, name: '미스터리/스릴러' },
-  { id: 6, name: '호러' },
-  { id: 7, name: '역사소설' },
-  { id: 8, name: '시/에세이' },
-  { id: 9, name: '자기계발' },
-  { id: 10, name: '경제/경영' },
-  { id: 11, name: '인문학' },
-  { id: 12, name: '과학' },
-  { id: 13, name: '역사' },
-  { id: 14, name: '사회' },
-  { id: 15, name: '예술' },
-  { id: 16, name: '여행' },
-  { id: 17, name: '요리' },
-  { id: 18, name: '건강' },
-  { id: 19, name: '종교/영성' },
-  { id: 20, name: '만화/웹툰' },
-  { id: 21, name: '라이트노벨' },
-  { id: 22, name: '아동/청소년' },
-];
+import type { GenreInfo } from './genre';
 
-export type BookStatus = 'reading' | 'wishlist' | 'completed' | null;
+export type BookSource = 'KAKAO' | 'GOOGLE';
 
+/** 라이브러리 읽기 상태 (스웨거 LibraryStatus) */
+export type BookStatus = 'WANT_TO_READ' | 'READING' | 'COMPLETED' | 'DROPPED';
+
+/** 책 상세 (GET /api/v1/books/{uuid}) */
 export interface Book {
-  id: string;
+  uuid: string;
+  externalId: string;
+  source: BookSource;
+  isbn10: string;
+  isbn13: string;
   title: string;
-  author: string;
+  subtitle: string;
+  authors: string[];
   publisher: string;
-  publishDate: string;
-  coverImage: string;
+  publishedDate: string;
   description: string;
   pageCount: number;
-  categories: Category[];
-  status?: BookStatus;
-  startDate?: string;
-  endDate?: string;
-  progress?: number;
+  thumbnailUrl: string;
+  language: string;
+  genres: GenreInfo[];
+  averageRating: number;
+  reviewCount: number;
 }
 
-export interface Review {
-  id: string;
-  bookId: string;
-  book: Book;
-  content: string;
-  rating: number;
-  startDate: string;
-  endDate: string;
-  createdAt: string;
+/** 책 요약 (검색/라이브러리/리뷰 응답에 포함) */
+export interface BookSummary {
+  uuid: string;
+  externalId: string;
+  isbn: string;
+  title: string;
+  authors: string[];
+  thumbnailUrl: string;
+  publishedDate: string;
+  publisher: string;
+  source: BookSource;
 }
 
+export interface BookSearchResponse {
+  books: BookSummary[];
+  totalItems: number;
+  currentPage: number;
+  hasNext: boolean;
+}
+
+export interface BookSearchParams {
+  query: string;
+  target?: 'title' | 'author';
+  page?: number;
+  size?: number;
+}
+
+// --- UI용 통계/차트 데이터 (API 외 로컬 모델) ---
 export interface ReadingStats {
   totalBooks: number;
   averageReadingDays: number;
@@ -77,5 +78,6 @@ export interface GenreStats {
 
 export interface CalendarItem {
   date: string;
-  books: Book[];
+  books: BookSummary[];
 }
+

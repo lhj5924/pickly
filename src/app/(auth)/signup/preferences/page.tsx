@@ -5,9 +5,10 @@ import Image from 'next/image';
 import { Button } from '@/components/common';
 import { useAuthStore } from '@/stores';
 import { useUpdateMe } from '@/api/useMe';
+import { useGenres, useUpdatePreferredGenres } from '@/api/useGenre';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Category, BOOK_CATEGORIES } from '@/types';
+import type { GenreInfo } from '@/types';
 import { ArrowRight } from 'lucide-react';
 
 const PageWrapper = styled.div`
@@ -167,7 +168,9 @@ const Tooltip = styled.span`
   font-size: 0.8rem;
   padding: 8px 12px;
   border-radius: 8px;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
   pointer-events: none;
 
   &::after {
@@ -188,24 +191,28 @@ const Tooltip = styled.span`
 
 export default function PreferencesPage() {
   const router = useRouter();
-  const { updateSignupData, completeSignup, updateFavoriteCategories } = useAuthStore();
+  const { updateSignupData, completeSignup } = useAuthStore();
   const { mutate: updateUser } = useUpdateMe();
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const { data: allGenres = [] } = useGenres();
+  const { mutate: savePreferredGenres } = useUpdatePreferredGenres();
+  const [selectedGenres, setSelectedGenres] = useState<GenreInfo[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCategoryToggle = (category: Category) => {
-    setSelectedCategories(prev =>
-      prev.find(c => c.id === category.id) ? prev.filter(c => c.id !== category.id) : [...prev, category],
+  const handleGenreToggle = (genre: GenreInfo) => {
+    setSelectedGenres(prev =>
+      prev.find(g => g.code === genre.code) ? prev.filter(g => g.code !== genre.code) : [...prev, genre],
     );
   };
 
   const handleComplete = () => {
-    if (selectedCategories.length < 3 || isSubmitting) return;
+    if (selectedGenres.length < 3 || isSubmitting) return;
     setIsSubmitting(true);
 
-    updateSignupData({ favoriteCategories: selectedCategories });
-    updateFavoriteCategories(selectedCategories);
+    updateSignupData({ preferredGenres: selectedGenres });
     completeSignup();
+
+    // 서버에 선호 장르 저장
+    savePreferredGenres({ genreCodes: selectedGenres.map(g => g.code) });
 
     // 서버에 닉네임 등 온보딩 정보 전송 (실패해도 로컬 상태는 유지)
     const user = useAuthStore.getState().user;
@@ -223,13 +230,13 @@ export default function PreferencesPage() {
     }
   };
 
-  const isValid = selectedCategories.length >= 3;
+  const isValid = selectedGenres.length >= 3;
 
   return (
     <PageWrapper>
       <Container>
         <LeftPanel>
-          <Logo>pickly</Logo>
+          <Logo>Pickly</Logo>
           <JarImage>
             <Image src="/pickly-jar.png" alt="Pickly Jar" width={174} height={280} priority />
           </JarImage>
@@ -240,13 +247,13 @@ export default function PreferencesPage() {
           <Subtitle>선호하는 장르를 최소 3개 이상 선택해주세요.</Subtitle>
 
           <CategoryGrid>
-            {BOOK_CATEGORIES.map(category => (
+            {allGenres.map(genre => (
               <CategoryChip
-                key={category.id}
-                $selected={selectedCategories.some(c => c.id === category.id)}
-                onClick={() => handleCategoryToggle(category)}
+                key={genre.code}
+                $selected={selectedGenres.some(g => g.code === genre.code)}
+                onClick={() => handleGenreToggle(genre)}
               >
-                {category.name}
+                {genre.name}
               </CategoryChip>
             ))}
           </CategoryGrid>

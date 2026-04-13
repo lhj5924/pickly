@@ -15,7 +15,17 @@ import {
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { readingStats, monthlyBarData, staleReadingBooks } from '@/data/mockData';
+import { useMyLibraries } from '@/api/useLibrary';
+
+// UI-only 차트 데이터 (추후 서버 API 연동 예정)
+const monthlyBarData = [
+  { label: '1월', value: 20.5 },
+  { label: '5/13 - 5/20', value: 20.5 },
+  { label: '5/20 - 5/27', value: 20.5 },
+  { label: '5/27 - 6/3', value: 20.5 },
+  { label: '6/3 - 6/10', value: 20.5 },
+  { label: '6/10 - 6/17', value: 3.4, highlight: true },
+];
 
 const Container = styled.div`
   max-width: 900px;
@@ -508,15 +518,38 @@ const MoreButton = styled.button`
   }
 `;
 
-// Data from centralized mock data (replace with API calls later)
 const monthlyData = monthlyBarData;
-const staleBooks = staleReadingBooks;
 
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+
+const daysBetween = (a: string, b: string) => {
+  const ms = new Date(b).getTime() - new Date(a).getTime();
+  return Math.max(1, Math.round(ms / (1000 * 60 * 60 * 24)));
+};
 
 export default function StatsPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const maxBarValue = Math.max(...monthlyData.map(d => d.value));
+
+  const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
+  const { data: readingLibrary = [] } = useMyLibraries('READING');
+  const staleBooks = readingLibrary
+    .filter(item => item.startedAt)
+    .map(item => ({
+      id: item.uuid,
+      coverImage: item.book.thumbnailUrl,
+      date: `${item.startedAt}부터 읽는 중`,
+    }));
+
+  const totalBooks = completedLibrary.length;
+  const finishedPairs = completedLibrary.filter(item => item.startedAt && item.finishedAt);
+  const averageReadingDays = finishedPairs.length
+    ? Math.round(
+        finishedPairs.reduce((sum, item) => sum + daysBetween(item.startedAt!, item.finishedAt!), 0) /
+          finishedPairs.length,
+      )
+    : 0;
+  const monthlyAverage = totalBooks ? Math.round((totalBooks / 12) * 10) / 10 : 0;
 
   const getDaysInMonth = () => {
     const year = currentMonth.getFullYear();
@@ -555,7 +588,7 @@ export default function StatsPage() {
         <StatCard>
           <StatInfo>
             <StatLabel>총 읽은 책 수</StatLabel>
-            <StatValue>{readingStats.totalBooks}권</StatValue>
+            <StatValue>{totalBooks}권</StatValue>
           </StatInfo>
           <StatIcon>
             <Book size={24} />
@@ -564,7 +597,7 @@ export default function StatsPage() {
         <StatCard>
           <StatInfo>
             <StatLabel>평균 독서 기간</StatLabel>
-            <StatValue>{readingStats.averageReadingDays}일</StatValue>
+            <StatValue>{averageReadingDays}일</StatValue>
           </StatInfo>
           <StatIcon>
             <Calendar size={24} />
@@ -573,7 +606,7 @@ export default function StatsPage() {
         <StatCard>
           <StatInfo>
             <StatLabel>월 평균 권 수</StatLabel>
-            <StatValue>{readingStats.monthlyAverage}권</StatValue>
+            <StatValue>{monthlyAverage}권</StatValue>
           </StatInfo>
           <StatIcon>
             <BarChart3 size={24} />

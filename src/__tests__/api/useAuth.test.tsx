@@ -26,6 +26,7 @@ const mockUserResponse: UserResponse = {
   provider: 'KAKAO',
   gender: 'MALE',
   ageGroup: 'TWENTIES',
+  preferredGenres: [],
   isOnboarded: true,
 };
 
@@ -76,7 +77,7 @@ describe('useLogin', () => {
     expect(mockLoginWithApi).toHaveBeenCalledWith(mockLoginResponse);
 
     // Verify user data was seeded into cache (prefetch)
-    const cachedUser = queryClient.getQueryData<UserResponse>(userKeys.me());
+    const cachedUser = queryClient.getQueryData<UserResponse>(userKeys.me(mockUserResponse.uuid));
     expect(cachedUser).toEqual(mockUserResponse);
   });
 

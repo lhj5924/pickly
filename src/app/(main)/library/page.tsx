@@ -4,7 +4,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { BookCard, StatsGrid, StatCard, ShowMoreToggle } from '@/components/common';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
-import { readingStats, getCompletedBooks, getReadingBooks, getWishlistBooks } from '@/data/mockData';
+import { useMyLibraries } from '@/api/useLibrary';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -52,15 +52,33 @@ const EmptyState = styled.div`
   font-size: 0.9375rem;
 `;
 
-
 const FIRST_ROW_COUNT = 5;
 const LOAD_MORE_COUNT = 10;
 
+const daysBetween = (a: string, b: string) => {
+  const ms = new Date(b).getTime() - new Date(a).getTime();
+  return Math.max(1, Math.round(ms / (1000 * 60 * 60 * 24)));
+};
+
 export default function LibraryPage() {
-  const completedBooks = getCompletedBooks();
-  const readingBooks = getReadingBooks();
-  const wishlistBooks = getWishlistBooks();
-  const totalRead = readingStats.totalBooks;
+  const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
+  const { data: readingLibrary = [] } = useMyLibraries('READING');
+  const { data: wishlistLibrary = [] } = useMyLibraries('WANT_TO_READ');
+
+  const totalRead = completedLibrary.length;
+
+  const averageReadingDays = completedLibrary.length
+    ? Math.round(
+        completedLibrary
+          .filter(item => item.startedAt && item.finishedAt)
+          .reduce((sum, item) => sum + daysBetween(item.startedAt!, item.finishedAt!), 0) /
+          Math.max(1, completedLibrary.filter(item => item.startedAt && item.finishedAt).length),
+      )
+    : 0;
+
+  const monthlyAverage = completedLibrary.length
+    ? Math.round((completedLibrary.length / 12) * 10) / 10
+    : 0;
 
   const [completedVisible, setCompletedVisible] = useState(FIRST_ROW_COUNT);
   const [readingVisible, setReadingVisible] = useState(FIRST_ROW_COUNT);
@@ -72,13 +90,9 @@ export default function LibraryPage() {
       <SectionTitle>지금까지 총 {totalRead}권의 책을 읽었어요!</SectionTitle>
       <StatsGridMargin>
         <StatsGrid>
-          <StatCard label="총 읽은 책 수" value={`${readingStats.totalBooks}권`} icon={<OpenedBookIcon size={24} />} />
-          <StatCard
-            label="평균 독서 기간"
-            value={`${readingStats.averageReadingDays}일`}
-            icon={<CalendarIcon size={24} />}
-          />
-          <StatCard label="월 평균 권 수" value={`${readingStats.monthlyAverage}권`} icon={<BooksIcon size={24} />} />
+          <StatCard label="총 읽은 책 수" value={`${totalRead}권`} icon={<OpenedBookIcon size={24} />} />
+          <StatCard label="평균 독서 기간" value={`${averageReadingDays}일`} icon={<CalendarIcon size={24} />} />
+          <StatCard label="월 평균 권 수" value={`${monthlyAverage}권`} icon={<BooksIcon size={24} />} />
         </StatsGrid>
       </StatsGridMargin>
 
@@ -86,15 +100,17 @@ export default function LibraryPage() {
       {totalRead > 0 ? (
         <Section>
           <BookGrid>
-            {completedBooks.slice(0, completedVisible).map(book => (
-              <BookCard key={book.id} book={book} size="sm" />
+            {completedLibrary.slice(0, completedVisible).map(item => (
+              <BookCard key={item.uuid} book={item.book} size="sm" initialStatus="completed" />
             ))}
           </BookGrid>
-          {completedBooks.length > FIRST_ROW_COUNT && (
+          {completedLibrary.length > FIRST_ROW_COUNT && (
             <ShowMoreToggle
-              expanded={completedVisible >= completedBooks.length}
+              expanded={completedVisible >= completedLibrary.length}
               onToggle={() =>
-                setCompletedVisible(prev => (prev >= completedBooks.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT))
+                setCompletedVisible(prev =>
+                  prev >= completedLibrary.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT,
+                )
               }
             />
           )}
@@ -105,19 +121,23 @@ export default function LibraryPage() {
 
       {/* Reading Books */}
       <Section>
-        <SectionTitle>읽고 있는 작품이 {readingBooks.length}권이에요. 한 권부터 차근차근 읽어볼까요?</SectionTitle>
-        {readingBooks.length > 0 ? (
+        <SectionTitle>
+          읽고 있는 작품이 {readingLibrary.length}권이에요. 한 권부터 차근차근 읽어볼까요?
+        </SectionTitle>
+        {readingLibrary.length > 0 ? (
           <>
             <BookGrid>
-              {readingBooks.slice(0, readingVisible).map(book => (
-                <BookCard key={book.id} book={book} size="sm" showProgress />
+              {readingLibrary.slice(0, readingVisible).map(item => (
+                <BookCard key={item.uuid} book={item.book} size="sm" showProgress initialStatus="reading" />
               ))}
             </BookGrid>
-            {readingBooks.length > FIRST_ROW_COUNT && (
+            {readingLibrary.length > FIRST_ROW_COUNT && (
               <ShowMoreToggle
-                expanded={readingVisible >= readingBooks.length}
+                expanded={readingVisible >= readingLibrary.length}
                 onToggle={() =>
-                  setReadingVisible(prev => (prev >= readingBooks.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT))
+                  setReadingVisible(prev =>
+                    prev >= readingLibrary.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT,
+                  )
                 }
               />
             )}
@@ -129,19 +149,23 @@ export default function LibraryPage() {
 
       {/* Wishlist Books */}
       <Section>
-        <SectionTitle>'보고 싶어요'가 {wishlistBooks.length}권 쌓였어요. 지금 시작해볼 작품을 골라보세요.</SectionTitle>
-        {wishlistBooks.length > 0 ? (
+        <SectionTitle>
+          &apos;보고 싶어요&apos;가 {wishlistLibrary.length}권 쌓였어요. 지금 시작해볼 작품을 골라보세요.
+        </SectionTitle>
+        {wishlistLibrary.length > 0 ? (
           <>
             <BookGrid>
-              {wishlistBooks.slice(0, wishlistVisible).map(book => (
-                <BookCard key={book.id} book={book} size="sm" />
+              {wishlistLibrary.slice(0, wishlistVisible).map(item => (
+                <BookCard key={item.uuid} book={item.book} size="sm" initialStatus="wishlist" />
               ))}
             </BookGrid>
-            {wishlistBooks.length > FIRST_ROW_COUNT && (
+            {wishlistLibrary.length > FIRST_ROW_COUNT && (
               <ShowMoreToggle
-                expanded={wishlistVisible >= wishlistBooks.length}
+                expanded={wishlistVisible >= wishlistLibrary.length}
                 onToggle={() =>
-                  setWishlistVisible(prev => (prev >= wishlistBooks.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT))
+                  setWishlistVisible(prev =>
+                    prev >= wishlistLibrary.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT,
+                  )
                 }
               />
             )}

@@ -10,6 +10,13 @@ import * as userApi from '@/api/user';
 import type { UserResponse } from '@/types/api';
 
 jest.mock('@/api/user');
+jest.mock('@/stores', () => ({
+  useAuthStore: Object.assign(
+    (selector: (state: Record<string, unknown>) => unknown) =>
+      selector({ user: { id: 'test-uuid' } }),
+    { getState: () => ({ user: { id: 'test-uuid' } }) },
+  ),
+}));
 
 const mockUser: UserResponse = {
   uuid: 'test-uuid',
@@ -19,6 +26,7 @@ const mockUser: UserResponse = {
   provider: 'KAKAO',
   gender: 'MALE',
   ageGroup: 'TWENTIES',
+  preferredGenres: [],
   isOnboarded: true,
 };
 
@@ -47,7 +55,7 @@ describe('렌더링 횟수 측정', () => {
       localStorage.setItem('accessToken', 'test-token');
 
       // 캐시에 데이터 시딩 (로그인 시 useLogin이 수행하는 것과 동일)
-      queryClient.setQueryData(userKeys.me(), mockUser);
+      queryClient.setQueryData(userKeys.me('test-uuid'), mockUser);
 
       const wrapper = createWrapper(queryClient);
       const { result } = renderHook(() => useMe(), { wrapper });
@@ -65,7 +73,7 @@ describe('렌더링 횟수 측정', () => {
       (userApi.getMe as jest.Mock).mockResolvedValue(mockUser);
 
       // 캐시에 stale 데이터 세팅 (updatedAt을 과거로)
-      queryClient.setQueryData(userKeys.me(), mockUser, {
+      queryClient.setQueryData(userKeys.me('test-uuid'), mockUser, {
         updatedAt: Date.now() - 1000 * 60 * 10, // 10분 전
       });
 
@@ -93,7 +101,7 @@ describe('렌더링 횟수 측정', () => {
       );
       (userApi.getMe as jest.Mock).mockResolvedValue(updatedUser);
 
-      queryClient.setQueryData(userKeys.me(), mockUser);
+      queryClient.setQueryData(userKeys.me('test-uuid'), mockUser);
       const wrapper = createWrapper(queryClient);
 
       const { result } = renderHook(() => useUpdateMe(), { wrapper });
@@ -106,7 +114,7 @@ describe('렌더링 횟수 측정', () => {
       });
 
       // API 응답 전에 이미 캐시가 업데이트되어 있어야 함
-      const cachedData = queryClient.getQueryData<UserResponse>(userKeys.me());
+      const cachedData = queryClient.getQueryData<UserResponse>(userKeys.me('test-uuid'));
       expect(cachedData?.nickname).toBe('새닉네임');
 
       // 이 시점에서 API는 아직 응답하지 않았음 (500ms 지연)
@@ -119,7 +127,7 @@ describe('렌더링 횟수 측정', () => {
       localStorage.setItem('accessToken', 'test-token');
 
       // 로그인 시 useLogin의 onSuccess에서 수행하는 캐시 시딩 시뮬레이션
-      queryClient.setQueryData(userKeys.me(), mockUser);
+      queryClient.setQueryData(userKeys.me('test-uuid'), mockUser);
 
       const wrapper = createWrapper(queryClient);
 

@@ -20,7 +20,7 @@ export const useLogin = (provider: 'kakao' | 'google') => {
 
       // 로그인 성공 시 사용자 데이터를 캐시에 즉시 세팅 (prefetch 효과)
       // 이미 LoginResponse에 user 데이터가 포함되어 있으므로 추가 API 호출 불필요
-      queryClient.setQueryData(userKeys.me(), data.user);
+      queryClient.setQueryData(userKeys.me(data.user.uuid), data.user);
     },
   });
 };

@@ -6,9 +6,10 @@ import { Pencil, ArrowRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores';
-import { Category, BOOK_CATEGORIES } from '@/types';
-import { mockReviews as allMockReviews } from '@/data/mockData';
+import type { GenreInfo } from '@/types';
 import { useMe, useUpdateMe, useDeleteMe } from '@/api/useMe';
+import { useMyReviews } from '@/api/useReview';
+import { useGenres, useMyPreferredGenres, useUpdatePreferredGenres } from '@/api/useGenre';
 
 const Container = styled.div`
   max-width: 900px;
@@ -107,29 +108,22 @@ const GenreRow = styled.div`
   }
 `;
 
-const GENRE_COLORS: Record<number, { bg: string; text: string }> = {
-  1: { bg: '#FFF0F0', text: '#D14343' }, // 소설
-  2: { bg: '#FFF0F5', text: '#C93892' }, // 로맨스
-  3: { bg: '#F0F0FF', text: '#5B5BD6' }, // 판타지
-  4: { bg: '#E8F4FF', text: '#2B7BB9' }, // SF
-  5: { bg: '#F5F0FF', text: '#7C3AED' }, // 미스터리/스릴러
-  6: { bg: '#F4F0F7', text: '#6B3FA0' }, // 호러
-  7: { bg: '#FFF5EB', text: '#B35C1E' }, // 역사소설
-  8: { bg: '#FDF6EC', text: '#A67C2E' }, // 시/에세이
-  9: { bg: '#ECFDF5', text: '#1E8A5E' }, // 자기계발
-  10: { bg: '#EEF6FF', text: '#2E6DA4' }, // 경제/경영
-  11: { bg: '#FFF8F0', text: '#B86E2B' }, // 인문학
-  12: { bg: '#E8FFF0', text: '#1A7A42' }, // 과학
-  13: { bg: '#FAF0E6', text: '#8B6914' }, // 역사
-  14: { bg: '#F0F4F8', text: '#4A6785' }, // 사회
-  15: { bg: '#FFF0FB', text: '#B03A8E' }, // 예술
-  16: { bg: '#E6F9F5', text: '#148A6E' }, // 여행
-  17: { bg: '#FFF7E6', text: '#C07A1A' }, // 요리
-  18: { bg: '#EAFFF0', text: '#2D8C4E' }, // 건강
-  19: { bg: '#F5F0FF', text: '#6E4AB5' }, // 종교/영성
-  20: { bg: '#FFF0E8', text: '#D4602C' }, // 만화/웹툰
-  21: { bg: '#F0F8FF', text: '#3B7FC4' }, // 라이트노벨
-  22: { bg: '#FFF8F5', text: '#C95B3C' }, // 아동/청소년
+const GENRE_COLORS: Record<string, { bg: string; text: string }> = {
+  FICTION: { bg: '#FFF0F0', text: '#D14343' },
+  ESSAY: { bg: '#FDF6EC', text: '#A67C2E' },
+  SELF_HELP: { bg: '#ECFDF5', text: '#1E8A5E' },
+  BIOGRAPHY: { bg: '#FFF5EB', text: '#B35C1E' },
+  HISTORY: { bg: '#FAF0E6', text: '#8B6914' },
+  SCIENCE: { bg: '#E8FFF0', text: '#1A7A42' },
+  PHILOSOPHY: { bg: '#F5F0FF', text: '#7C3AED' },
+  RELIGION: { bg: '#F5F0FF', text: '#6E4AB5' },
+  ART: { bg: '#FFF0FB', text: '#B03A8E' },
+  ECONOMY: { bg: '#EEF6FF', text: '#2E6DA4' },
+  TRAVEL: { bg: '#E6F9F5', text: '#148A6E' },
+  HEALTH: { bg: '#EAFFF0', text: '#2D8C4E' },
+  COOKING: { bg: '#FFF7E6', text: '#C07A1A' },
+  COMIC: { bg: '#FFF0E8', text: '#D4602C' },
+  CHILDREN: { bg: '#FFF8F5', text: '#C95B3C' },
 };
 
 const DEFAULT_GENRE_COLOR = { bg: '#F5F5F5', text: '#6B6B6B' };
@@ -278,26 +272,36 @@ const GenreChip = styled.button<{ $selected: boolean }>`
   }
 `;
 
-const mockReviews = allMockReviews.slice(0, 2);
-
 export default function MyPage() {
-  const { user: localUser, updateNickname, updateFavoriteCategories, logout } = useAuthStore();
+  const { user: localUser, updateNickname, logout } = useAuthStore();
   const { data: serverUser, isLoading, isError } = useMe();
   const { mutate: updateUser } = useUpdateMe();
   const { mutate: deleteUser, isPending: isDeleting } = useDeleteMe();
+  const { data: myReviews = [] } = useMyReviews();
+  const { data: allGenres = [] } = useGenres();
+  const { data: preferredGenresData } = useMyPreferredGenres();
+  const { mutate: updatePreferredGenres } = useUpdatePreferredGenres();
 
-  // React Query를 서버 상태의 Single Source of Truth로 사용
-  // Zustand 동기화 useEffect 제거 → 불필요한 리렌더링 방지
+  const previewReviews = myReviews.slice(0, 2);
+
   const displayNickname = serverUser?.nickname ?? localUser?.nickname ?? '';
   const displayEmail = serverUser?.email ?? localUser?.email ?? '';
 
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [nicknameValue, setNicknameValue] = useState(displayNickname);
   const [showGenreModal, setShowGenreModal] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>(
-    localUser?.preferences.favoriteCategories || [],
+  const [selectedGenres, setSelectedGenres] = useState<GenreInfo[]>(
+    preferredGenresData?.genres ?? serverUser?.preferredGenres ?? [],
   );
-  const [tempCategories, setTempCategories] = useState<Category[]>([]);
+  const [tempGenres, setTempGenres] = useState<GenreInfo[]>([]);
+
+  useEffect(() => {
+    if (preferredGenresData?.genres) {
+      setSelectedGenres(preferredGenresData.genres);
+    } else if (serverUser?.preferredGenres) {
+      setSelectedGenres(serverUser.preferredGenres);
+    }
+  }, [preferredGenresData, serverUser]);
 
   // 서버 데이터 도착 시 닉네임 input 동기화
   useEffect(() => {
@@ -339,20 +343,20 @@ export default function MyPage() {
   };
 
   const handleOpenGenreModal = () => {
-    setTempCategories([...selectedCategories]);
+    setTempGenres([...selectedGenres]);
     setShowGenreModal(true);
   };
 
-  const handleGenreToggle = (category: Category) => {
-    setTempCategories(prev =>
-      prev.find(c => c.id === category.id) ? prev.filter(c => c.id !== category.id) : [...prev, category],
+  const handleGenreToggle = (genre: GenreInfo) => {
+    setTempGenres(prev =>
+      prev.find(g => g.code === genre.code) ? prev.filter(g => g.code !== genre.code) : [...prev, genre],
     );
   };
 
   const handleGenreSave = () => {
-    if (tempCategories.length < 3) return;
-    setSelectedCategories(tempCategories);
-    updateFavoriteCategories(tempCategories);
+    if (tempGenres.length < 3) return;
+    setSelectedGenres(tempGenres);
+    updatePreferredGenres({ genreCodes: tempGenres.map(g => g.code) });
     setShowGenreModal(false);
   };
 
@@ -412,11 +416,11 @@ export default function MyPage() {
             </NicknameRow>
             <Email>{displayEmail}</Email>
             <GenreRow>
-              {selectedCategories.slice(0, 3).map(cat => {
-                const color = GENRE_COLORS[cat.id] ?? DEFAULT_GENRE_COLOR;
+              {selectedGenres.slice(0, 3).map(genre => {
+                const color = GENRE_COLORS[genre.code] ?? DEFAULT_GENRE_COLOR;
                 return (
-                  <GenreTag key={cat.id} $bg={color.bg} $color={color.text}>
-                    {cat.name}
+                  <GenreTag key={genre.code} $bg={color.bg} $color={color.text}>
+                    {genre.name}
                   </GenreTag>
                 );
               })}
@@ -435,12 +439,12 @@ export default function MyPage() {
         </SectionHeader>
 
         <ReviewGrid>
-          {mockReviews.map(review => (
+          {previewReviews.map(review => (
             <ReviewCard
-              key={review.id}
-              id={review.id}
+              key={review.uuid}
+              id={review.uuid}
               bookTitle={review.book.title}
-              bookCoverImage={review.book.coverImage}
+              bookCoverImage={review.book.thumbnailUrl}
               content={review.content}
             />
           ))}
@@ -473,18 +477,18 @@ export default function MyPage() {
           </ModalHeader>
 
           <GenreGrid>
-            {BOOK_CATEGORIES.map(category => (
+            {allGenres.map(genre => (
               <GenreChip
-                key={category.id}
-                $selected={tempCategories.some(c => c.id === category.id)}
-                onClick={() => handleGenreToggle(category)}
+                key={genre.code}
+                $selected={tempGenres.some(g => g.code === genre.code)}
+                onClick={() => handleGenreToggle(genre)}
               >
-                {category.name}
+                {genre.name}
               </GenreChip>
             ))}
           </GenreGrid>
 
-          <Button fullWidth disabled={tempCategories.length < 3} onClick={handleGenreSave}>
+          <Button fullWidth disabled={tempGenres.length < 3} onClick={handleGenreSave}>
             선택완료
           </Button>
         </Modal>
