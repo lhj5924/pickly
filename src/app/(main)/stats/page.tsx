@@ -105,6 +105,7 @@ const ChartInfo = styled.div`
   align-items: center;
   gap: 1rem;
   font-size: 0.875rem;
+  margin-bottom: 0.5rem;
 `;
 
 const ChartVolume = styled.span`
@@ -193,7 +194,7 @@ const Bar = styled.div<{ $height: number; $highlight: boolean; $delay: number }>
   background: ${({ $highlight }) => ($highlight ? '#B5EBA7' : '#EAEAEA')};
   border-radius: 0.25rem 0.25rem 0 0;
   transform-origin: bottom;
-  animation: ${growUp} 0.8s ease-out forwards;
+  animation: ${growUp} 0.5s ease-out both;
   animation-delay: ${({ $delay }) => $delay}s;
   position: relative;
 
@@ -566,9 +567,9 @@ export default function StatsPage() {
       };
     });
   })();
-  // 차트 Y축 최대값: 10 단위로 올림 (max < 10 → 10, 10~19 → 20, 20~29 → 30, ...)
+  // 차트 Y축 최대값: 5 단위로 올림 (max < 5 → 5, 5~9 → 10, 10~14 → 15, ...)
   const rawMax = Math.max(...weeklyData.map(d => d.value), 0);
-  const maxBarValue = (Math.floor(rawMax / 10) + 1) * 10;
+  const maxBarValue = (Math.floor(rawMax / 5) + 1) * 5;
   const yTicks = Array.from({ length: maxBarValue / 5 + 1 }, (_, i) => i * 5);
 
   const earliestFinishedAt = completedLibrary.reduce<Date | null>((min, item) => {
@@ -679,15 +680,23 @@ export default function StatsPage() {
               <AlertCircle size={16} color="#a3a3a3" />
             </ChartTitle>
             <NavButtons>
-              <NavButton aria-label="이전 6주" disabled={!canGoPrevWeeks} onClick={() => setWeekPageOffset(p => p + 1)}>
-                <ChevronLeft size={20} />
+              <NavButton
+                $size={24}
+                $shadow="0px 1.85px 4.62px 0px #00000040"
+                aria-label="이전 6주"
+                disabled={!canGoPrevWeeks}
+                onClick={() => setWeekPageOffset(p => p + 1)}
+              >
+                <ChevronLeft size={16} />
               </NavButton>
               <NavButton
+                $size={24}
+                $shadow="0px 1.85px 4.62px 0px #00000040"
                 aria-label="다음 6주"
                 disabled={!canGoNextWeeks}
                 onClick={() => setWeekPageOffset(p => Math.max(0, p - 1))}
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={16} />
               </NavButton>
             </NavButtons>
           </ChartSubHeader>

@@ -18,14 +18,22 @@ const daysAgo = (d: number): string => {
   return date.toISOString();
 };
 
-const mockCompleted: LibraryItem[] = COMPLETED_BOOKS.map((book, i) => ({
-  uuid: `mock-lib-completed-${String(i + 1).padStart(3, '0')}`,
-  book,
-  status: 'COMPLETED',
-  startedAt: daysAgo(30 + i * 14),
-  finishedAt: daysAgo(15 + i * 14),
-  createdAt: daysAgo(30 + i * 14),
-}));
+// 처음 6권은 3/29 ~ 4/4 주(오늘 2026-04-15 기준 11~17일 전) 안에 finishedAt 분포
+const FOCUS_WEEK_FINISHED_DAYS_AGO = [11, 12, 13, 14, 15, 16];
+
+const mockCompleted: LibraryItem[] = COMPLETED_BOOKS.map((book, i) => {
+  const inFocusWeek = i < FOCUS_WEEK_FINISHED_DAYS_AGO.length;
+  const finishedDaysAgo = inFocusWeek ? FOCUS_WEEK_FINISHED_DAYS_AGO[i] : 15 + i * 14;
+  const startedDaysAgo = finishedDaysAgo + 15;
+  return {
+    uuid: `mock-lib-completed-${String(i + 1).padStart(3, '0')}`,
+    book,
+    status: 'COMPLETED',
+    startedAt: daysAgo(startedDaysAgo),
+    finishedAt: daysAgo(finishedDaysAgo),
+    createdAt: daysAgo(startedDaysAgo),
+  };
+});
 
 const mockReading: LibraryItem[] = READING_BOOKS.map((book, i) => ({
   uuid: `mock-lib-reading-${String(i + 1).padStart(3, '0')}`,
