@@ -8,6 +8,7 @@ import { getMe, updateMe, deleteMe } from './user';
 import type { UpdateUserRequest, UserResponse } from '../types/api';
 import { useAuthStore } from '../stores';
 import { userKeys } from './queryKeys';
+import { MOCK_MODE, mockUserResponse } from '../mocks';
 
 /** 내 정보 조회 */
 export const useMe = () => {
@@ -15,10 +16,15 @@ export const useMe = () => {
 
   return useQuery<UserResponse, Error>({
     queryKey: userKeys.me(userUuid),
-    queryFn: () => getMe(userUuid!),
+    queryFn: () => {
+      if (MOCK_MODE) return Promise.resolve(mockUserResponse);
+      return getMe(userUuid!);
+    },
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
-    enabled: typeof window !== 'undefined' && !!userUuid && !!localStorage.getItem('accessToken'),
+    enabled:
+      MOCK_MODE ||
+      (typeof window !== 'undefined' && !!userUuid && !!localStorage.getItem('accessToken')),
   });
 };
 

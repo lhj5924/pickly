@@ -311,12 +311,12 @@ function ReviewWriteContent() {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [selectedItem, setSelectedItem] = useState<LibraryItem | null>(null);
 
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Date | null>(() => new Date());
+  const [endDate, setEndDate] = useState<Date | null>(() => new Date());
   const [showCalendar, setShowCalendar] = useState<'start' | 'end' | null>(null);
   const [calendarDate, setCalendarDate] = useState(new Date());
 
-  const [rating, setRating] = useState(3);
+  const [rating, setRating] = useState(5);
   const [reviewContent, setReviewContent] = useState('');
 
   const searchRef = useRef<HTMLDivElement>(null);

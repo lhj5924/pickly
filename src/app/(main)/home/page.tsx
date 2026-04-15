@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores';
 import { useMyLibraries } from '@/api/useLibrary';
+import { MOCK_MODE, mockRecommendations } from '@/mocks';
 // UI-only 차트/배너 데이터는 아직 서버 API가 없어 로컬 상수로 유지합니다 (Stage 3).
 const genreChartData = [
   { name: '소설', value: 54 },
@@ -251,8 +252,18 @@ const EmptyBooks = styled.div`
 
 export default function HomePage() {
   const { user } = useAuthStore();
-  const { data: readingLibrary = [] } = useMyLibraries('READING');
+  const { data: readingLibraryAll = [] } = useMyLibraries('READING');
   const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
+
+  const readingLibrary = [...readingLibraryAll]
+    .sort((a, b) => {
+      const aTime = new Date(a.startedAt ?? a.createdAt).getTime();
+      const bTime = new Date(b.startedAt ?? b.createdAt).getTime();
+      return bTime - aTime;
+    })
+    .slice(0, 5);
+
+  const recommendedBooks = MOCK_MODE ? mockRecommendations : [];
   const hasData = completedLibrary.length > 0;
   const [currentBanner, setCurrentBanner] = useState(0);
   const [chartAnimated, setChartAnimated] = useState(false);
@@ -324,7 +335,7 @@ export default function HomePage() {
               />
               <StatCard
                 label="읽는 중"
-                value={`${readingLibrary.length}권`}
+                value={`${readingLibraryAll.length}권`}
                 icon={<CalendarIcon size={24} />}
               />
               <StatCard
@@ -381,7 +392,15 @@ export default function HomePage() {
         {/* AI Recommendations - TODO: 서버에 추천 API가 추가되면 연동 */}
         <BooksSection>
           <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
-          <EmptyBooks>곧 AI 추천 책을 보여드릴 예정이에요.</EmptyBooks>
+          {recommendedBooks.length > 0 ? (
+            <BooksScroll>
+              {recommendedBooks.map(book => (
+                <BookCard key={book.uuid} book={book} size="sm" />
+              ))}
+            </BooksScroll>
+          ) : (
+            <EmptyBooks>곧 AI 추천 책을 보여드릴 예정이에요.</EmptyBooks>
+          )}
         </BooksSection>
       </Container>
     </PageWrapper>
