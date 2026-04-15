@@ -19,3 +19,5 @@ export {
   mockHiddenBooks,
 } from './mockRecommendPage';
 export type { HiddenMockBook } from './mockRecommendPage';
+export { READING_LEVELS, getMockReadingLevel } from './mockReadingLevel';
+export type { ReadingLevel } from './mockReadingLevel';

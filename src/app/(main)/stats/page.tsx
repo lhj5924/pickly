@@ -1,31 +1,26 @@
 'use client';
 
 import styled, { keyframes } from 'styled-components';
-import { BookCard, Button } from '@/components/common';
-import {
-  Book,
-  Calendar,
-  BarChart3,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  HelpCircle,
-  ChevronDown,
-} from 'lucide-react';
+import { BookCard, Button, StatsGrid, StatCard, NavButtons, NavButton } from '@/components/common';
+import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
+import { ArrowRight, ChevronLeft, ChevronRight, AlertCircle, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useMyLibraries } from '@/api/useLibrary';
+import { useMe } from '@/api/useMe';
+import { getMockReadingLevel } from '@/mocks';
 
-// UI-only 차트 데이터 (추후 서버 API 연동 예정)
-const monthlyBarData = [
-  { label: '1월', value: 20.5 },
-  { label: '5/13 - 5/20', value: 20.5 },
-  { label: '5/20 - 5/27', value: 20.5 },
-  { label: '5/27 - 6/3', value: 20.5 },
-  { label: '6/3 - 6/10', value: 20.5 },
-  { label: '6/10 - 6/17', value: 3.4, highlight: true },
-];
+const WEEKS_PER_PAGE = 6;
+
+const getWeekStart = (date: Date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d;
+};
+
+const formatWeekLabel = (start: Date, end: Date) =>
+  `${start.getMonth() + 1}/${start.getDate()} ~ ${end.getMonth() + 1}/${end.getDate()}`;
 
 const Container = styled.div`
   max-width: 900px;
@@ -37,14 +32,13 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   margin-bottom: 2rem;
-  background: linear-gradient(135deg, #f5f7ed 0%, #e8ebd8 100%);
-  border-radius: 1rem;
-  padding: 1.5rem 2rem;
+  padding: 0.5rem 0;
 
   @media (max-width: 640px) {
     flex-direction: column;
-    gap: 1rem;
+    align-items: flex-start;
   }
 `;
 
@@ -52,84 +46,55 @@ const HeaderLeft = styled.div`
   flex: 1;
 `;
 
-const HeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+const ShareButton = styled(Button)`
+  flex-shrink: 0;
+  padding: 16px 48px;
+  font-size: 1rem;
 `;
 
 const Level = styled.h1`
   font-size: 1.5rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary[600]};
+  color: ${({ theme }) => theme.colors.text.black};
   margin-bottom: 0.25rem;
 `;
 
 const LevelDesc = styled.p`
   font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
+  color: ${({ theme }) => theme.colors.text.black};
 `;
 
-// Stats Cards
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+const StatsGridWrapper = styled.div`
   margin-bottom: 2rem;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const StatCard = styled.div`
-  background: white;
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-`;
-
-const StatInfo = styled.div``;
-
-const StatLabel = styled.p`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-bottom: 0.5rem;
-`;
-
-const StatValue = styled.p`
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const StatIcon = styled.div`
-  color: ${({ theme }) => theme.colors.primary[500]};
 `;
 
 // Bar Chart Section
-const ChartCard = styled.div`
+const ChartSection = styled.div`
   background: white;
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const ChartHeader = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   margin-bottom: 1rem;
 `;
 
+const ChartSubHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+`;
+
 const ChartTitle = styled.h3`
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.primary};
+  color: ${({ theme }) => theme.colors.text.quinary};
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -140,34 +105,18 @@ const ChartInfo = styled.div`
   align-items: center;
   gap: 1rem;
   font-size: 0.875rem;
+  margin-bottom: 0.5rem;
 `;
 
-const TotalBooks = styled.span`
+const ChartVolume = styled.span`
   font-weight: 700;
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
+  font-size: 1.125rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
 
-const ThisWeekBooks = styled.span`
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const ChartNav = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`;
-
-const NavButton = styled.button`
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.neutral[50]};
+  span {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: ${({ theme }) => theme.colors.text.seventary};
   }
 `;
 
@@ -180,30 +129,72 @@ const growUp = keyframes`
   }
 `;
 
+const ChartPlot = styled.div`
+  position: relative;
+  height: 240px;
+  margin-top: 1rem;
+  padding-left: 36px;
+`;
+
+const Gridline = styled.div<{ $bottom: number }>`
+  position: absolute;
+  left: 36px;
+  right: 0;
+  bottom: ${({ $bottom }) => $bottom}%;
+  height: 1px;
+  background: #eaeaea;
+  pointer-events: none;
+`;
+
+const GridlineLabel = styled.span`
+  position: absolute;
+  left: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c8c8c8;
+`;
+
 const BarChartContainer = styled.div`
+  position: relative;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   justify-content: space-between;
-  height: 200px;
-  padding-top: 20px;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border.light};
+  height: 100%;
+  z-index: 1;
 `;
 
 const BarWrapper = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   align-items: center;
-  gap: 0.5rem;
+  height: 100%;
+`;
+
+const BarLabelRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0 0 36px;
+`;
+
+const BarLabelCell = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: center;
 `;
 
 const Bar = styled.div<{ $height: number; $highlight: boolean; $delay: number }>`
-  width: 50px;
+  width: 96px;
   height: ${({ $height }) => $height}%;
-  background: ${({ theme, $highlight }) => ($highlight ? theme.colors.primary[500] : theme.colors.primary[200])};
+  background: ${({ $highlight }) => ($highlight ? '#B5EBA7' : '#EAEAEA')};
   border-radius: 0.25rem 0.25rem 0 0;
   transform-origin: bottom;
-  animation: ${growUp} 0.8s ease-out forwards;
+  animation: ${growUp} 0.5s ease-out both;
   animation-delay: ${({ $delay }) => $delay}s;
   position: relative;
 
@@ -214,25 +205,28 @@ const Bar = styled.div<{ $height: number; $highlight: boolean; $delay: number }>
 
 const BarValue = styled.span`
   position: absolute;
-  top: -20px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
+  transform: translate(-50%, -50%);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.text.quinary};
+  pointer-events: none;
 `;
 
-const BarLabel = styled.span`
+const BarLabel = styled.span<{ $highlight: boolean }>`
   font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  font-weight: 500;
+  color: ${({ theme, $highlight }) => ($highlight ? theme.colors.text.primary : theme.colors.text.tertiary)};
 `;
 
 // Calendar Section
-const CalendarCard = styled.div`
+const CalendarSection = styled.div`
   background: white;
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const CalendarHeader = styled.div`
@@ -317,10 +311,11 @@ const BookTooltip = styled.div`
 
 // Pie Chart Section
 const PieSection = styled.div`
-  background: ${({ theme }) => theme.colors.neutral[50]};
+  background: white;
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const PieSectionTitle = styled.h3`
@@ -372,7 +367,7 @@ const PieCenter = styled.div`
   width: 60%;
   height: 60%;
   border-radius: 50%;
-  background: ${({ theme }) => theme.colors.neutral[50]};
+  background: white;
 `;
 
 const PieLegend = styled.div`
@@ -399,10 +394,11 @@ const LegendDot = styled.span<{ $color: string }>`
 
 // Quarterly Section
 const QuarterlySection = styled.div`
-  background: ${({ theme }) => theme.colors.neutral[50]};
+  background: white;
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const QuarterlyTitle = styled.h3`
@@ -455,9 +451,9 @@ const QuarterSubGenres = styled.div`
 // Stale Reading Section
 const StaleSection = styled.div`
   background: white;
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
   border-radius: 0.75rem;
   padding: 1.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const StaleTitle = styled.h3`
@@ -518,8 +514,6 @@ const MoreButton = styled.button`
   }
 `;
 
-const monthlyData = monthlyBarData;
-
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
 const daysBetween = (a: string, b: string) => {
@@ -529,10 +523,69 @@ const daysBetween = (a: string, b: string) => {
 
 export default function StatsPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const maxBarValue = Math.max(...monthlyData.map(d => d.value));
+  const [weekPageOffset, setWeekPageOffset] = useState(0);
+
+  const { data: me } = useMe();
+  const readingLevel = getMockReadingLevel(me?.uuid);
 
   const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
   const { data: readingLibrary = [] } = useMyLibraries('READING');
+
+  // 오늘 기준 가장 가까운 (과거의) 완독일
+  const mostRecentFinishedAt: Date | null = completedLibrary.reduce<Date | null>((latest, item) => {
+    if (!item.finishedAt) return latest;
+    const d = new Date(item.finishedAt);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    if (d > today) return latest;
+    return !latest || d > latest ? d : latest;
+  }, null);
+
+  // 최근 6주간 완독 권수 (weekPageOffset 만큼 과거로 이동)
+  const weeklyData = (() => {
+    const currentWeekStart = getWeekStart(new Date());
+    return Array.from({ length: WEEKS_PER_PAGE }, (_, i) => {
+      const start = new Date(currentWeekStart);
+      start.setDate(currentWeekStart.getDate() - (weekPageOffset * WEEKS_PER_PAGE + (WEEKS_PER_PAGE - 1 - i)) * 7);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      const endExclusive = new Date(start);
+      endExclusive.setDate(start.getDate() + 7);
+
+      const value = completedLibrary.filter(item => {
+        if (!item.finishedAt) return false;
+        const finished = new Date(item.finishedAt);
+        return finished >= start && finished < endExclusive;
+      }).length;
+
+      const highlight = !!mostRecentFinishedAt && mostRecentFinishedAt >= start && mostRecentFinishedAt < endExclusive;
+
+      return {
+        label: formatWeekLabel(start, end),
+        value,
+        highlight,
+      };
+    });
+  })();
+  // 차트 Y축 최대값: 5 단위로 올림 (max < 5 → 5, 5~9 → 10, 10~14 → 15, ...)
+  const rawMax = Math.max(...weeklyData.map(d => d.value), 0);
+  const maxBarValue = (Math.floor(rawMax / 5) + 1) * 5;
+  const yTicks = Array.from({ length: maxBarValue / 5 + 1 }, (_, i) => i * 5);
+
+  const earliestFinishedAt = completedLibrary.reduce<Date | null>((min, item) => {
+    if (!item.finishedAt) return min;
+    const d = new Date(item.finishedAt);
+    return !min || d < min ? d : min;
+  }, null);
+  const earliestShownWeekStart = (() => {
+    const currentWeekStart = getWeekStart(new Date());
+    const start = new Date(currentWeekStart);
+    start.setDate(currentWeekStart.getDate() - (weekPageOffset * WEEKS_PER_PAGE + (WEEKS_PER_PAGE - 1)) * 7);
+    return start;
+  })();
+  const canGoPrevWeeks = !!earliestFinishedAt && earliestFinishedAt < earliestShownWeekStart;
+  const canGoNextWeeks = weekPageOffset > 0;
+
   const staleBooks = readingLibrary
     .filter(item => item.startedAt)
     .map(item => ({
@@ -549,7 +602,22 @@ export default function StatsPage() {
           finishedPairs.length,
       )
     : 0;
-  const monthlyAverage = totalBooks ? Math.round((totalBooks / 12) * 10) / 10 : 0;
+  // finishedAt 기준 월별 완독 권수 → 전체 월 평균
+  const monthlyFinishedCounts = (() => {
+    const map = new Map<string, number>();
+    completedLibrary.forEach(item => {
+      if (!item.finishedAt) return;
+      const d = new Date(item.finishedAt);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      map.set(key, (map.get(key) ?? 0) + 1);
+    });
+    return map;
+  })();
+  const monthlyAverage = monthlyFinishedCounts.size
+    ? Math.round(
+        (Array.from(monthlyFinishedCounts.values()).reduce((a, b) => a + b, 0) / monthlyFinishedCounts.size) * 10,
+      ) / 10
+    : 0;
 
   const getDaysInMonth = () => {
     const year = currentMonth.getFullYear();
@@ -573,85 +641,105 @@ export default function StatsPage() {
     <Container>
       <Header>
         <HeaderLeft>
-          <Level>나의 독서 레벨 Lv.5 - 안정적 독서자</Level>
-          <LevelDesc>&quot;독서가 일상의 한 부분이에요.&quot;</LevelDesc>
+          <Level>
+            나의 독서 레벨 Lv.{readingLevel.level} - {readingLevel.title}
+          </Level>
+          <LevelDesc>&quot;{readingLevel.description}&quot;</LevelDesc>
         </HeaderLeft>
-        <HeaderRight>
-          <Button size="sm" rightIcon={<ArrowRight size={16} />}>
-            내 통계 공유하기
-          </Button>
-          <Image src="/pickly-jar.png" alt="pickly" width={60} height={96} />
-        </HeaderRight>
+        <ShareButton variant="cta" rightIcon={<ArrowRight size={20} />}>
+          내 통계 공유하기
+        </ShareButton>
       </Header>
 
-      <StatsGrid>
-        <StatCard>
-          <StatInfo>
-            <StatLabel>총 읽은 책 수</StatLabel>
-            <StatValue>{totalBooks}권</StatValue>
-          </StatInfo>
-          <StatIcon>
-            <Book size={24} />
-          </StatIcon>
-        </StatCard>
-        <StatCard>
-          <StatInfo>
-            <StatLabel>평균 독서 기간</StatLabel>
-            <StatValue>{averageReadingDays}일</StatValue>
-          </StatInfo>
-          <StatIcon>
-            <Calendar size={24} />
-          </StatIcon>
-        </StatCard>
-        <StatCard>
-          <StatInfo>
-            <StatLabel>월 평균 권 수</StatLabel>
-            <StatValue>{monthlyAverage}권</StatValue>
-          </StatInfo>
-          <StatIcon>
-            <BarChart3 size={24} />
-          </StatIcon>
-        </StatCard>
-      </StatsGrid>
+      <StatsGridWrapper>
+        <StatsGrid>
+          <StatCard
+            label="총 읽은 책 수"
+            value={totalBooks ? `${totalBooks}권` : undefined}
+            icon={<OpenedBookIcon size={24} />}
+          />
+          <StatCard
+            label="평균 독서 기간"
+            value={averageReadingDays ? `${averageReadingDays}일` : undefined}
+            icon={<CalendarIcon size={24} />}
+          />
+          <StatCard
+            label="월 평균 권 수"
+            value={totalBooks ? `${monthlyAverage}권` : undefined}
+            icon={<BooksIcon size={24} />}
+          />
+        </StatsGrid>
+      </StatsGridWrapper>
 
       {/* Monthly Bar Chart */}
-      <ChartCard>
+      <ChartSection>
         <ChartHeader>
-          <ChartTitle>
-            월별 독서량
-            <HelpCircle size={16} color="#a3a3a3" />
-          </ChartTitle>
+          <ChartSubHeader>
+            <ChartTitle>
+              월별 독서량
+              <AlertCircle size={16} color="#a3a3a3" />
+            </ChartTitle>
+            <NavButtons>
+              <NavButton
+                $size={24}
+                $shadow="0px 1.85px 4.62px 0px #00000040"
+                aria-label="이전 6주"
+                disabled={!canGoPrevWeeks}
+                onClick={() => setWeekPageOffset(p => p + 1)}
+              >
+                <ChevronLeft size={16} />
+              </NavButton>
+              <NavButton
+                $size={24}
+                $shadow="0px 1.85px 4.62px 0px #00000040"
+                aria-label="다음 6주"
+                disabled={!canGoNextWeeks}
+                onClick={() => setWeekPageOffset(p => Math.max(0, p - 1))}
+              >
+                <ChevronRight size={16} />
+              </NavButton>
+            </NavButtons>
+          </ChartSubHeader>
           <ChartInfo>
-            <TotalBooks>34권 (년째)</TotalBooks>
-            <ThisWeekBooks>3권 (이번 주)</ThisWeekBooks>
+            <ChartVolume>
+              {totalBooks}권 <span>(전체)</span>
+            </ChartVolume>
+            <ChartVolume>
+              {monthlyAverage}권 <span>(월 평균)</span>
+            </ChartVolume>
           </ChartInfo>
-          <ChartNav>
-            <NavButton>
-              <ChevronLeft size={16} />
-            </NavButton>
-            <NavButton>
-              <ChevronRight size={16} />
-            </NavButton>
-          </ChartNav>
         </ChartHeader>
-        <BarChartContainer>
-          {monthlyData.map((data, index) => (
-            <BarWrapper key={index}>
-              <Bar $height={(data.value / maxBarValue) * 100} $highlight={data.highlight || false} $delay={index * 0.1}>
-                <BarValue>{data.value}</BarValue>
-              </Bar>
-              <BarLabel>{data.label}</BarLabel>
-            </BarWrapper>
+        <ChartPlot>
+          {yTicks.map(tick => (
+            <Gridline key={tick} $bottom={(tick / maxBarValue) * 100}>
+              <GridlineLabel>{tick}</GridlineLabel>
+            </Gridline>
           ))}
-        </BarChartContainer>
-      </ChartCard>
+          <BarChartContainer>
+            {weeklyData.map((data, index) => (
+              <BarWrapper key={`${weekPageOffset}-${index}`}>
+                <Bar $height={(data.value / maxBarValue) * 100} $highlight={data.highlight} $delay={index * 0.1}>
+                  {data.value > 0 && <BarValue>{data.value}</BarValue>}
+                </Bar>
+              </BarWrapper>
+            ))}
+          </BarChartContainer>
+        </ChartPlot>
+        <BarLabelRow>
+          {weeklyData.map((data, index) => (
+            <BarLabelCell key={`${weekPageOffset}-${index}`}>
+              <BarLabel $highlight={data.highlight}>{data.label}</BarLabel>
+            </BarLabelCell>
+          ))}
+        </BarLabelRow>
+      </ChartSection>
 
       {/* Calendar */}
-      <CalendarCard>
+      <CalendarSection>
         <CalendarHeader>
           <ChartTitle>
             독서 캘린더
-            <HelpCircle size={16} color="#a3a3a3" />
+            <AlertCircle size={16} color="#a3a3a3" />
           </ChartTitle>
           <CalendarNav>
             <CalendarNavBtn
@@ -678,7 +766,7 @@ export default function StatsPage() {
             </CalendarDay>
           ))}
         </CalendarGrid>
-      </CalendarCard>
+      </CalendarSection>
 
       {/* Pie Charts */}
       <PieSection>
@@ -782,7 +870,7 @@ export default function StatsPage() {
       <StaleSection>
         <StaleTitle>
           아직 이 책을 읽고 계신가요?
-          <HelpCircle size={16} color="#a3a3a3" />
+          <AlertCircle size={16} color="#a3a3a3" />
         </StaleTitle>
         <StaleBooks>
           {staleBooks.map(book => (

@@ -28,7 +28,7 @@ const BackButton = styled.button`
 const Card = styled.article`
   background: #ffffff;
   border-radius: 1.25rem;
-  box-shadow: 0px 20px 44px 0px #dadada40;
+  box-shadow: ${({ theme }) => theme.shadows.card};
   padding: 2.5rem 2rem;
   display: flex;
   flex-direction: column;

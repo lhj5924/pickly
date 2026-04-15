@@ -21,7 +21,7 @@ const Container = styled.div`
 const ProfileCard = styled.div`
   padding: 2rem 4rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0px 20px 44px 0px #dadada40;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const ProfileHeader = styled.div`
@@ -142,7 +142,7 @@ const ReviewSection = styled.div`
   background: ${({ theme }) => theme.colors.neutral[50]};
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0px 20px 44px 0px #dadada40;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const SectionHeader = styled.div`
