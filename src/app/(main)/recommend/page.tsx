@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
-import { BookCard } from '@/components/common';
+import { BookCard, NavButtons, NavButton } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
 import {
@@ -140,29 +140,6 @@ const SmallBookTitle = styled.p`
   letter-spacing: 0;
   text-align: center;
   color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const NavButtons = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-`;
-
-const NavButton = styled.button`
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #000000;
-  box-shadow: 0px 4.44px 31.06px 0px #b8b8b840;
-
-  &:disabled {
-    color: ${({ theme }) => theme.colors.neutral[300]};
-    cursor: not-allowed;
-  }
 `;
 
 const VerticalGrid = styled.div`

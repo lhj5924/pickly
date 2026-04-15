@@ -7,3 +7,4 @@ export { StatsGrid, StatCard } from './StatsGrid';
 export { ShowMoreToggle } from './ShowMoreToggle';
 export { ReviewCard } from './ReviewCard';
 export { Logo } from './Logo';
+export { NavButtons, NavButton } from './NavButtons';
