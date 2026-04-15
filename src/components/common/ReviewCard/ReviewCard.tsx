@@ -13,6 +13,12 @@ const Card = styled(Link)`
   flex-direction: column;
   align-items: center;
   background: linear-gradient(to bottom, #f7f7f7 33.3%, #ffffff 33.3%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: scale(1.03);
+    box-shadow: 0px 12px 32px rgba(180, 180, 180, 0.25);
+  }
 `;
 
 const CardInner = styled.div`

@@ -7,60 +7,14 @@ import styled from 'styled-components';
 import { BookCard } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
-
-// --- 추천 섹션 로컬 목업 (서버 추천 API 추가 전까지 로컬 유지) ---
-interface RecommendBook {
-  id: string;
-  title: string;
-  subtitle?: string;
-  author?: string;
-  coverImage: string;
-}
-interface HiddenBookData {
-  id: string;
-  coverImage: string;
-  quote: string;
-  title: string;
-}
-
-const similarBooksData: RecommendBook[] = [
-  { id: 'sim-1', title: '당연하게도 나는 너를1', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'sim-2', title: '당연하게도 나는 너를2', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'sim-3', title: '당연하게도 나는 너를3', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'sim-4', title: '당연하게도 나는 너를4', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'sim-5', title: '당연하게도 나는 너를5', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'sim-6', title: '당연하게도 나는 너를6', author: '이꽃', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-];
-
-const genreBooksData: RecommendBook[] = [
-  { id: 'gr-1', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'gr-2', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'gr-3', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-  { id: 'gr-4', title: '당연하게도 나는 너를', author: '이꽃', subtitle: '당연하게도 나는 너를', coverImage: 'https://image.yes24.com/goods/119564892/XL' },
-];
-
-const aiRecommendations: RecommendBook[] = [
-  { id: 'rec-1', title: '서해는 모든 것을 알았다', author: '정세랑', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'rec-2', title: '우리는 모두 천문학자로 태어난다', author: '지웅배', coverImage: 'https://image.yes24.com/goods/124857283/XL' },
-  { id: 'rec-3', title: '서해는 모든 것을 알았다', author: '정세랑', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'rec-4', title: '우리는 모두 천문학자로 태어난다', author: '지웅배', coverImage: 'https://image.yes24.com/goods/124857283/XL' },
-];
-
-const popularBooksData: RecommendBook[] = [
-  { id: 'pop-1', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'pop-2', title: '내가 없던 어느 밤', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'pop-3', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'pop-4', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'pop-5', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-  { id: 'pop-6', title: '내가 없던 어느 밤에', coverImage: 'https://image.yes24.com/goods/125698547/XL' },
-];
-
-const hiddenBooksData: HiddenBookData[] = [
-  { id: 'ht-1', title: '', coverImage: 'https://image.yes24.com/goods/125698547/XL', quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?' },
-  { id: 'ht-2', title: '', coverImage: 'https://image.yes24.com/goods/124857283/XL', quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?' },
-  { id: 'ht-3', title: '', coverImage: 'https://image.yes24.com/goods/124857283/XL', quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?' },
-  { id: 'ht-4', title: '', coverImage: 'https://image.yes24.com/goods/124857283/XL', quote: '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?' },
-];
+import {
+  mockSimilarBooks,
+  mockGenreBooks,
+  mockAiRecommendBooks,
+  mockPopularBooks,
+  mockHiddenBooks,
+  type HiddenMockBook,
+} from '@/mocks';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -352,11 +306,11 @@ const HiddenQuoteText = styled.p`
 `;
 
 // Data from centralized mock data (replace with API calls later)
-const similarBooks = similarBooksData;
-const genreBooks = genreBooksData;
-const aiBooks = aiRecommendations;
-const popularBooks = popularBooksData;
-const hiddenBooks = hiddenBooksData;
+const similarBooks = mockSimilarBooks;
+const genreBooks = mockGenreBooks;
+const aiBooks = mockAiRecommendBooks;
+const popularBooks = mockPopularBooks;
+const hiddenBooks = mockHiddenBooks;
 
 const SIMILAR_BOOKS_PAGE_SIZE = 5;
 const GENRE_BOOKS_PAGE_SIZE = 3;
@@ -451,13 +405,11 @@ const useImagePalette = (src: string, fallback: string[]) => {
   return palette;
 };
 
-type HiddenBook = (typeof hiddenBooksData)[number];
-
-const HiddenBookCard = ({ book }: { book: HiddenBook }) => {
+const HiddenBookCard = ({ book }: { book: HiddenMockBook }) => {
   const router = useRouter();
-  const seed = hashStringToInt(book.id);
+  const seed = hashStringToInt(book.uuid);
   const fallback = PASTEL_FALLBACK_PALETTES[seed % PASTEL_FALLBACK_PALETTES.length];
-  const palette = useImagePalette(book.coverImage, fallback);
+  const palette = useImagePalette(book.thumbnailUrl, fallback);
   const colors = [...palette, ...palette];
   const [c1, c2, c3, c4] = colors;
   const angle = seed % 360;
@@ -472,7 +424,7 @@ const HiddenBookCard = ({ book }: { book: HiddenBook }) => {
   ].join(', ');
 
   return (
-    <HiddenCard style={{ background }} onClick={() => router.push(`/book/${book.id}`)}>
+    <HiddenCard style={{ background }} onClick={() => router.push(`/book/${book.uuid}`)}>
       <HiddenBookCoverWrapper>
         <BookCard book={book} size="md" />
       </HiddenBookCoverWrapper>
@@ -523,14 +475,14 @@ export default function RecommendPage() {
               <BookCard book={featuredSimilarBook} size="md" />
               <FeaturedTextWrapper>
                 <FeaturedTitle>{featuredSimilarBook.title}</FeaturedTitle>
-                <FeaturedSubtitle>{featuredSimilarBook.author}</FeaturedSubtitle>
+                <FeaturedSubtitle>{featuredSimilarBook.authors?.[0]}</FeaturedSubtitle>
               </FeaturedTextWrapper>
             </FeaturedBookColumn>
           )}
           <SmallBooksColumn>
             <SmallBooksGrid>
               {visibleSmallSimilarBooks.map(book => (
-                <SmallBookItem key={book.id}>
+                <SmallBookItem key={book.uuid}>
                   <BookCard book={book} size="sm" showTitle={false} />
                   <SmallBookTextWrapper>
                     <SmallBookTitle>{book.title}</SmallBookTitle>
@@ -568,13 +520,13 @@ export default function RecommendPage() {
         </SectionHeader>
         <VerticalGrid>
           {genre.items.map(book => (
-            <VerticalBookCard key={book.id} onClick={() => router.push(`/book/${book.id}`)}>
+            <VerticalBookCard key={book.uuid} onClick={() => router.push(`/book/${book.uuid}`)}>
               <VerticalBookCoverWrapper>
                 <BookCard book={book} size="sm" showTitle={false} />
               </VerticalBookCoverWrapper>
               <VerticalBookTitle>{book.title}</VerticalBookTitle>
-              <VerticalBookSubTitle>{book.subtitle}</VerticalBookSubTitle>
-              <VerticalBookAuthor>{book.author}</VerticalBookAuthor>
+              <VerticalBookSubTitle>{book.publisher}</VerticalBookSubTitle>
+              <VerticalBookAuthor>{book.authors?.[0]}</VerticalBookAuthor>
             </VerticalBookCard>
           ))}
         </VerticalGrid>
@@ -590,7 +542,7 @@ export default function RecommendPage() {
         </SectionHeader>
         <AIBookGrid>
           {ai.items.map(book => (
-            <BookCard key={book.id} book={book} size="md" />
+            <BookCard key={book.uuid} book={book} size="md" />
           ))}
         </AIBookGrid>
       </Section>
@@ -605,7 +557,7 @@ export default function RecommendPage() {
         </SectionHeader>
         <PopularGrid>
           {popular.items.map(book => (
-            <VerticalBookCard key={book.id} onClick={() => router.push(`/book/${book.id}`)}>
+            <VerticalBookCard key={book.uuid} onClick={() => router.push(`/book/${book.uuid}`)}>
               <PopularCoverWrapper>
                 <BookCard book={book} size="md" />
               </PopularCoverWrapper>
@@ -633,7 +585,7 @@ export default function RecommendPage() {
         </SectionHeader>
         <HiddenGrid>
           {hidden.items.map(book => (
-            <HiddenBookCard key={book.id} book={book} />
+            <HiddenBookCard key={book.uuid} book={book} />
           ))}
         </HiddenGrid>
       </HiddenSection>
