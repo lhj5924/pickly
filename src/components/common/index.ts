@@ -8,3 +8,4 @@ export { ShowMoreToggle } from './ShowMoreToggle';
 export { ReviewCard } from './ReviewCard';
 export { Logo } from './Logo';
 export { NavButtons, NavButton } from './NavButtons';
+export { Pagination } from './Pagination';
