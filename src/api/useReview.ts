@@ -14,6 +14,7 @@ import {
 } from './review';
 import { reviewKeys } from './queryKeys';
 import { useAuthStore } from '../stores';
+import { MOCK_MODE, mockReviews, getMockLibraries } from '../mocks';
 import type { LibraryItem } from '../types/library';
 import type {
   CreateReviewRequest,
@@ -39,7 +40,10 @@ export const useMyReviews = () => {
 
   return useQuery<Review[], Error>({
     queryKey: reviewKeys.me(userUuid),
-    queryFn: () => getMyReviews(userUuid!),
+    queryFn: () => {
+      if (MOCK_MODE) return Promise.resolve(mockReviews);
+      return getMyReviews(userUuid!);
+    },
     enabled: !!userUuid,
     staleTime: 1000 * 60,
   });
@@ -51,7 +55,10 @@ export const useReviewAvailableBooks = () => {
 
   return useQuery<LibraryItem[], Error>({
     queryKey: reviewKeys.available(userUuid),
-    queryFn: () => getAvailableBooksForReview(userUuid!),
+    queryFn: () => {
+      if (MOCK_MODE) return Promise.resolve(getMockLibraries('COMPLETED'));
+      return getAvailableBooksForReview(userUuid!);
+    },
     enabled: !!userUuid,
     staleTime: 1000 * 60,
   });

@@ -10,7 +10,7 @@ const Container = styled.div`
   max-width: 900px;
   margin: 1rem auto;
   padding: 2rem 1.5rem 4rem;
-  box-shadow: 0px 20px 44px 0px #dadada40;
+  box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
 const Title = styled.h1`

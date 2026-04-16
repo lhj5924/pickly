@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import StyledComponentsRegistry from './registry';
-import { ThemeProvider, QueryProvider } from '@/components/providers';
+import { ThemeProvider, QueryProvider, MockProvider } from '@/components/providers';
 
 export const metadata: Metadata = {
   title: '피클리 - 도서 큐레이션 서비스',
@@ -19,10 +19,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Titan+One&display=swap" rel="stylesheet" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <StyledComponentsRegistry>
           <QueryProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <MockProvider>
+              <ThemeProvider>{children}</ThemeProvider>
+            </MockProvider>
           </QueryProvider>
         </StyledComponentsRegistry>
       </body>

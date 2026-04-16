@@ -36,12 +36,14 @@ export const theme = {
       gradient: 'linear-gradient(180deg, #f5f6e8 0%, #e8ebd8 50%, #d4e4c4 100%)',
     },
     text: {
+      black: '#000000',
       primary: '#171717',
       secondary: '#525252',
       tertiary: '#a3a3a3',
       quaternary: '#4C4C4C',
       quinary: '#646464',
       sextary: '#7F7F7F',
+      seventary: '#808080',
     },
     border: {
       light: '#e5e5e5',
@@ -61,6 +63,7 @@ export const theme = {
     sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
     md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    card: '0px 20px 44px 0px #dadada40',
   },
   borderRadius: {
     sm: '0.375rem',
