@@ -291,14 +291,14 @@ const StaleSection = styled.div`
 
 const StaleBooks = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(7, 1fr);
   gap: 1rem;
 `;
 
 const StaleBookItem = styled.div`
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: space-between;
   gap: 0.375rem;
 `;
 
