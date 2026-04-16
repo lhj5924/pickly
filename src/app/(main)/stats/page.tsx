@@ -1,10 +1,10 @@
 'use client';
 
 import styled, { keyframes } from 'styled-components';
-import { Button, StatsGrid, StatCard, NavButtons, NavButton } from '@/components/common';
+import { Button, StatsGrid, StatCard, NavButtons, NavButton, BookCard } from '@/components/common';
 import { ReadingCalendar } from '@/components/stats';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
-import { ArrowRight, ChevronLeft, ChevronRight, AlertCircle, ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { useMe } from '@/api/useMe';
 import { getMockReadingLevel } from '@/mocks';
@@ -248,25 +248,36 @@ const QuarterCard = styled.div`
 `;
 
 const QuarterLabel = styled.p`
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: ${({ theme }) => theme.colors.text.tertiary};
   margin-bottom: 0.5rem;
+  font-weight: 700;
+  text-align: left;
+`;
+
+const GenreBox = styled.div`
+  background: #f8f8f8;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 `;
 
 const QuarterGenre = styled.p`
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 400;
   color: ${({ theme }) => theme.colors.primary[600]};
-  margin-bottom: 0.25rem;
 `;
 
-const QuarterPercent = styled.span`
-  font-size: 1.25rem;
+const QuarterSecondGenres = styled.div`
+  font-size: 1.125rem;
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
-const QuarterSubGenres = styled.div`
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
+const QuarterThirdGenres = styled.p`
+  font-size: 1rem;
   color: ${({ theme }) => theme.colors.text.secondary};
 `;
 
@@ -279,38 +290,26 @@ const StaleSection = styled.div`
 `;
 
 const StaleBooks = styled.div`
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
 `;
 
-const StaleBookCard = styled.div`
-  flex-shrink: 0;
-  width: 120px;
-  text-align: center;
-`;
-
-const StaleBookCover = styled.div`
-  width: 100%;
-  aspect-ratio: 2/3;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+const StaleBookItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: space-between;
+  gap: 0.375rem;
 `;
 
 const StaleBookDate = styled.p`
   font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
+  color: ${({ theme }) => theme.colors.text.primary};
+  text-align: center;
+  margin-top: 0.75rem;
 `;
 
-const MoreButton = styled.button`
+const ShowMoreToggle = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -333,6 +332,7 @@ const daysBetween = (a: string, b: string) => {
 
 export default function StatsPage() {
   const [weekPageOffset, setWeekPageOffset] = useState(0);
+  const [staleShowCount, setStaleShowCount] = useState(7);
 
   const { data: me } = useMe();
   const readingLevel = getMockReadingLevel(me?.uuid);
@@ -398,9 +398,14 @@ export default function StatsPage() {
   const staleBooks = readingLibrary
     .filter(item => item.startedAt)
     .map(item => ({
-      id: item.uuid,
-      coverImage: item.book.thumbnailUrl,
-      date: `${item.startedAt}부터 읽는 중`,
+      uuid: item.uuid,
+      title: item.book.title,
+      thumbnailUrl: item.book.thumbnailUrl,
+      authors: item.book.authors,
+      date: (() => {
+        const [y, m, d] = item.startedAt!.slice(0, 10).split('-').map(Number);
+        return `${y}년 ${m}월 ${d}일`;
+      })(),
     }));
 
   const totalBooks = completedLibrary.length;
@@ -536,47 +541,35 @@ export default function StatsPage() {
         <QuarterlyGrid>
           <QuarterCard>
             <QuarterLabel>1분기</QuarterLabel>
-            <QuarterGenre>
-              스릴러 <QuarterPercent>65%</QuarterPercent>
-            </QuarterGenre>
-            <QuarterSubGenres>
-              로맨스 23%
-              <br />
-              로맨스 13%
-            </QuarterSubGenres>
+            <GenreBox>
+              <QuarterGenre>스릴러 65%</QuarterGenre>
+              <QuarterSecondGenres>로맨스 23%</QuarterSecondGenres>
+              <QuarterThirdGenres>성장 13%</QuarterThirdGenres>
+            </GenreBox>
           </QuarterCard>
           <QuarterCard>
             <QuarterLabel>2분기</QuarterLabel>
-            <QuarterGenre>
-              라이트노벨 <QuarterPercent>65%</QuarterPercent>
-            </QuarterGenre>
-            <QuarterSubGenres>
-              로맨스 23%
-              <br />
-              로맨스 13%
-            </QuarterSubGenres>
+            <GenreBox>
+              <QuarterGenre>라이트노벨 65%</QuarterGenre>
+              <QuarterSecondGenres>로맨스 23%</QuarterSecondGenres>
+              <QuarterThirdGenres>로맨스 13%</QuarterThirdGenres>
+            </GenreBox>
           </QuarterCard>
           <QuarterCard>
             <QuarterLabel>3분기</QuarterLabel>
-            <QuarterGenre>
-              예술/대중문화 <QuarterPercent>65%</QuarterPercent>
-            </QuarterGenre>
-            <QuarterSubGenres>
-              로맨스 23%
-              <br />
-              로맨스 13%
-            </QuarterSubGenres>
+            <GenreBox>
+              <QuarterGenre>예술/대중문화 65%</QuarterGenre>
+              <QuarterSecondGenres>로맨스 23%</QuarterSecondGenres>
+              <QuarterThirdGenres>로맨스 13%</QuarterThirdGenres>
+            </GenreBox>
           </QuarterCard>
           <QuarterCard>
             <QuarterLabel>4분기</QuarterLabel>
-            <QuarterGenre>
-              스릴러 <QuarterPercent>65%</QuarterPercent>
-            </QuarterGenre>
-            <QuarterSubGenres>
-              로맨스 23%
-              <br />
-              로맨스 13%
-            </QuarterSubGenres>
+            <GenreBox>
+              <QuarterGenre>스릴러 65%</QuarterGenre>
+              <QuarterSecondGenres>로맨스 23%</QuarterSecondGenres>
+              <QuarterThirdGenres>로맨스 13%</QuarterThirdGenres>
+            </GenreBox>
           </QuarterCard>
         </QuarterlyGrid>
       </QuarterlySection>
@@ -588,18 +581,32 @@ export default function StatsPage() {
           <AlertCircle size={16} color="#a3a3a3" />
         </SectionTitle>
         <StaleBooks>
-          {staleBooks.map(book => (
-            <StaleBookCard key={book.id}>
-              <StaleBookCover>
-                <img src={book.coverImage} alt="" />
-              </StaleBookCover>
-              <StaleBookDate>{book.date}</StaleBookDate>
-            </StaleBookCard>
+          {staleBooks.slice(0, staleShowCount).map(book => (
+            <StaleBookItem key={book.uuid}>
+              <BookCard book={book} size="sm" showTitle={false} />
+              <StaleBookDate>
+                {book.date}부터
+                <br />
+                읽는 중
+              </StaleBookDate>
+            </StaleBookItem>
           ))}
         </StaleBooks>
-        <MoreButton>
-          더보기 <ChevronDown size={16} />
-        </MoreButton>
+        {staleBooks.length > 7 && (
+          <ShowMoreToggle
+            onClick={() => (staleShowCount >= staleBooks.length ? setStaleShowCount(7) : setStaleShowCount(c => c + 7))}
+          >
+            {staleShowCount >= staleBooks.length ? (
+              <>
+                접기 <ChevronUp size={16} />
+              </>
+            ) : (
+              <>
+                더보기 <ChevronDown size={16} />
+              </>
+            )}
+          </ShowMoreToggle>
+        )}
       </StaleSection>
     </Container>
   );

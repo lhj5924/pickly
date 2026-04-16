@@ -56,7 +56,7 @@ const LeftPanel = styled.div`
 const Logo = styled.h1`
   font-size: 96px;
   font-weight: 400;
-  color: #57824c;
+  color: ${({ theme }) => theme.colors.primary[600]};
   font-family: 'Titan One', cursive;
   margin-bottom: 4rem;
   line-height: 1;
