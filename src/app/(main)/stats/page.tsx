@@ -1,7 +1,8 @@
 'use client';
 
 import styled, { keyframes } from 'styled-components';
-import { BookCard, Button, StatsGrid, StatCard, NavButtons, NavButton } from '@/components/common';
+import { Button, StatsGrid, StatCard, NavButtons, NavButton } from '@/components/common';
+import { ReadingCalendar } from '@/components/stats';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { ArrowRight, ChevronLeft, ChevronRight, AlertCircle, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
@@ -220,95 +221,6 @@ const BarLabel = styled.span<{ $highlight: boolean }>`
   color: ${({ theme, $highlight }) => ($highlight ? theme.colors.text.primary : theme.colors.text.tertiary)};
 `;
 
-// Calendar Section
-const CalendarSection = styled.div`
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: ${({ theme }) => theme.shadows.card};
-`;
-
-const CalendarHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-`;
-
-const CalendarNav = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-`;
-
-const CalendarMonth = styled.span`
-  font-size: 1rem;
-  font-weight: 600;
-`;
-
-const CalendarNavBtn = styled.button`
-  color: ${({ theme }) => theme.colors.text.tertiary};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.text.primary};
-  }
-`;
-
-const UnitLabel = styled.span`
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-`;
-
-const CalendarGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.25rem;
-`;
-
-const CalendarWeekday = styled.div`
-  text-align: center;
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  padding: 0.5rem 0;
-`;
-
-const CalendarDay = styled.div<{ $hasBooks: boolean; $bookCount: number }>`
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  border-radius: 0.25rem;
-  background: ${({ $hasBooks, $bookCount, theme }) =>
-    $hasBooks
-      ? `${theme.colors.primary[(100 + Math.min($bookCount * 100, 400)) as keyof typeof theme.colors.primary]}`
-      : 'transparent'};
-  position: relative;
-  cursor: ${({ $hasBooks }) => ($hasBooks ? 'pointer' : 'default')};
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.primary[100]};
-  }
-`;
-
-const BookTooltip = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  border: 1px solid ${({ theme }) => theme.colors.border.light};
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  box-shadow: ${({ theme }) => theme.shadows.md};
-  white-space: nowrap;
-  z-index: 10;
-  font-size: 0.75rem;
-`;
-
 // Pie Chart Section
 const PieSection = styled.div`
   background: white;
@@ -514,15 +426,12 @@ const MoreButton = styled.button`
   }
 `;
 
-const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-
 const daysBetween = (a: string, b: string) => {
   const ms = new Date(b).getTime() - new Date(a).getTime();
   return Math.max(1, Math.round(ms / (1000 * 60 * 60 * 24)));
 };
 
 export default function StatsPage() {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [weekPageOffset, setWeekPageOffset] = useState(0);
 
   const { data: me } = useMe();
@@ -618,24 +527,6 @@ export default function StatsPage() {
         (Array.from(monthlyFinishedCounts.values()).reduce((a, b) => a + b, 0) / monthlyFinishedCounts.size) * 10,
       ) / 10
     : 0;
-
-  const getDaysInMonth = () => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    const days = [];
-    for (let i = 0; i < firstDay; i++) {
-      days.push({ day: 0, books: 0 });
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-      // Mock: random book count
-      const bookCount = Math.random() > 0.7 ? Math.floor(Math.random() * 3) + 1 : 0;
-      days.push({ day: i, books: bookCount });
-    }
-    return days;
-  };
 
   return (
     <Container>
@@ -734,39 +625,7 @@ export default function StatsPage() {
         </BarLabelRow>
       </ChartSection>
 
-      {/* Calendar */}
-      <CalendarSection>
-        <CalendarHeader>
-          <ChartTitle>
-            독서 캘린더
-            <AlertCircle size={16} color="#a3a3a3" />
-          </ChartTitle>
-          <CalendarNav>
-            <CalendarNavBtn
-              onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}
-            >
-              <ChevronLeft size={18} />
-            </CalendarNavBtn>
-            <CalendarMonth>{currentMonth.getMonth() + 1}월</CalendarMonth>
-            <CalendarNavBtn
-              onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}
-            >
-              <ChevronRight size={18} />
-            </CalendarNavBtn>
-          </CalendarNav>
-          <UnitLabel>단위 : 시간</UnitLabel>
-        </CalendarHeader>
-        <CalendarGrid>
-          {weekdays.map(day => (
-            <CalendarWeekday key={day}>{day}</CalendarWeekday>
-          ))}
-          {getDaysInMonth().map((item, index) => (
-            <CalendarDay key={index} $hasBooks={item.books > 0} $bookCount={item.books}>
-              {item.day || ''}
-            </CalendarDay>
-          ))}
-        </CalendarGrid>
-      </CalendarSection>
+      <ReadingCalendar />
 
       {/* Pie Charts */}
       <PieSection>
