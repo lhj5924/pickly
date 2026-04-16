@@ -6,10 +6,10 @@ import { ReadingCalendar } from '@/components/stats';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { ArrowRight, ChevronLeft, ChevronRight, AlertCircle, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
-import Link from 'next/link';
-import { useMyLibraries } from '@/api/useLibrary';
 import { useMe } from '@/api/useMe';
 import { getMockReadingLevel } from '@/mocks';
+import { PieChart } from '@/components/common/PieChart';
+import { useMyLibraries } from '@/api/useLibrary';
 
 const WEEKS_PER_PAGE = 6;
 
@@ -24,7 +24,7 @@ const formatWeekLabel = (start: Date, end: Date) =>
   `${start.getMonth() + 1}/${start.getDate()} ~ ${end.getMonth() + 1}/${end.getDate()}`;
 
 const Container = styled.div`
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 `;
@@ -89,16 +89,16 @@ const ChartSubHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
 `;
 
-const ChartTitle = styled.h3`
+const SectionTitle = styled.h3`
   font-size: 1.25rem;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text.quinary};
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-bottom: 1.5rem;
 `;
 
 const ChartInfo = styled.div`
@@ -221,89 +221,6 @@ const BarLabel = styled.span<{ $highlight: boolean }>`
   color: ${({ theme, $highlight }) => ($highlight ? theme.colors.text.primary : theme.colors.text.tertiary)};
 `;
 
-// Pie Chart Section
-const PieSection = styled.div`
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: ${({ theme }) => theme.shadows.card};
-`;
-
-const PieSectionTitle = styled.h3`
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1.5rem;
-`;
-
-const PieContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const PieChartWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const PieChartLabel = styled.p`
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin-bottom: 1rem;
-`;
-
-const PieChart = styled.div`
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: conic-gradient(
-    ${({ theme }) => theme.colors.chart[0]} 0deg 194deg,
-    ${({ theme }) => theme.colors.chart[2]} 194deg 316deg,
-    ${({ theme }) => theme.colors.chart[4]} 316deg 360deg
-  );
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const PieCenter = styled.div`
-  width: 60%;
-  height: 60%;
-  border-radius: 50%;
-  background: white;
-`;
-
-const PieLegend = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 1rem;
-`;
-
-const LegendItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-  color: ${({ theme }) => theme.colors.text.secondary};
-`;
-
-const LegendDot = styled.span<{ $color: string }>`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: ${({ $color }) => $color};
-`;
-
 // Quarterly Section
 const QuarterlySection = styled.div`
   background: white;
@@ -311,13 +228,6 @@ const QuarterlySection = styled.div`
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: ${({ theme }) => theme.shadows.card};
-`;
-
-const QuarterlyTitle = styled.h3`
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1.5rem;
 `;
 
 const QuarterlyGrid = styled.div`
@@ -366,16 +276,6 @@ const StaleSection = styled.div`
   border-radius: 0.75rem;
   padding: 1.5rem;
   box-shadow: ${({ theme }) => theme.shadows.card};
-`;
-
-const StaleTitle = styled.h3`
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 `;
 
 const StaleBooks = styled.div`
@@ -566,10 +466,10 @@ export default function StatsPage() {
       <ChartSection>
         <ChartHeader>
           <ChartSubHeader>
-            <ChartTitle>
+            <SectionTitle>
               월별 독서량
               <AlertCircle size={16} color="#a3a3a3" />
-            </ChartTitle>
+            </SectionTitle>
             <NavButtons>
               <NavButton
                 $size={24}
@@ -628,55 +528,11 @@ export default function StatsPage() {
       <ReadingCalendar />
 
       {/* Pie Charts */}
-      <PieSection>
-        <PieSectionTitle>당신은 로맨스 중심의 소설을 가장 많이 소비해요</PieSectionTitle>
-        <PieContainer>
-          <PieChartWrapper>
-            <PieChartLabel>장르별 독서량</PieChartLabel>
-            <PieChart>
-              <PieCenter />
-            </PieChart>
-            <PieLegend>
-              <LegendItem>
-                <LegendDot $color="#DEFFD6" />
-                소설 54%
-              </LegendItem>
-              <LegendItem>
-                <LegendDot $color="#D1FBC6" />
-                에세이 34%
-              </LegendItem>
-              <LegendItem>
-                <LegendDot $color="#BDF0AF" />
-                경제/경영 32%
-              </LegendItem>
-            </PieLegend>
-          </PieChartWrapper>
-          <PieChartWrapper>
-            <PieChartLabel>키워드별 독서량</PieChartLabel>
-            <PieChart>
-              <PieCenter />
-            </PieChart>
-            <PieLegend>
-              <LegendItem>
-                <LegendDot $color="#DEFFD6" />
-                소설 54%
-              </LegendItem>
-              <LegendItem>
-                <LegendDot $color="#D1FBC6" />
-                에세이 34%
-              </LegendItem>
-              <LegendItem>
-                <LegendDot $color="#BDF0AF" />
-                경제/경영 32%
-              </LegendItem>
-            </PieLegend>
-          </PieChartWrapper>
-        </PieContainer>
-      </PieSection>
+      <PieChart />
 
       {/* Quarterly */}
       <QuarterlySection>
-        <QuarterlyTitle>분기별 많이 읽은 장르</QuarterlyTitle>
+        <SectionTitle>분기별 많이 읽은 장르</SectionTitle>
         <QuarterlyGrid>
           <QuarterCard>
             <QuarterLabel>1분기</QuarterLabel>
@@ -727,10 +583,10 @@ export default function StatsPage() {
 
       {/* Stale Reading */}
       <StaleSection>
-        <StaleTitle>
+        <SectionTitle>
           아직 이 책을 읽고 계신가요?
           <AlertCircle size={16} color="#a3a3a3" />
-        </StaleTitle>
+        </SectionTitle>
         <StaleBooks>
           {staleBooks.map(book => (
             <StaleBookCard key={book.id}>

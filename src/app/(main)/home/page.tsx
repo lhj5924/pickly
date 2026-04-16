@@ -9,18 +9,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores';
 import { useMyLibraries } from '@/api/useLibrary';
 import { MOCK_MODE, mockRecommendations } from '@/mocks';
-// UI-only 차트/배너 데이터는 아직 서버 API가 없어 로컬 상수로 유지합니다 (Stage 3).
-const genreChartData = [
-  { name: '소설', value: 54 },
-  { name: '에세이', value: 34 },
-  { name: '경제경영', value: 12 },
-];
-
-const keywordChartData = [
-  { name: '로맨스', value: 40 },
-  { name: '성장', value: 35 },
-  { name: '힐링', value: 25 },
-];
+import { PieChart } from '@/components/common/PieChart';
 
 const bannerData = [
   {
@@ -333,11 +322,7 @@ export default function HomePage() {
                 value={hasData ? `${completedLibrary.length}권` : undefined}
                 icon={<OpenedBookIcon size={24} />}
               />
-              <StatCard
-                label="읽는 중"
-                value={`${readingLibraryAll.length}권`}
-                icon={<CalendarIcon size={24} />}
-              />
+              <StatCard label="읽는 중" value={`${readingLibraryAll.length}권`} icon={<CalendarIcon size={24} />} />
               <StatCard
                 label="월 평균 권 수"
                 value={hasData ? `${Math.round((completedLibrary.length / 12) * 10) / 10}권` : undefined}
@@ -346,27 +331,7 @@ export default function HomePage() {
             </StatsGrid>
           </StatsGridMargin>
 
-          <ChartSection ref={chartRef}>
-            <ChartTitle>당신은 로맨스 중심의 소설을 가장 많이 소비해요</ChartTitle>
-            {hasData ? (
-              <ChartContainer>
-                <PieChartWrapper>
-                  <PieChartLabel>장르별 독서량</PieChartLabel>
-                  <PieChartContainer>
-                    <AnimatedPieChart data={genreChartData} animate={chartAnimated} />
-                  </PieChartContainer>
-                </PieChartWrapper>
-                <PieChartWrapper>
-                  <PieChartLabel>키워드별 독서량</PieChartLabel>
-                  <PieChartContainer>
-                    <AnimatedPieChart data={keywordChartData} animate={chartAnimated} />
-                  </PieChartContainer>
-                </PieChartWrapper>
-              </ChartContainer>
-            ) : (
-              <EmptyChart>아직 데이터가 없습니다</EmptyChart>
-            )}
-          </ChartSection>
+          <PieChart />
 
           <CtaButtonWrapper>
             <Button variant="cta" as={Link} href="/stats" rightIcon={<ArrowRight size={24} />}>
