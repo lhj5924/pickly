@@ -257,7 +257,7 @@ const BarLink = styled(Link)<{
   }
 `;
 
-export const ReadingCalendar = () => {
+export const ReadingCalendar = ({ className }: { className?: string }) => {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const d = new Date();
     d.setDate(1);
@@ -290,7 +290,7 @@ export const ReadingCalendar = () => {
   };
 
   return (
-    <Section>
+    <Section className={className}>
       <Header>
         <SubHeader>
           <Title>

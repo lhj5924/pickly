@@ -93,9 +93,44 @@ export const AnimatedPieChart = ({ data, animate }: AnimatedPieChartProps) => {
 
   const shouldAnimate = animate && !animationComplete;
 
+  // ── Compute SVG bounding box from actual content positions ──
+  const FONT_SIZE = 14;
+  const SVG_PAD = 16;
+
+  // Estimate rendered text width per character at font-size 14 weight 500
+  const estimateTextWidth = (text: string): number => {
+    let w = 0;
+    for (const ch of text) {
+      const code = ch.charCodeAt(0);
+      if (code >= 0xac00 && code <= 0xd7a3) w += 14; // Korean syllable
+      else if (ch === ' ') w += 5;
+      else w += 9; // ASCII digit / symbol
+    }
+    return w;
+  };
+
+  let minX = 0, maxX = size, minY = 0, maxY = size; // donut bounds
+  segments.forEach(seg => {
+    const label = `${seg.name} ${seg.percentage}%`;
+    const tw = estimateTextWidth(label);
+    const textLeft = seg.textAnchor === 'end' ? seg.labelX - tw : seg.labelX;
+    const textRight = seg.textAnchor === 'end' ? seg.labelX : seg.labelX + tw;
+    const textTop = seg.labelY - FONT_SIZE / 2;
+    const textBottom = seg.labelY + FONT_SIZE / 2;
+    minX = Math.min(minX, textLeft, seg.lineStartX, seg.lineEndX);
+    maxX = Math.max(maxX, textRight, seg.lineStartX, seg.lineEndX);
+    minY = Math.min(minY, textTop, seg.lineStartY, seg.lineEndY);
+    maxY = Math.max(maxY, textBottom, seg.lineStartY, seg.lineEndY);
+  });
+
+  const svgWidth = maxX - minX + SVG_PAD * 2;
+  const svgHeight = maxY - minY + SVG_PAD * 2;
+  const tx = -minX + SVG_PAD;
+  const ty = -minY + SVG_PAD;
+
   return (
-    <svg width={size + 100} height={size + 40} style={{ overflow: 'visible' }}>
-      <g transform={`translate(50, 20)`}>
+    <svg width={svgWidth} height={svgHeight}>
+      <g transform={`translate(${tx}, ${ty})`}>
         <g style={{ transform: 'rotate(-90deg)', transformOrigin: `${center}px ${center}px` }}>
           {segments.map((segment, index) => (
             <circle

@@ -77,7 +77,6 @@ const PieChartContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 4rem;
 `;
 
 const EmptyChart = styled.div`
@@ -94,7 +93,7 @@ const CtaButtonWrapper = styled.div`
   justify-content: center;
 `;
 
-export const PieChart: React.FC = () => {
+export const PieChart: React.FC<{ className?: string }> = ({ className }) => {
   const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
   const hasData = completedLibrary.length > 0;
   const [chartAnimated, setChartAnimated] = useState(false);
@@ -122,7 +121,7 @@ export const PieChart: React.FC = () => {
 
   return (
     <>
-      <ChartSection ref={chartRef}>
+      <ChartSection ref={chartRef} className={className}>
         <ChartTitle>당신은 {keywordChartData[0]?.name} 중심의 소설을 가장 많이 소비해요</ChartTitle>
         {hasData ? (
           <ChartContainer>

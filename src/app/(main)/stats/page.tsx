@@ -6,6 +6,7 @@ import { ReadingCalendar } from '@/components/stats';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
 import { ArrowRight, ChevronLeft, ChevronRight, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMe } from '@/api/useMe';
 import { getMockReadingLevel } from '@/mocks';
 import { PieChart } from '@/components/common/PieChart';
@@ -331,6 +332,7 @@ const daysBetween = (a: string, b: string) => {
 };
 
 export default function StatsPage() {
+  const router = useRouter();
   const [weekPageOffset, setWeekPageOffset] = useState(0);
   const [staleShowCount, setStaleShowCount] = useState(7);
 
@@ -442,7 +444,7 @@ export default function StatsPage() {
           </Level>
           <LevelDesc>&quot;{readingLevel.description}&quot;</LevelDesc>
         </HeaderLeft>
-        <ShareButton variant="cta" rightIcon={<ArrowRight size={20} />}>
+        <ShareButton variant="cta" rightIcon={<ArrowRight size={20} />} onClick={() => router.push('/stats/share')}>
           내 통계 공유하기
         </ShareButton>
       </Header>
@@ -609,5 +611,6 @@ export default function StatsPage() {
         )}
       </StaleSection>
     </Container>
+
   );
 }
