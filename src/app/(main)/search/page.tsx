@@ -3,7 +3,7 @@
 import styled from 'styled-components';
 import { BookCard, Pagination } from '@/components/common';
 import { Search, X, Clock } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useBookSearch } from '@/api/useBook';
 import { useRecentSearches } from '@/hooks/useRecentSearches';
@@ -220,7 +220,7 @@ const DeleteButton = styled.button`
 
 const PAGE_SIZE = 20;
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') ?? '';
   const [query, setQuery] = useState(initialQuery);
@@ -449,5 +449,13 @@ export default function SearchPage() {
         </EmptyState>
       )}
     </Container>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense>
+      <SearchContent />
+    </Suspense>
   );
 }
