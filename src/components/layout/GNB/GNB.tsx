@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { useState } from 'react';
 import { Logo } from '@/components/common';
 
 const Header = styled.header`
@@ -96,9 +97,20 @@ const navItems = [
 export const GNB = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const [query, setQuery] = useState('');
 
-  const handleSearchClick = () => {
-    router.push('/search');
+  const handleSearch = () => {
+    const trimmed = query.trim();
+    if (trimmed.length > 0) {
+      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+      setQuery('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
@@ -118,9 +130,14 @@ export const GNB = () => {
           ))}
         </Nav>
 
-        <SearchWrapper onClick={handleSearchClick}>
-          <Search size={18} color="#737373" />
-          <SearchInput placeholder="검색" readOnly />
+        <SearchWrapper>
+          <SearchInput
+            placeholder="검색"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <Search size={18} color="#737373" style={{ cursor: 'pointer' }} onClick={handleSearch} />
         </SearchWrapper>
       </Container>
     </Header>
