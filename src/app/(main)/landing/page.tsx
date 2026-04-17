@@ -12,7 +12,7 @@ import { Footer } from '@/components/layout';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import styled, { css, keyframes } from 'styled-components';
-import { BackgroundGradient1, BackgroundGradient2 } from '../home/page';
+import { BackgroundGradient1, BackgroundGradient2 } from '@/components/common/BackgroundGradient';
 
 const GNB_HEIGHT = 60;
 

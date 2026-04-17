@@ -35,7 +35,7 @@ const PageWrapper = styled.div`
   overflow: hidden;
 `;
 
-export const BackgroundGradient1 = styled.div`
+const BackgroundGradient1 = styled.div`
   position: absolute;
   width: 1283px;
   height: 1283px;
@@ -48,7 +48,7 @@ export const BackgroundGradient1 = styled.div`
   z-index: -1;
 `;
 
-export const BackgroundGradient2 = styled.div`
+const BackgroundGradient2 = styled.div`
   position: absolute;
   width: 1588px;
   height: 1588px;
