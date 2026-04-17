@@ -8,21 +8,10 @@ import { ArrowRight, ChevronLeft, ChevronRight, AlertCircle, ChevronDown, Chevro
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMe } from '@/api/useMe';
-import { getMockReadingLevel } from '@/mocks';
+import { getMockReadingLevel, computeStatsData, computeWeeklyData, computeWeekNavState, computeBarChartAxis } from '@/mocks';
 import { PieChart } from '@/components/common/PieChart';
 import { useMyLibraries } from '@/api/useLibrary';
 
-const WEEKS_PER_PAGE = 6;
-
-const getWeekStart = (date: Date) => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - d.getDay());
-  return d;
-};
-
-const formatWeekLabel = (start: Date, end: Date) =>
-  `${start.getMonth() + 1}/${start.getDate()} ~ ${end.getMonth() + 1}/${end.getDate()}`;
 
 const Container = styled.div`
   max-width: 1200px;
@@ -326,11 +315,6 @@ const ShowMoreToggle = styled.button`
   }
 `;
 
-const daysBetween = (a: string, b: string) => {
-  const ms = new Date(b).getTime() - new Date(a).getTime();
-  return Math.max(1, Math.round(ms / (1000 * 60 * 60 * 24)));
-};
-
 export default function StatsPage() {
   const router = useRouter();
   const [weekPageOffset, setWeekPageOffset] = useState(0);
@@ -342,98 +326,16 @@ export default function StatsPage() {
   const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
   const { data: readingLibrary = [] } = useMyLibraries('READING');
 
-  // 오늘 기준 가장 가까운 (과거의) 완독일
-  const mostRecentFinishedAt: Date | null = completedLibrary.reduce<Date | null>((latest, item) => {
-    if (!item.finishedAt) return latest;
-    const d = new Date(item.finishedAt);
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    if (d > today) return latest;
-    return !latest || d > latest ? d : latest;
-  }, null);
+  // TODO: API 연동 시 completedLibrary / readingLibrary 를 API 응답으로 교체
+  const { totalBooks, averageReadingDays, monthlyAverage, staleBooks, mostRecentFinishedAt, earliestFinishedAt } =
+    computeStatsData(completedLibrary, readingLibrary);
 
-  // 최근 6주간 완독 권수 (weekPageOffset 만큼 과거로 이동)
-  const weeklyData = (() => {
-    const currentWeekStart = getWeekStart(new Date());
-    return Array.from({ length: WEEKS_PER_PAGE }, (_, i) => {
-      const start = new Date(currentWeekStart);
-      start.setDate(currentWeekStart.getDate() - (weekPageOffset * WEEKS_PER_PAGE + (WEEKS_PER_PAGE - 1 - i)) * 7);
-      const end = new Date(start);
-      end.setDate(start.getDate() + 6);
-      const endExclusive = new Date(start);
-      endExclusive.setDate(start.getDate() + 7);
-
-      const value = completedLibrary.filter(item => {
-        if (!item.finishedAt) return false;
-        const finished = new Date(item.finishedAt);
-        return finished >= start && finished < endExclusive;
-      }).length;
-
-      const highlight = !!mostRecentFinishedAt && mostRecentFinishedAt >= start && mostRecentFinishedAt < endExclusive;
-
-      return {
-        label: formatWeekLabel(start, end),
-        value,
-        highlight,
-      };
-    });
-  })();
-  // 차트 Y축 최대값: 5 단위로 올림 (max < 5 → 5, 5~9 → 10, 10~14 → 15, ...)
-  const rawMax = Math.max(...weeklyData.map(d => d.value), 0);
-  const maxBarValue = (Math.floor(rawMax / 5) + 1) * 5;
-  const yTicks = Array.from({ length: maxBarValue / 5 + 1 }, (_, i) => i * 5);
-
-  const earliestFinishedAt = completedLibrary.reduce<Date | null>((min, item) => {
-    if (!item.finishedAt) return min;
-    const d = new Date(item.finishedAt);
-    return !min || d < min ? d : min;
-  }, null);
-  const earliestShownWeekStart = (() => {
-    const currentWeekStart = getWeekStart(new Date());
-    const start = new Date(currentWeekStart);
-    start.setDate(currentWeekStart.getDate() - (weekPageOffset * WEEKS_PER_PAGE + (WEEKS_PER_PAGE - 1)) * 7);
-    return start;
-  })();
-  const canGoPrevWeeks = !!earliestFinishedAt && earliestFinishedAt < earliestShownWeekStart;
-  const canGoNextWeeks = weekPageOffset > 0;
-
-  const staleBooks = readingLibrary
-    .filter(item => item.startedAt)
-    .map(item => ({
-      uuid: item.uuid,
-      title: item.book.title,
-      thumbnailUrl: item.book.thumbnailUrl,
-      authors: item.book.authors,
-      date: (() => {
-        const [y, m, d] = item.startedAt!.slice(0, 10).split('-').map(Number);
-        return `${y}년 ${m}월 ${d}일`;
-      })(),
-    }));
-
-  const totalBooks = completedLibrary.length;
-  const finishedPairs = completedLibrary.filter(item => item.startedAt && item.finishedAt);
-  const averageReadingDays = finishedPairs.length
-    ? Math.round(
-        finishedPairs.reduce((sum, item) => sum + daysBetween(item.startedAt!, item.finishedAt!), 0) /
-          finishedPairs.length,
-      )
-    : 0;
-  // finishedAt 기준 월별 완독 권수 → 전체 월 평균
-  const monthlyFinishedCounts = (() => {
-    const map = new Map<string, number>();
-    completedLibrary.forEach(item => {
-      if (!item.finishedAt) return;
-      const d = new Date(item.finishedAt);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      map.set(key, (map.get(key) ?? 0) + 1);
-    });
-    return map;
-  })();
-  const monthlyAverage = monthlyFinishedCounts.size
-    ? Math.round(
-        (Array.from(monthlyFinishedCounts.values()).reduce((a, b) => a + b, 0) / monthlyFinishedCounts.size) * 10,
-      ) / 10
-    : 0;
+  const weeklyData = computeWeeklyData(completedLibrary, mostRecentFinishedAt, weekPageOffset);
+  const { maxBarValue, yTicks } = computeBarChartAxis(weeklyData);
+  const { canGoPrev: canGoPrevWeeks, canGoNext: canGoNextWeeks } = computeWeekNavState(
+    earliestFinishedAt,
+    weekPageOffset,
+  );
 
   return (
     <Container>

@@ -21,3 +21,15 @@ export {
 export type { HiddenMockBook } from './mockRecommendPage';
 export { READING_LEVELS, getMockReadingLevel } from './mockReadingLevel';
 export type { ReadingLevel } from './mockReadingLevel';
+export {
+  WEEKS_PER_PAGE,
+  daysBetween,
+  getWeekStart,
+  formatWeekLabel,
+  computeStatsData,
+  computeWeeklyData,
+  computeWeekNavState,
+  computeBarChartAxis,
+  mockStatsData,
+} from './mockStats';
+export type { WeeklyDataItem, StaleBook, StatsData } from './mockStats';
