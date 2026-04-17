@@ -35,7 +35,7 @@ const PageWrapper = styled.div`
   overflow: hidden;
 `;
 
-const BackgroundGradient1 = styled.div`
+export const BackgroundGradient1 = styled.div`
   position: absolute;
   width: 1283px;
   height: 1283px;
@@ -45,10 +45,10 @@ const BackgroundGradient1 = styled.div`
   filter: blur(107px);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 `;
 
-const BackgroundGradient2 = styled.div`
+export const BackgroundGradient2 = styled.div`
   position: absolute;
   width: 1588px;
   height: 1588px;
@@ -58,7 +58,7 @@ const BackgroundGradient2 = styled.div`
   filter: blur(107px);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 `;
 
 const Container = styled.div`

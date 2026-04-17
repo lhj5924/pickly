@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { ReactNode } from 'react';
 
@@ -68,16 +69,62 @@ interface StatCardProps {
   value?: string;
   icon: ReactNode;
   emptyText?: string;
+  animate?: boolean;
 }
 
-function StatCard({ label, value, icon, emptyText = '아직 데이터가 없습니다' }: StatCardProps) {
+function StatCard({ label, value, icon, emptyText = '아직 데이터가 없습니다', animate = false }: StatCardProps) {
+  const [displayValue, setDisplayValue] = useState<string | undefined>(value);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setDisplayValue(value);
+    setHasAnimated(false);
+  }, [value]);
+
+  useEffect(() => {
+    if (!animate || !value || hasAnimated) return;
+
+    const match = value.match(/^(\d+(?:\.\d+)?)(.*)$/);
+    if (!match) return;
+
+    const targetNum = parseFloat(match[1]);
+    const suffix = match[2];
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasAnimated(true);
+          observer.disconnect();
+          const duration = 1500;
+          const startTime = Date.now();
+          setDisplayValue(`0${suffix}`);
+          const timer = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(eased * targetNum);
+            setDisplayValue(`${current}${suffix}`);
+            if (progress >= 1) clearInterval(timer);
+          }, 16);
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    if (wrapperRef.current) observer.observe(wrapperRef.current);
+    return () => observer.disconnect();
+  }, [animate, value, hasAnimated]);
+
   return (
-    <StatCardWrapper>
+    <StatCardWrapper ref={wrapperRef}>
       <StatHeader>
         <StatLabel>{label}</StatLabel>
         <StatIconWrapper>{icon}</StatIconWrapper>
       </StatHeader>
-      <StatInfo>{value ? <StatValue>{value}</StatValue> : <EmptyStatValue>{emptyText}</EmptyStatValue>}</StatInfo>
+      <StatInfo>
+        {displayValue ? <StatValue>{displayValue}</StatValue> : <EmptyStatValue>{emptyText}</EmptyStatValue>}
+      </StatInfo>
     </StatCardWrapper>
   );
 }

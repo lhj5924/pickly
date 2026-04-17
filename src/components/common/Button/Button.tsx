@@ -4,7 +4,7 @@ import styled, { css } from 'styled-components';
 import { ButtonHTMLAttributes, forwardRef, ElementType } from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'kakao' | 'google' | 'stats' | 'cta';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonSize = 'sm' | 'md' | 'lg' | 'lg2';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -33,15 +33,20 @@ const sizeStyles = {
     font-size: 1.125rem;
     border-radius: 1rem;
   `,
+  lg2: css`
+    padding: 1rem 6rem;
+    font-size: 1.255rem;
+    border-radius: 1rem;
+  `,
 };
 
 const variantStyles = {
   primary: css`
-    background: ${({ theme }) => theme.colors.primary[500]};
+    background: ${({ theme }) => theme.colors.primary[600]};
     color: white;
 
     &:hover:not(:disabled) {
-      background: ${({ theme }) => theme.colors.primary[600]};
+      background: ${({ theme }) => theme.colors.primary[500]};
     }
   `,
   secondary: css`
