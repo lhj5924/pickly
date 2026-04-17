@@ -439,7 +439,7 @@ export default function MyPage() {
         </SectionHeader>
 
         <ReviewGrid>
-          {previewReviews.map(review => (
+          {previewReviews.slice(0, 2).map(review => (
             <ReviewCard
               key={review.uuid}
               id={review.uuid}

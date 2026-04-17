@@ -39,12 +39,12 @@ const Nav = styled.nav`
 const NavLink = styled(Link)<{ $active: boolean }>`
   font-size: 0.9375rem;
   font-weight: ${({ $active }) => ($active ? '600' : '400')};
-  color: ${({ theme, $active }) => ($active ? theme.colors.primary[600] : theme.colors.text.secondary)};
+  color: ${({ theme, $active }) => ($active ? theme.colors.text.primary : theme.colors.text.secondary)};
   font-family: 'Pretendard Variable', sans-serif;
   transition: color 0.2s ease;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.primary[600]};
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 

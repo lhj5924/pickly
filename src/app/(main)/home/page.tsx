@@ -45,7 +45,7 @@ const BackgroundGradient1 = styled.div`
   filter: blur(107px);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 `;
 
 const BackgroundGradient2 = styled.div`
@@ -58,7 +58,7 @@ const BackgroundGradient2 = styled.div`
   filter: blur(107px);
   border-radius: 50%;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 `;
 
 const Container = styled.div`
