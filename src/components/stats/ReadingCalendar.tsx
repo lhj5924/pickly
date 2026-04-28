@@ -1,24 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import Link from 'next/link';
-import styled from 'styled-components';
-import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useMyReviews } from '@/api/useReview';
 import type { Review } from '@/types/review';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
-const BAR_COLORS = [
-  '#FDF1F1',
-  '#FEF5E8',
-  '#FDFAE4',
-  '#F1F9EC',
-  '#EAF7F1',
-  '#ECF2FD',
-  '#F0EAFD',
-  '#FCEAF4',
-];
+const BAR_COLORS = ['#FDF1F1', '#FEF5E8', '#FDFAE4', '#F1F9EC', '#EAF7F1', '#ECF2FD', '#F0EAFD', '#FCEAF4'];
 
 const DAY_HEIGHT_BASE = 72;
 const BAR_HEIGHT = 20;
@@ -267,15 +258,9 @@ export const ReadingCalendar = ({ className }: { className?: string }) => {
 
   const { data: reviews = [] } = useMyReviews();
 
-  const weeks = useMemo(
-    () => buildCalendarWeeks(currentMonth.getFullYear(), currentMonth.getMonth()),
-    [currentMonth],
-  );
+  const weeks = useMemo(() => buildCalendarWeeks(currentMonth.getFullYear(), currentMonth.getMonth()), [currentMonth]);
 
-  const weekSegments = useMemo(
-    () => weeks.map(w => computeWeekSegments(w, reviews)),
-    [weeks, reviews],
-  );
+  const weekSegments = useMemo(() => weeks.map(w => computeWeekSegments(w, reviews)), [weeks, reviews]);
 
   const goPrev = () => {
     const d = new Date(currentMonth);
@@ -293,10 +278,7 @@ export const ReadingCalendar = ({ className }: { className?: string }) => {
     <Section className={className}>
       <Header>
         <SubHeader>
-          <Title>
-            독서 캘린더
-            <AlertCircle size={16} color="#a3a3a3" />
-          </Title>
+          <Title>독서 캘린더</Title>
           <UnitLabel>단위 : 시간</UnitLabel>
         </SubHeader>
         <Nav>
@@ -320,37 +302,34 @@ export const ReadingCalendar = ({ className }: { className?: string }) => {
         {weeks.map((week, wi) => {
           const segments = weekSegments[wi];
           const laneCount = segments.reduce((max, s) => Math.max(max, s.lane + 1), 0);
-          const rowHeight = Math.max(
-            DAY_HEIGHT_BASE,
-            BARS_TOP_OFFSET + laneCount * (BAR_HEIGHT + BAR_GAP) + 8,
-          );
+          const rowHeight = Math.max(DAY_HEIGHT_BASE, BARS_TOP_OFFSET + laneCount * (BAR_HEIGHT + BAR_GAP) + 8);
 
           return (
-          <WeekRow key={wi} $height={rowHeight}>
-            {week.map((day, di) => (
-              <DayCell key={di} $height={rowHeight}>
-                <DayNumber $dim={!day.isCurrentMonth}>{day.date.getDate()}</DayNumber>
-              </DayCell>
-            ))}
-            <BarsLayer>
-              {segments.map(seg => {
-                const left = (seg.startCol / 7) * 100;
-                const width = ((seg.endCol - seg.startCol + 1) / 7) * 100;
-                const top = seg.lane * (BAR_HEIGHT + BAR_GAP);
-                return (
-                  <BarLink
-                    key={seg.key}
-                    href={`/review/${seg.reviewUuid}`}
-                    $left={left}
-                    $width={width}
-                    $top={top}
-                    $color={seg.color}
-                  >
-                    {seg.title}
-                  </BarLink>
-                );
-              })}
-            </BarsLayer>
+            <WeekRow key={wi} $height={rowHeight}>
+              {week.map((day, di) => (
+                <DayCell key={di} $height={rowHeight}>
+                  <DayNumber $dim={!day.isCurrentMonth}>{day.date.getDate()}</DayNumber>
+                </DayCell>
+              ))}
+              <BarsLayer>
+                {segments.map(seg => {
+                  const left = (seg.startCol / 7) * 100;
+                  const width = ((seg.endCol - seg.startCol + 1) / 7) * 100;
+                  const top = seg.lane * (BAR_HEIGHT + BAR_GAP);
+                  return (
+                    <BarLink
+                      key={seg.key}
+                      href={`/review/${seg.reviewUuid}`}
+                      $left={left}
+                      $width={width}
+                      $top={top}
+                      $color={seg.color}
+                    >
+                      {seg.title}
+                    </BarLink>
+                  );
+                })}
+              </BarsLayer>
             </WeekRow>
           );
         })}

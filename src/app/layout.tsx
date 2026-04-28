@@ -7,11 +7,11 @@ export const metadata: Metadata = {
   description: '나만의 독서 기록을 관리하고, 맞춤 추천을 받아보세요',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function reportWebVitals(metric: any) {
+  console.log(metric); // LCP, FID, CLS, TTFB, FCP 출력
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
       <head>

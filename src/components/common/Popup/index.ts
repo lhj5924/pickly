@@ -1,0 +1,1 @@
+export { TermsPopup } from './TermsPopup';

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
-import { BookCard, NavButtons, NavButton } from '@/components/common';
+import { BookCard, NavButtons, NavButton, ShowMoreToggle } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
 import {
@@ -42,23 +42,6 @@ const SectionTitle = styled.h2`
   color: ${({ theme }) => theme.colors.text.quaternary};
 `;
 
-const SeeMoreLink = styled.button`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.primary[600]};
-  }
-
-  &:disabled {
-    color: ${({ theme }) => theme.colors.neutral[300]};
-    cursor: not-allowed;
-
-    &:hover {
-      color: ${({ theme }) => theme.colors.neutral[300]};
-    }
-  }
-`;
 
 const SimilarBooksLayout = styled.div`
   display: flex;
@@ -301,8 +284,8 @@ const useShowMore = <T,>(items: T[], pageSize: number) => {
   const isFullyExpanded = canExpand && visibleCount >= items.length;
   return {
     items: items.slice(0, visibleCount),
-    label: isFullyExpanded ? '접기' : '더보기',
-    isDisabled: !canExpand,
+    expanded: isFullyExpanded,
+    canExpand,
     toggle: () => {
       if (!canExpand) return;
       setVisibleCount(count => (count >= items.length ? pageSize : count + pageSize));
@@ -491,9 +474,6 @@ export default function RecommendPage() {
       <Section>
         <SectionHeader>
           <SectionTitle>가장 최근 읽은 장르 기반 추천</SectionTitle>
-          <SeeMoreLink onClick={genre.toggle} disabled={genre.isDisabled}>
-            {genre.label}
-          </SeeMoreLink>
         </SectionHeader>
         <VerticalGrid>
           {genre.items.map(book => (
@@ -507,30 +487,26 @@ export default function RecommendPage() {
             </VerticalBookCard>
           ))}
         </VerticalGrid>
+        {genre.canExpand && <ShowMoreToggle expanded={genre.expanded} onToggle={genre.toggle} />}
       </Section>
 
       {/* AI 추천 */}
       <Section>
         <SectionHeader>
           <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
-          <SeeMoreLink style={{ color: '#a3a3a3' }} onClick={ai.toggle} disabled={ai.isDisabled}>
-            {ai.label}
-          </SeeMoreLink>
         </SectionHeader>
         <AIBookGrid>
           {ai.items.map(book => (
             <BookCard key={book.uuid} book={book} size="md" />
           ))}
         </AIBookGrid>
+        {ai.canExpand && <ShowMoreToggle expanded={ai.expanded} onToggle={ai.toggle} />}
       </Section>
 
       {/* 인기 책 */}
       <PopularSection>
         <SectionHeader>
           <SectionTitle>요즘엔 이런 책이 인기있어요</SectionTitle>
-          <SeeMoreLink onClick={popular.toggle} disabled={popular.isDisabled}>
-            {popular.label}
-          </SeeMoreLink>
         </SectionHeader>
         <PopularGrid>
           {popular.items.map(book => (
@@ -550,21 +526,20 @@ export default function RecommendPage() {
             </VerticalBookCard>
           ))}
         </PopularGrid>
+        {popular.canExpand && <ShowMoreToggle expanded={popular.expanded} onToggle={popular.toggle} />}
       </PopularSection>
 
       {/* 숨겨진 취향 */}
       <HiddenSection>
         <SectionHeader>
           <SectionTitle>숨겨진 취향 탐색 - 이런 책은 어때요?</SectionTitle>
-          <SeeMoreLink onClick={hidden.toggle} disabled={hidden.isDisabled}>
-            {hidden.label}
-          </SeeMoreLink>
         </SectionHeader>
         <HiddenGrid>
           {hidden.items.map(book => (
             <HiddenBookCard key={book.uuid} book={book} />
           ))}
         </HiddenGrid>
+        {hidden.canExpand && <ShowMoreToggle expanded={hidden.expanded} onToggle={hidden.toggle} />}
       </HiddenSection>
     </Container>
   );

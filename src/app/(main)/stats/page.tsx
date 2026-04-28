@@ -4,14 +4,19 @@ import styled, { keyframes } from 'styled-components';
 import { Button, StatsGrid, StatCard, NavButtons, NavButton, BookCard } from '@/components/common';
 import { ReadingCalendar } from '@/components/stats';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
-import { ArrowRight, ChevronLeft, ChevronRight, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMe } from '@/api/useMe';
-import { getMockReadingLevel, computeStatsData, computeWeeklyData, computeWeekNavState, computeBarChartAxis } from '@/mocks';
+import {
+  getMockReadingLevel,
+  computeStatsData,
+  computeWeeklyData,
+  computeWeekNavState,
+  computeBarChartAxis,
+} from '@/mocks';
 import { PieChart } from '@/components/common/PieChart';
 import { useMyLibraries } from '@/api/useLibrary';
-
 
 const Container = styled.div`
   max-width: 1200px;
@@ -375,10 +380,7 @@ export default function StatsPage() {
       <ChartSection>
         <ChartHeader>
           <ChartSubHeader>
-            <SectionTitle>
-              월별 독서량
-              <AlertCircle size={16} color="#a3a3a3" />
-            </SectionTitle>
+            <SectionTitle>월별 독서량</SectionTitle>
             <NavButtons>
               <NavButton
                 $size={24}
@@ -480,10 +482,7 @@ export default function StatsPage() {
 
       {/* Stale Reading */}
       <StaleSection>
-        <SectionTitle>
-          아직 이 책을 읽고 계신가요?
-          <AlertCircle size={16} color="#a3a3a3" />
-        </SectionTitle>
+        <SectionTitle>아직 이 책을 읽고 계신가요?</SectionTitle>
         <StaleBooks>
           {staleBooks.slice(0, staleShowCount).map(book => (
             <StaleBookItem key={book.uuid}>
@@ -513,6 +512,5 @@ export default function StatsPage() {
         )}
       </StaleSection>
     </Container>
-
   );
 }

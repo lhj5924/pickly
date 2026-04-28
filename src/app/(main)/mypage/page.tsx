@@ -1,7 +1,7 @@
 'use client';
 
 import styled from 'styled-components';
-import { Button, ReviewCard } from '@/components/common';
+import { Button, ReviewCard, ShowMoreToggle } from '@/components/common';
 import { Pencil, ArrowRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -158,14 +158,6 @@ const SectionTitle = styled.h2`
   color: ${({ theme }) => theme.colors.text.primary};
 `;
 
-const SeeMoreLink = styled(Link)`
-  font-size: 0.875rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.primary[600]};
-  }
-`;
 
 const ReviewGrid = styled.div`
   display: grid;
@@ -282,7 +274,19 @@ export default function MyPage() {
   const { data: preferredGenresData } = useMyPreferredGenres();
   const { mutate: updatePreferredGenres } = useUpdatePreferredGenres();
 
-  const previewReviews = myReviews.slice(0, 2);
+  const REVIEWS_PAGE_SIZE = 2;
+  const [reviewsVisible, setReviewsVisible] = useState(REVIEWS_PAGE_SIZE);
+  const canExpandReviews = myReviews.length > REVIEWS_PAGE_SIZE;
+  const reviewsAllVisible = myReviews.length > 0 && reviewsVisible >= myReviews.length;
+  const visibleReviews = myReviews.slice(0, reviewsVisible);
+
+  const handleReviewToggle = () => {
+    if (reviewsAllVisible) {
+      setReviewsVisible(REVIEWS_PAGE_SIZE);
+    } else {
+      setReviewsVisible(v => Math.min(v + REVIEWS_PAGE_SIZE, myReviews.length));
+    }
+  };
 
   const displayNickname = serverUser?.nickname ?? localUser?.nickname ?? '';
   const displayEmail = serverUser?.email ?? localUser?.email ?? '';
@@ -435,11 +439,10 @@ export default function MyPage() {
       <ReviewSection>
         <SectionHeader>
           <SectionTitle>내가 작성한 리뷰</SectionTitle>
-          <SeeMoreLink href="/review">더보기</SeeMoreLink>
         </SectionHeader>
 
         <ReviewGrid>
-          {previewReviews.slice(0, 2).map(review => (
+          {visibleReviews.map(review => (
             <ReviewCard
               key={review.uuid}
               id={review.uuid}
@@ -449,6 +452,8 @@ export default function MyPage() {
             />
           ))}
         </ReviewGrid>
+
+        {canExpandReviews && <ShowMoreToggle expanded={reviewsAllVisible} onToggle={handleReviewToggle} />}
 
         <WriteButtonWrapper>
           <Button variant="cta" as={Link} href="/review/write" rightIcon={<ArrowRight size={24} />}>
