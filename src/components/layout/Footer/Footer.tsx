@@ -3,6 +3,9 @@
 import Image from 'next/image';
 import styled from 'styled-components';
 import { Logo } from '@/components/common';
+import { useState } from 'react';
+import { TermsPopup } from '@/components/common/Popup';
+import { TERMS_OF_SERVICE, PRIVACY_POLICY } from '@/content/terms';
 
 const FooterWrapper = styled.footer`
   border-top: 1px solid ${({ theme }) => theme.colors.border.light};
@@ -18,6 +21,7 @@ const FooterLinks = styled.div`
 `;
 
 const FooterLink = styled.a`
+  width: 88px;
   font-size: 0.875rem;
   font-weight: 500;
   color: ${({ theme }) => theme.colors.text.secondary};
@@ -44,6 +48,16 @@ const FooterSubLinks = styled.div`
   font-size: 0.75rem;
 `;
 
+const FooterSubLink = styled.button`
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  transition: color 0.15s;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary[600]};
+  }
+`;
+
 const SocialLinks = styled.div`
   display: flex;
   justify-content: center;
@@ -65,18 +79,26 @@ const socialLinks = [
   { name: 'tiktok', src: '/icons/social-tiktok.svg', label: 'TikTok' },
 ];
 
+const DOCS = {
+  terms: TERMS_OF_SERVICE,
+  privacy: PRIVACY_POLICY,
+};
+
 export function Footer() {
+  const [popupType, setPopupType] = useState<'terms' | 'privacy' | null>(null);
+  const currentDoc = popupType ? DOCS[popupType] : null;
+
   return (
     <FooterWrapper>
       <Logo />
       <FooterLinks>
-        <FooterLink href="#">고객센터</FooterLink>
+        <FooterLink href="#">만든 이</FooterLink>
         <Divider />
         <FooterLink href="#">CONTACT US</FooterLink>
       </FooterLinks>
       <FooterSubLinks>
-        <span>이용약관</span>
-        <span>개인정보처리방침</span>
+        <FooterSubLink onClick={() => setPopupType('terms')}>이용약관</FooterSubLink>
+        <FooterSubLink onClick={() => setPopupType('privacy')}>개인정보처리방침</FooterSubLink>
       </FooterSubLinks>
       <SocialLinks>
         {socialLinks.map(({ name, src, label }) => (
@@ -85,6 +107,14 @@ export function Footer() {
           </SocialIcon>
         ))}
       </SocialLinks>
+
+      {currentDoc && (
+        <TermsPopup
+          title={currentDoc.title}
+          sections={currentDoc.sections}
+          onClose={() => setPopupType(null)}
+        />
+      )}
     </FooterWrapper>
   );
 }

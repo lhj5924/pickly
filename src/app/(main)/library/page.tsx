@@ -53,7 +53,7 @@ const EmptyState = styled.div`
 `;
 
 const FIRST_ROW_COUNT = 5;
-const LOAD_MORE_COUNT = 10;
+const LOAD_MORE_COUNT = 5;
 
 const daysBetween = (a: string, b: string) => {
   const ms = new Date(b).getTime() - new Date(a).getTime();
@@ -76,9 +76,7 @@ export default function LibraryPage() {
       )
     : 0;
 
-  const monthlyAverage = completedLibrary.length
-    ? Math.round((completedLibrary.length / 12) * 10) / 10
-    : 0;
+  const monthlyAverage = completedLibrary.length ? Math.round((completedLibrary.length / 12) * 10) / 10 : 0;
 
   const [completedVisible, setCompletedVisible] = useState(FIRST_ROW_COUNT);
   const [readingVisible, setReadingVisible] = useState(FIRST_ROW_COUNT);
@@ -121,9 +119,7 @@ export default function LibraryPage() {
 
       {/* Reading Books */}
       <Section>
-        <SectionTitle>
-          읽고 있는 작품이 {readingLibrary.length}권이에요. 한 권부터 차근차근 읽어볼까요?
-        </SectionTitle>
+        <SectionTitle>읽고 있는 작품이 {readingLibrary.length}권이에요. 한 권부터 차근차근 읽어볼까요?</SectionTitle>
         {readingLibrary.length > 0 ? (
           <>
             <BookGrid>
@@ -135,9 +131,7 @@ export default function LibraryPage() {
               <ShowMoreToggle
                 expanded={readingVisible >= readingLibrary.length}
                 onToggle={() =>
-                  setReadingVisible(prev =>
-                    prev >= readingLibrary.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT,
-                  )
+                  setReadingVisible(prev => (prev >= readingLibrary.length ? FIRST_ROW_COUNT : prev + LOAD_MORE_COUNT))
                 }
               />
             )}
