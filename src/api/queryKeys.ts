@@ -11,6 +11,11 @@ export const userKeys = {
   me: (userUuid: string | undefined) => [...userKeys.all, 'me', userUuid] as const,
 } as const;
 
+export const homeKeys = {
+  all: ['home'] as const,
+  data: (userUuid: string | undefined) => [...homeKeys.all, 'data', userUuid] as const,
+} as const;
+
 export const genreKeys = {
   all: ['genre'] as const,
   list: () => [...genreKeys.all, 'list'] as const,
