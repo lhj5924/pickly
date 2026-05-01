@@ -112,7 +112,7 @@ export const computeStatsData = (
   const staleBooks: StaleBook[] = readingLibrary
     .filter(item => item.startedAt)
     .map(item => ({
-      uuid: item.book.uuid,
+      uuid: item.book.uuid ?? '',
       libraryUuid: item.uuid,
       title: item.book.title,
       thumbnailUrl: item.book.thumbnailUrl,
