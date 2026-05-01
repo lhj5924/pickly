@@ -367,7 +367,7 @@ const useImagePalette = (src: string, fallback: string[]) => {
 
 const HiddenBookCard = ({ book }: { book: HiddenMockBook }) => {
   const router = useRouter();
-  const seed = hashStringToInt(book.uuid);
+  const seed = hashStringToInt(book.uuid ?? book.externalId);
   const fallback = PASTEL_FALLBACK_PALETTES[seed % PASTEL_FALLBACK_PALETTES.length];
   const palette = useImagePalette(book.thumbnailUrl, fallback);
   const colors = [...palette, ...palette];

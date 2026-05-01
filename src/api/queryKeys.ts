@@ -11,6 +11,11 @@ export const userKeys = {
   me: (userUuid: string | undefined) => [...userKeys.all, 'me', userUuid] as const,
 } as const;
 
+export const homeKeys = {
+  all: ['home'] as const,
+  data: (userUuid: string | undefined) => [...homeKeys.all, 'data', userUuid] as const,
+} as const;
+
 export const genreKeys = {
   all: ['genre'] as const,
   list: () => [...genreKeys.all, 'list'] as const,
@@ -24,6 +29,7 @@ export const preferredGenreKeys = {
 export const bookKeys = {
   all: ['book'] as const,
   detail: (uuid: string) => [...bookKeys.all, 'detail', uuid] as const,
+  external: (externalId: string, source: string) => [...bookKeys.all, 'external', externalId, source] as const,
   search: (query: string, target?: string, page?: number, size?: number) =>
     [...bookKeys.all, 'search', query, target, page, size] as const,
 } as const;
