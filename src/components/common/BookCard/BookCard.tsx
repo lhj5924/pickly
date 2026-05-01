@@ -13,10 +13,12 @@ import type { BookStatus } from '../../../types/book';
  * uuid/thumbnailUrl/authors 우선, 없으면 id/coverImage/author로 폴백합니다.
  */
 export interface BookCardData {
-  uuid?: string;
+  uuid?: string | null;
   id?: string;
   /** 라이브러리 항목 uuid — 읽기 상태 변경 API 호출 시 필요 */
   libraryUuid?: string;
+  externalId?: string;
+  source?: string;
   title: string;
   thumbnailUrl?: string;
   coverImage?: string;
@@ -43,7 +45,13 @@ interface BookCardProps {
   initialStatus?: StatusKey | null;
 }
 
-const pickId = (book: BookCardData) => book.uuid ?? book.id ?? '';
+const getBookPath = (book: BookCardData): string => {
+  if (book.uuid) return `/book/${book.uuid}`;
+  if (book.id) return `/book/${book.id}`;
+  if (book.externalId && book.source)
+    return `/book/external?externalId=${encodeURIComponent(book.externalId)}&source=${encodeURIComponent(book.source)}`;
+  return '';
+};
 const pickCover = (book: BookCardData) => book.thumbnailUrl ?? book.coverImage ?? '';
 const pickAuthor = (book: BookCardData) => book.authors?.[0] ?? book.author ?? '';
 
@@ -333,7 +341,7 @@ export const BookCard = ({
   initialStatus = null,
 }: BookCardProps) => {
   const router = useRouter();
-  const bookId = pickId(book);
+  const bookPath = getBookPath(book);
   const coverSrc = pickCover(book);
   const authorText = pickAuthor(book);
   const [activeStatus, setActiveStatus] = useState<StatusKey | null>(initialStatus ?? null);
@@ -357,11 +365,11 @@ export const BookCard = ({
   };
 
   const handleCardClick = () => {
-    if (bookId) router.push(`/book/${bookId}`);
+    if (bookPath) router.push(bookPath);
   };
 
   const handleTitleClick = () => {
-    if (bookId) router.push(`/book/${bookId}`);
+    if (bookPath) router.push(bookPath);
   };
 
   // SM size layout - vertical card with white info section

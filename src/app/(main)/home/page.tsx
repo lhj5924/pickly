@@ -1,14 +1,13 @@
 'use client';
 
-import styled, { keyframes } from 'styled-components';
-import { BookCard, Button, AnimatedPieChart, StatsGrid, StatCard } from '@/components/common';
+import styled from 'styled-components';
+import { BookCard, Button, StatsGrid, StatCard } from '@/components/common';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores';
-import { useMyLibraries } from '@/api/useLibrary';
-import { MOCK_MODE, mockRecommendations } from '@/mocks';
+import { useHome } from '@/api/useHome';
 import { PieChart } from '@/components/common/PieChart';
 
 const bannerData = [
@@ -241,22 +240,12 @@ const EmptyBooks = styled.div`
 
 export default function HomePage() {
   const { user } = useAuthStore();
-  const { data: readingLibraryAll = [] } = useMyLibraries('READING');
-  const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
+  const { data: homeData } = useHome(user?.id);
 
-  const readingLibrary = [...readingLibraryAll]
-    .sort((a, b) => {
-      const aTime = new Date(a.startedAt ?? a.createdAt).getTime();
-      const bTime = new Date(b.startedAt ?? b.createdAt).getTime();
-      return bTime - aTime;
-    })
-    .slice(0, 5);
-
-  const recommendedBooks = MOCK_MODE ? mockRecommendations : [];
-  const hasData = completedLibrary.length > 0;
+  const readingLibrary = homeData?.currentlyReadingBooks ?? [];
+  const recommendedBooks = homeData?.recommendations ?? [];
+  const hasData = (homeData?.totalBooksRead ?? 0) > 0;
   const [currentBanner, setCurrentBanner] = useState(0);
-  const [chartAnimated, setChartAnimated] = useState(false);
-  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -264,26 +253,6 @@ export default function HomePage() {
     }, 5000);
     return () => clearInterval(timer);
   }, []);
-
-  // Intersection Observer for chart animation
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !chartAnimated) {
-            setChartAnimated(true);
-          }
-        });
-      },
-      { threshold: 0.3 },
-    );
-
-    if (chartRef.current) {
-      observer.observe(chartRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [chartAnimated]);
 
   const nickname = user?.nickname?.split('_')[0] || '빨리';
 
@@ -319,19 +288,23 @@ export default function HomePage() {
             <StatsGrid>
               <StatCard
                 label="총 읽은 책 수"
-                value={hasData ? `${completedLibrary.length}권` : undefined}
+                value={hasData ? `${homeData?.totalBooksRead}권` : undefined}
                 icon={<OpenedBookIcon size={24} />}
               />
-              <StatCard label="읽는 중" value={`${readingLibraryAll.length}권`} icon={<CalendarIcon size={24} />} />
+              <StatCard
+                label="읽는 중"
+                value={`${homeData?.currentlyReadingCount ?? 0}권`}
+                icon={<CalendarIcon size={24} />}
+              />
               <StatCard
                 label="월 평균 권 수"
-                value={hasData ? `${Math.round((completedLibrary.length / 12) * 10) / 10}권` : undefined}
+                value={hasData ? `${homeData?.monthlyAverageBooks}권` : undefined}
                 icon={<BooksIcon size={24} />}
               />
             </StatsGrid>
           </StatsGridMargin>
 
-          <PieChart />
+          <PieChart genreStats={homeData?.genreStats} hasData={hasData} />
 
           <CtaButtonWrapper>
             <Button variant="cta" as={Link} href="/stats" rightIcon={<ArrowRight size={24} />}>
@@ -354,7 +327,6 @@ export default function HomePage() {
           )}
         </BooksSection>
 
-        {/* AI Recommendations - TODO: 서버에 추천 API가 추가되면 연동 */}
         <BooksSection>
           <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
           {recommendedBooks.length > 0 ? (

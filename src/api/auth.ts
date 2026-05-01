@@ -17,3 +17,8 @@ export const refreshToken = async (body: RefreshRequest): Promise<TokenResponse>
   const { data } = await apiClient.post<TokenResponse>('/api/v1/auth/refresh', body);
   return data;
 };
+
+// Logout with userUuid
+export const logout = async (body: { userUuid: string }): Promise<void> => {
+  await apiClient.post('/api/v1/auth/logout', body);
+};
