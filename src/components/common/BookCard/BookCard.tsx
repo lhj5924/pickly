@@ -5,6 +5,8 @@ import { Eye, Heart, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
+import { useUpdateLibraryStatus } from '../../../api/useLibrary';
+import type { BookStatus } from '../../../types/book';
 
 /**
  * BookCard는 서버의 BookSummary/Book 형태 및 (추천 페이지 등) 로컬 mock 데이터의 느슨한 형태 모두를 받습니다.
@@ -13,6 +15,8 @@ import Image from 'next/image';
 export interface BookCardData {
   uuid?: string;
   id?: string;
+  /** 라이브러리 항목 uuid — 읽기 상태 변경 API 호출 시 필요 */
+  libraryUuid?: string;
   title: string;
   thumbnailUrl?: string;
   coverImage?: string;
@@ -22,6 +26,12 @@ export interface BookCardData {
 }
 
 type StatusKey = 'reading' | 'wishlist' | 'completed';
+
+const STATUS_API_MAP: Record<StatusKey, BookStatus> = {
+  reading: 'READING',
+  wishlist: 'WANT_TO_READ',
+  completed: 'COMPLETED',
+};
 
 interface BookCardProps {
   book: BookCardData;
@@ -314,12 +324,6 @@ const ProgressText = styled.span`
   color: ${({ theme }) => theme.colors.primary[600]};
 `;
 
-interface StatusState {
-  reading: boolean;
-  wishlist: boolean;
-  completed: boolean;
-}
-
 export const BookCard = ({
   book,
   size = 'md',
@@ -332,20 +336,24 @@ export const BookCard = ({
   const bookId = pickId(book);
   const coverSrc = pickCover(book);
   const authorText = pickAuthor(book);
-  const [statusState, setStatusState] = useState<StatusState>({
-    reading: initialStatus === 'reading',
-    wishlist: initialStatus === 'wishlist',
-    completed: initialStatus === 'completed',
-  });
+  const [activeStatus, setActiveStatus] = useState<StatusKey | null>(initialStatus ?? null);
+  const { mutate: updateStatus } = useUpdateLibraryStatus();
 
   const handleStatusClick = (e: React.MouseEvent, status: StatusKey) => {
     e.stopPropagation();
-    const nextActive = !statusState[status];
-    setStatusState(prev => ({
-      ...prev,
-      [status]: nextActive,
-    }));
-    onStatusChange?.(nextActive ? status : null);
+    const newStatus = activeStatus === status ? null : status;
+    const prevStatus = activeStatus;
+
+    // Optimistic update
+    setActiveStatus(newStatus);
+    onStatusChange?.(newStatus);
+
+    if (book.libraryUuid && newStatus !== null) {
+      updateStatus(
+        { uuid: book.libraryUuid, body: { status: STATUS_API_MAP[newStatus] } },
+        { onError: () => setActiveStatus(prevStatus) },
+      );
+    }
   };
 
   const handleCardClick = () => {
@@ -367,7 +375,7 @@ export const BookCard = ({
               <SmStatusLabel>읽는 중</SmStatusLabel>
               <SmStatusIcon>
                 <Image
-                  src={statusState.reading ? '/icons/reading-color.png' : '/icons/reading-white.png'}
+                  src={activeStatus === 'reading' ? '/icons/reading-color.png' : '/icons/reading-white.png'}
                   alt="읽는 중"
                   width={20}
                   height={20}
@@ -378,7 +386,7 @@ export const BookCard = ({
               <SmStatusLabel>보고 싶어요</SmStatusLabel>
               <SmStatusIcon>
                 <Image
-                  src={statusState.wishlist ? '/icons/heart-color.png' : '/icons/heart-white.png'}
+                  src={activeStatus === 'wishlist' ? '/icons/heart-color.png' : '/icons/heart-white.png'}
                   alt="보고 싶어요"
                   width={20}
                   height={20}
@@ -389,7 +397,7 @@ export const BookCard = ({
               <SmStatusLabel>독서 완료</SmStatusLabel>
               <SmStatusIcon>
                 <Image
-                  src={statusState.completed ? '/icons/complete-color.png' : '/icons/complete-white.png'}
+                  src={activeStatus === 'completed' ? '/icons/complete-color.png' : '/icons/complete-white.png'}
                   alt="독서 완료"
                   width={20}
                   height={20}
@@ -423,7 +431,7 @@ export const BookCard = ({
               <MdStatusLabel>읽는 중</MdStatusLabel>
               <MdStatusIcon>
                 <Image
-                  src={statusState.reading ? '/icons/reading-color.png' : '/icons/reading-white.png'}
+                  src={activeStatus === 'reading' ? '/icons/reading-color.png' : '/icons/reading-white.png'}
                   alt="읽는 중"
                   width={24}
                   height={24}
@@ -434,7 +442,7 @@ export const BookCard = ({
               <MdStatusLabel>보고 싶어요</MdStatusLabel>
               <MdStatusIcon>
                 <Image
-                  src={statusState.wishlist ? '/icons/heart-color.png' : '/icons/heart-white.png'}
+                  src={activeStatus === 'wishlist' ? '/icons/heart-color.png' : '/icons/heart-white.png'}
                   alt="보고 싶어요"
                   width={24}
                   height={24}
@@ -445,7 +453,7 @@ export const BookCard = ({
               <MdStatusLabel>독서 완료</MdStatusLabel>
               <MdStatusIcon>
                 <Image
-                  src={statusState.completed ? '/icons/complete-color.png' : '/icons/complete-white.png'}
+                  src={activeStatus === 'completed' ? '/icons/complete-color.png' : '/icons/complete-white.png'}
                   alt="독서 완료"
                   width={24}
                   height={24}
@@ -465,7 +473,7 @@ export const BookCard = ({
         <CoverImage src={coverSrc} alt={book.title} />
         <StatusOverlay className="status-overlay">
           <StatusButton
-            $active={statusState.reading}
+            $active={activeStatus === 'reading'}
             $color="#3b82f6"
             onClick={e => handleStatusClick(e, 'reading')}
             title="읽는 중"
@@ -473,15 +481,15 @@ export const BookCard = ({
             <Eye size={16} />
           </StatusButton>
           <StatusButton
-            $active={statusState.wishlist}
+            $active={activeStatus === 'wishlist'}
             $color="#ef4444"
             onClick={e => handleStatusClick(e, 'wishlist')}
             title="보고싶어요"
           >
-            <Heart size={16} fill={statusState.wishlist ? 'currentColor' : 'none'} />
+            <Heart size={16} fill={activeStatus === 'wishlist' ? 'currentColor' : 'none'} />
           </StatusButton>
           <StatusButton
-            $active={statusState.completed}
+            $active={activeStatus === 'completed'}
             $color="#22c55e"
             onClick={e => handleStatusClick(e, 'completed')}
             title="독서 완료"
