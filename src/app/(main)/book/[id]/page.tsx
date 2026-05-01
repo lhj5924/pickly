@@ -3,10 +3,10 @@
 import styled from 'styled-components';
 import { Button } from '@/components/common';
 import { ChevronDown, ArrowRight } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useBook } from '@/api/useBook';
+import { useBook, useExternalBook } from '@/api/useBook';
 import { useBookReviews } from '@/api/useReview';
 
 const Container = styled.div`
@@ -220,11 +220,27 @@ const SimilarBooksGrid = styled.div`
   padding-bottom: 0.5rem;
 `;
 
-export default function BookDetailPage() {
+function BookDetailContent() {
   const params = useParams();
-  const bookUuid = Array.isArray(params?.id) ? params.id[0] : (params?.id as string | undefined);
-  const { data: book, isLoading, isError } = useBook(bookUuid);
-  const { data: reviewsPage } = useBookReviews(bookUuid, { page: 0, size: 1 });
+  const searchParams = useSearchParams();
+
+  const id = Array.isArray(params?.id) ? params.id[0] : (params?.id as string | undefined);
+  const isExternal = id === 'external';
+
+  const externalId = searchParams.get('externalId') ?? undefined;
+  const source = searchParams.get('source') ?? undefined;
+
+  const { data: uuidBook, isLoading: uuidLoading, isError: uuidError } = useBook(isExternal ? undefined : id);
+  const { data: extBook, isLoading: extLoading, isError: extError } = useExternalBook(
+    isExternal ? externalId : undefined,
+    isExternal ? source : undefined,
+  );
+
+  const book = isExternal ? extBook : uuidBook;
+  const isLoading = isExternal ? extLoading : uuidLoading;
+  const isError = isExternal ? extError : uuidError;
+
+  const { data: reviewsPage } = useBookReviews(book?.uuid, { page: 0, size: 1 });
   const myReview = reviewsPage?.content?.[0] ?? null;
   const [descExpanded, setDescExpanded] = useState(false);
   const [authorExpanded, setAuthorExpanded] = useState(false);
@@ -307,5 +323,19 @@ export default function BookDetailPage() {
         </ExpandButton>
       </Section>
     </Container>
+  );
+}
+
+export default function BookDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <Container>
+          <p style={{ textAlign: 'center', padding: '4rem 0' }}>책 정보를 불러오는 중…</p>
+        </Container>
+      }
+    >
+      <BookDetailContent />
+    </Suspense>
   );
 }
