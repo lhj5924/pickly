@@ -4,11 +4,19 @@
 // ============================================================
 
 import { apiClient } from './client';
-import type { Book, BookSearchParams, BookSearchResponse } from '../types/book';
+import type { Book, BookSearchParams, BookSearchResponse, BookSource } from '../types/book';
 
-/** 책 상세 조회 */
+/** 책 상세 조회 (DB) */
 export const getBook = async (uuid: string): Promise<Book> => {
   const { data } = await apiClient.get<Book>(`/api/v1/books/${uuid}`);
+  return data;
+};
+
+/** 책 상세 조회 (외부 API - uuid 없는 경우) */
+export const getExternalBook = async (externalId: string, source: BookSource): Promise<Book> => {
+  const { data } = await apiClient.get<Book>('/api/v1/books/external', {
+    params: { externalId, source },
+  });
   return data;
 };
 

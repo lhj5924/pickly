@@ -24,6 +24,7 @@ export const preferredGenreKeys = {
 export const bookKeys = {
   all: ['book'] as const,
   detail: (uuid: string) => [...bookKeys.all, 'detail', uuid] as const,
+  external: (externalId: string, source: string) => [...bookKeys.all, 'external', externalId, source] as const,
   search: (query: string, target?: string, page?: number, size?: number) =>
     [...bookKeys.all, 'search', query, target, page, size] as const,
 } as const;

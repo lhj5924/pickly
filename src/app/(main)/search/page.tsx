@@ -408,7 +408,7 @@ function SearchContent() {
             <>
               <BookGrid>
                 {results.map(book => (
-                  <BookCard key={book.uuid} book={book} size="md" />
+                  <BookCard key={book.uuid ?? book.externalId} book={book} size="md" />
                 ))}
               </BookGrid>
               <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
