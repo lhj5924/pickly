@@ -222,14 +222,23 @@ const PAGE_SIZE = 20;
 
 function SearchContent() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams.get('q') ?? '';
-  const [query, setQuery] = useState(initialQuery);
-  const [submittedQuery, setSubmittedQuery] = useState(initialQuery);
+  const urlQuery = searchParams.get('q') ?? '';
+  const [query, setQuery] = useState(urlQuery);
+  const [submittedQuery, setSubmittedQuery] = useState(urlQuery);
   const [currentPage, setCurrentPage] = useState(1);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const { items: recentSearches, add: addRecent, remove: removeRecent, clear: clearRecent } = useRecentSearches();
+
+  // GNB에서 검색 시 URL이 바뀌면 검색어·결과 동기화
+  useEffect(() => {
+    if (urlQuery) {
+      setQuery(urlQuery);
+      setSubmittedQuery(urlQuery);
+      setCurrentPage(1);
+    }
+  }, [urlQuery]);
 
   useEffect(() => {
     if (inputRef.current) {
