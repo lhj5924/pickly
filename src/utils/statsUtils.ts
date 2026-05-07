@@ -1,17 +1,6 @@
-// ============================================================
-// src/mocks/mockStats.ts
-// Stats 계산 함수 모음 + Mock 데이터.
-// API 연동 시 computeStatsData / computeWeeklyData 에
-// 실제 API 응답을 그대로 넣으면 됩니다.
-// ============================================================
-
 import type { LibraryItem } from '@/types/library';
-import { getMockLibraries } from './mockLibraries';
 
-// ── 상수 ─────────────────────────────────────────────────
 export const WEEKS_PER_PAGE = 6;
-
-// ── 순수 유틸 ─────────────────────────────────────────────
 
 export const daysBetween = (a: string, b: string): number => {
   const ms = new Date(b).getTime() - new Date(a).getTime();
@@ -27,8 +16,6 @@ export const getWeekStart = (date: Date): Date => {
 
 export const formatWeekLabel = (start: Date, end: Date): string =>
   `${start.getMonth() + 1}/${start.getDate()} ~ ${end.getMonth() + 1}/${end.getDate()}`;
-
-// ── 타입 ─────────────────────────────────────────────────
 
 export type WeeklyDataItem = {
   label: string;
@@ -54,12 +41,6 @@ export type StatsData = {
   earliestFinishedAt: Date | null;
 };
 
-// ── 계산 함수 ─────────────────────────────────────────────
-
-/**
- * completedLibrary / readingLibrary 를 받아 정적 통계를 계산합니다.
- * API 응답으로 대체할 때는 이 함수의 인자만 교체하면 됩니다.
- */
 export const computeStatsData = (
   completedLibrary: LibraryItem[],
   readingLibrary: LibraryItem[],
@@ -74,7 +55,6 @@ export const computeStatsData = (
       )
     : 0;
 
-  // finishedAt 기준 월별 완독 권수 → 전체 월 평균
   const monthlyFinishedCounts = (() => {
     const map = new Map<string, number>();
     completedLibrary.forEach(item => {
@@ -93,7 +73,6 @@ export const computeStatsData = (
       ) / 10
     : 0;
 
-  // 오늘 기준 가장 가까운 (과거의) 완독일
   const mostRecentFinishedAt = completedLibrary.reduce<Date | null>((latest, item) => {
     if (!item.finishedAt) return latest;
     const d = new Date(item.finishedAt);
@@ -133,10 +112,6 @@ export const computeStatsData = (
   };
 };
 
-/**
- * 주간 바 차트용 데이터를 계산합니다.
- * weekPageOffset: 0 = 현재 6주, 1 = 6주 전, ...
- */
 export const computeWeeklyData = (
   completedLibrary: LibraryItem[],
   mostRecentFinishedAt: Date | null,
@@ -169,9 +144,6 @@ export const computeWeeklyData = (
   });
 };
 
-/**
- * 주간 페이지 네비게이션 가능 여부를 계산합니다.
- */
 export const computeWeekNavState = (
   earliestFinishedAt: Date | null,
   weekPageOffset: number,
@@ -188,10 +160,6 @@ export const computeWeekNavState = (
   };
 };
 
-/**
- * 차트 Y축 눈금을 계산합니다. (5 단위 올림)
- * maxBarValue: rawMax < 5 → 5, 5~9 → 10, ...
- */
 export const computeBarChartAxis = (
   weeklyData: WeeklyDataItem[],
 ): { maxBarValue: number; yTicks: number[] } => {
@@ -200,10 +168,3 @@ export const computeBarChartAxis = (
   const yTicks = Array.from({ length: maxBarValue / 5 + 1 }, (_, i) => i * 5);
   return { maxBarValue, yTicks };
 };
-
-// ── Mock 데이터 (API 연동 전 사용) ───────────────────────
-
-const mockCompletedLibrary = getMockLibraries('COMPLETED');
-const mockReadingLibrary = getMockLibraries('READING');
-
-export const mockStatsData = computeStatsData(mockCompletedLibrary, mockReadingLibrary);

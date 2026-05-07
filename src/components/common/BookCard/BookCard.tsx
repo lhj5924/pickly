@@ -13,7 +13,7 @@ import type { BookSource, BookStatus } from '../../../types/book';
  * uuid/thumbnailUrl/authors 우선, 없으면 id/coverImage/author로 폴백합니다.
  */
 export interface BookCardData {
-  uuid?: string;
+  uuid?: string | null;
   id?: string;
   title: string;
   thumbnailUrl?: string;
@@ -44,7 +44,13 @@ interface BookCardProps {
   libraryItemUuid?: string;
 }
 
-const pickId = (book: BookCardData) => book.uuid ?? book.id ?? '';
+const getBookPath = (book: BookCardData): string => {
+  if (book.uuid) return `/book/${book.uuid}`;
+  if (book.id) return `/book/${book.id}`;
+  if (book.externalId && book.source)
+    return `/book/external?externalId=${encodeURIComponent(book.externalId)}&source=${encodeURIComponent(book.source)}`;
+  return '';
+};
 const pickCover = (book: BookCardData) => book.thumbnailUrl ?? book.coverImage ?? '';
 const pickAuthor = (book: BookCardData) => book.authors?.[0] ?? book.author ?? '';
 
@@ -335,7 +341,7 @@ export const BookCard = ({
   libraryItemUuid,
 }: BookCardProps) => {
   const router = useRouter();
-  const bookId = pickId(book);
+  const bookPath = getBookPath(book);
   const coverSrc = pickCover(book);
   const authorText = pickAuthor(book);
   const [currentStatus, setCurrentStatus] = useState<StatusKey | null>(initialStatus ?? null);
@@ -345,23 +351,34 @@ export const BookCard = ({
 
   const handleStatusClick = (e: React.MouseEvent, status: StatusKey) => {
     e.stopPropagation();
-    if (currentStatus === status) return;
-    setCurrentStatus(status);
-    const apiStatus = STATUS_TO_API[status];
-    if (libraryItemUuid) {
-      updateStatus({ uuid: libraryItemUuid, body: { status: apiStatus } });
-    } else if (book.externalId && book.source) {
-      addBook({ externalId: book.externalId, source: book.source, status: apiStatus });
+    const newStatus = currentStatus === status ? null : status;
+    const prevStatus = currentStatus;
+
+    setCurrentStatus(newStatus);
+    onStatusChange?.(newStatus);
+
+    if (newStatus !== null) {
+      const apiStatus = STATUS_TO_API[newStatus];
+      if (libraryItemUuid) {
+        updateStatus(
+          { uuid: libraryItemUuid, body: { status: apiStatus } },
+          { onError: () => setCurrentStatus(prevStatus) },
+        );
+      } else if (book.externalId && book.source) {
+        addBook(
+          { externalId: book.externalId, source: book.source, status: apiStatus },
+          { onError: () => setCurrentStatus(prevStatus) },
+        );
+      }
     }
-    onStatusChange?.(status);
   };
 
   const handleCardClick = () => {
-    if (bookId) router.push(`/book/${bookId}`);
+    if (bookPath) router.push(bookPath);
   };
 
   const handleTitleClick = () => {
-    if (bookId) router.push(`/book/${bookId}`);
+    if (bookPath) router.push(bookPath);
   };
 
   // SM size layout - vertical card with white info section

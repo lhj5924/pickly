@@ -1,8 +1,3 @@
-// ============================================================
-// 📁 src/api/useLibrary.ts
-// Library 관련 React Query 훅
-// ============================================================
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   addToLibrary,
@@ -12,7 +7,6 @@ import {
 } from './library';
 import { libraryKeys } from './queryKeys';
 import { useAuthStore } from '../stores';
-import { MOCK_MODE, getMockLibraries } from '../mocks';
 import type { BookStatus } from '../types/book';
 import type {
   AddLibraryRequest,
@@ -26,10 +20,7 @@ export const useMyLibraries = (status?: BookStatus) => {
 
   return useQuery<LibraryItem[], Error>({
     queryKey: libraryKeys.list(userUuid, status),
-    queryFn: () => {
-      if (MOCK_MODE) return Promise.resolve(getMockLibraries(status));
-      return getMyLibraries(userUuid!, status);
-    },
+    queryFn: () => getMyLibraries(userUuid!, status),
     enabled: !!userUuid,
     staleTime: 1000 * 60,
   });

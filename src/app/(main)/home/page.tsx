@@ -1,15 +1,15 @@
 'use client';
 
-import styled, { keyframes } from 'styled-components';
-import { BookCard, Button, AnimatedPieChart, StatsGrid, StatCard } from '@/components/common';
+import styled from 'styled-components';
+import { BookCard, Button, StatsGrid, StatCard } from '@/components/common';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores';
-import { useMyLibraries } from '@/api/useLibrary';
-import { MOCK_MODE, mockRecommendations } from '@/mocks';
+import { useHome } from '@/api/useHome';
 import { PieChart } from '@/components/common/PieChart';
+import type { PieChartDataItem } from '@/components/common/PieChart/PieChart';
 
 const bannerData = [
   {
@@ -69,7 +69,6 @@ const Container = styled.div`
   padding: 0 1.5rem 4rem;
 `;
 
-// Banner Section
 const BannerSection = styled.section`
   position: relative;
   margin: 1.5rem 0 2.5rem;
@@ -117,7 +116,6 @@ const BannerNav = styled.button<{ $direction: 'left' | 'right' }>`
   }
 `;
 
-// Stats Section
 const StatsSection = styled.section`
   margin-bottom: 2.5rem;
 `;
@@ -133,83 +131,12 @@ const StatsGridMargin = styled.div`
   margin-bottom: 1.5rem;
 `;
 
-// Chart Section
-const ChartSection = styled.div`
-  background: white;
-  border-radius: 1rem;
-  padding: 2.5rem 3rem;
-  margin-bottom: 1.5rem;
-  box-shadow: ${({ theme }) => theme.shadows.md};
-`;
-
-const ChartTitle = styled.h3`
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.text.quinary};
-  margin-bottom: 1.5rem;
-  text-align: left;
-`;
-
-const ChartContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const PieChartWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-
-  &:first-child {
-    border-right: 1px solid #cfcfcf;
-    padding-right: 2rem;
-
-    @media (max-width: 640px) {
-      border-right: none;
-      border-bottom: 1px solid #cfcfcf;
-      padding-right: 0;
-      padding-bottom: 2rem;
-    }
-  }
-`;
-
-const PieChartLabel = styled.p`
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1rem;
-`;
-
-const PieChartContainer = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 4rem;
-`;
-
-const EmptyChart = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  font-size: 0.875rem;
-`;
-
 const CtaButtonWrapper = styled.div`
   display: flex;
   justify-content: center;
 `;
 
-// Books Section
-const BooksSection = styled.section`
-  // margin-bottom: 2.5rem;
-`;
+const BooksSection = styled.section``;
 
 const BooksScroll = styled.div`
   display: flex;
@@ -241,10 +168,9 @@ const EmptyBooks = styled.div`
 
 export default function HomePage() {
   const { user } = useAuthStore();
-  const { data: readingLibraryAll = [] } = useMyLibraries('READING');
-  const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
+  const { data: home } = useHome();
 
-  const readingLibrary = [...readingLibraryAll]
+  const readingBooks = [...(home?.currentlyReadingBooks ?? [])]
     .sort((a, b) => {
       const aTime = new Date(a.startedAt ?? a.createdAt).getTime();
       const bTime = new Date(b.startedAt ?? b.createdAt).getTime();
@@ -252,11 +178,17 @@ export default function HomePage() {
     })
     .slice(0, 5);
 
-  const recommendedBooks = MOCK_MODE ? mockRecommendations : [];
-  const hasData = completedLibrary.length > 0;
+  const recommendedBooks = home?.recommendations ?? [];
+  const totalBooksRead = home?.totalBooksRead ?? 0;
+  const currentlyReadingCount = home?.currentlyReadingCount ?? 0;
+  const monthlyAverageBooks = home?.monthlyAverageBooks ?? 0;
+  const hasData = totalBooksRead > 0;
+
+  const genreData: PieChartDataItem[] | undefined = home?.genreStats?.length
+    ? home.genreStats.map(g => ({ name: g.genreName, value: g.booksRead }))
+    : undefined;
+
   const [currentBanner, setCurrentBanner] = useState(0);
-  const [chartAnimated, setChartAnimated] = useState(false);
-  const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -265,26 +197,6 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Intersection Observer for chart animation
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !chartAnimated) {
-            setChartAnimated(true);
-          }
-        });
-      },
-      { threshold: 0.3 },
-    );
-
-    if (chartRef.current) {
-      observer.observe(chartRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [chartAnimated]);
-
   const nickname = user?.nickname?.split('_')[0] || '빨리';
 
   return (
@@ -292,7 +204,7 @@ export default function HomePage() {
       <BackgroundGradient1 />
       <BackgroundGradient2 />
       <Container>
-        {/* Banner */}
+        {/* 배너 */}
         <BannerSection>
           <BannerSlide $bannerIndex={currentBanner} />
           <BannerNav
@@ -311,7 +223,7 @@ export default function HomePage() {
           </BannerNav>
         </BannerSection>
 
-        {/* Stats */}
+        {/* 통계 */}
         <StatsSection>
           <SectionTitle>나는 어떤 책을 얼마나 읽었을까?</SectionTitle>
 
@@ -319,19 +231,23 @@ export default function HomePage() {
             <StatsGrid>
               <StatCard
                 label="총 읽은 책 수"
-                value={hasData ? `${completedLibrary.length}권` : undefined}
+                value={hasData ? `${totalBooksRead}권` : undefined}
                 icon={<OpenedBookIcon size={24} />}
               />
-              <StatCard label="읽는 중" value={`${readingLibraryAll.length}권`} icon={<CalendarIcon size={24} />} />
+              <StatCard
+                label="읽는 중"
+                value={`${currentlyReadingCount}권`}
+                icon={<CalendarIcon size={24} />}
+              />
               <StatCard
                 label="월 평균 권 수"
-                value={hasData ? `${Math.round((completedLibrary.length / 12) * 10) / 10}권` : undefined}
+                value={hasData ? `${monthlyAverageBooks}권` : undefined}
                 icon={<BooksIcon size={24} />}
               />
             </StatsGrid>
           </StatsGridMargin>
 
-          <PieChart />
+          <PieChart genreData={genreData} />
 
           <CtaButtonWrapper>
             <Button variant="cta" as={Link} href="/stats" rightIcon={<ArrowRight size={24} />}>
@@ -340,12 +256,12 @@ export default function HomePage() {
           </CtaButtonWrapper>
         </StatsSection>
 
-        {/* Reading Books */}
+        {/* 읽고 있는 책 */}
         <BooksSection>
           <SectionTitle>내가 지금 읽고 있는 책</SectionTitle>
-          {readingLibrary.length > 0 ? (
+          {readingBooks.length > 0 ? (
             <BooksScroll>
-              {readingLibrary.map(item => (
+              {readingBooks.map(item => (
                 <BookCard key={item.uuid} book={item.book} size="sm" initialStatus="reading" libraryItemUuid={item.uuid} />
               ))}
             </BooksScroll>
@@ -354,7 +270,7 @@ export default function HomePage() {
           )}
         </BooksSection>
 
-        {/* AI Recommendations - TODO: 서버에 추천 API가 추가되면 연동 */}
+        {/* AI 추천 */}
         <BooksSection>
           <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
           {recommendedBooks.length > 0 ? (

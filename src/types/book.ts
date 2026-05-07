@@ -32,7 +32,7 @@ export interface Book {
 
 /** 책 요약 (검색/라이브러리/리뷰 응답에 포함) */
 export interface BookSummary {
-  uuid: string;
+  uuid: string | null;
   externalId: string;
   isbn: string;
   title: string;
