@@ -486,7 +486,7 @@ export default function StatsPage() {
         <StaleBooks>
           {staleBooks.slice(0, staleShowCount).map(book => (
             <StaleBookItem key={book.uuid}>
-              <BookCard book={book} size="sm" showTitle={false} />
+              <BookCard book={book} size="sm" showTitle={false} libraryItemUuid={book.libraryItemUuid} />
               <StaleBookDate>
                 {book.date}부터
                 <br />
