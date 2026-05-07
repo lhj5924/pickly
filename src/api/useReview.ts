@@ -1,8 +1,3 @@
-// ============================================================
-// 📁 src/api/useReview.ts
-// Review 관련 React Query 훅
-// ============================================================
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   createReview,
@@ -14,7 +9,6 @@ import {
 } from './review';
 import { reviewKeys } from './queryKeys';
 import { useAuthStore } from '../stores';
-import { MOCK_MODE, mockReviews, getMockLibraries } from '../mocks';
 import type { LibraryItem } from '../types/library';
 import type {
   CreateReviewRequest,
@@ -40,10 +34,7 @@ export const useMyReviews = () => {
 
   return useQuery<Review[], Error>({
     queryKey: reviewKeys.me(userUuid),
-    queryFn: () => {
-      if (MOCK_MODE) return Promise.resolve(mockReviews);
-      return getMyReviews(userUuid!);
-    },
+    queryFn: () => getMyReviews(userUuid!),
     enabled: !!userUuid,
     staleTime: 1000 * 60,
   });
@@ -55,10 +46,7 @@ export const useReviewAvailableBooks = () => {
 
   return useQuery<LibraryItem[], Error>({
     queryKey: reviewKeys.available(userUuid),
-    queryFn: () => {
-      if (MOCK_MODE) return Promise.resolve(getMockLibraries('COMPLETED'));
-      return getAvailableBooksForReview(userUuid!);
-    },
+    queryFn: () => getAvailableBooksForReview(userUuid!),
     enabled: !!userUuid,
     staleTime: 1000 * 60,
   });

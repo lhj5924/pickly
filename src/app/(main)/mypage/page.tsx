@@ -368,7 +368,7 @@ export default function MyPage() {
     const uuid = serverUser?.uuid ?? localUser?.id;
     if (uuid) {
       try {
-        await logoutApi({ userUuid: uuid });
+        await logoutApi(uuid);
       } catch {
         // 서버 로그아웃 실패해도 로컬 로그아웃은 진행
       }

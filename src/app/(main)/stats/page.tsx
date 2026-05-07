@@ -7,16 +7,17 @@ import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/Stat
 import { ArrowRight, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMe } from '@/api/useMe';
+import { useMyLibraries } from '@/api/useLibrary';
+import { useMyStats } from '@/api/useStats';
+import { PieChart } from '@/components/common/PieChart';
 import {
-  getMockReadingLevel,
   computeStatsData,
   computeWeeklyData,
   computeWeekNavState,
   computeBarChartAxis,
-} from '@/mocks';
-import { PieChart } from '@/components/common/PieChart';
-import { useMyLibraries } from '@/api/useLibrary';
+} from '@/utils/statsUtils';
+import { getReadingLevel } from '@/utils/readingLevel';
+import type { PieChartDataItem } from '@/components/common/PieChart/PieChart';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -64,7 +65,6 @@ const StatsGridWrapper = styled.div`
   margin-bottom: 2rem;
 `;
 
-// Bar Chart Section
 const ChartSection = styled.div`
   background: white;
   border-radius: 0.75rem;
@@ -117,12 +117,8 @@ const ChartVolume = styled.span`
 `;
 
 const growUp = keyframes`
-  from {
-    transform: scaleY(0);
-  }
-  to {
-    transform: scaleY(1);
-  }
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
 `;
 
 const ChartPlot = styled.div`
@@ -216,8 +212,7 @@ const BarLabel = styled.span<{ $highlight: boolean }>`
   color: ${({ theme, $highlight }) => ($highlight ? theme.colors.text.primary : theme.colors.text.tertiary)};
 `;
 
-// Quarterly Section
-const QuarterlySection = styled.div`
+const GenreSection = styled.div`
   background: white;
   border-radius: 0.75rem;
   padding: 1.5rem;
@@ -225,58 +220,52 @@ const QuarterlySection = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.card};
 `;
 
-const QuarterlyGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-
-  @media (max-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-`;
-
-const QuarterCard = styled.div`
-  text-align: center;
-  padding: 1rem;
-  background: white;
-  border-radius: 0.5rem;
-`;
-
-const QuarterLabel = styled.p`
-  font-size: 1rem;
-  color: ${({ theme }) => theme.colors.text.tertiary};
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-  text-align: left;
-`;
-
-const GenreBox = styled.div`
-  background: #f8f8f8;
-  border-radius: 0.5rem;
-  padding: 1rem;
+const GenreList = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const GenreRow = styled.div`
+  display: flex;
   align-items: center;
   gap: 1rem;
 `;
 
-const QuarterGenre = styled.p`
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: ${({ theme }) => theme.colors.primary[600]};
-`;
-
-const QuarterSecondGenres = styled.div`
-  font-size: 1.125rem;
-  color: ${({ theme }) => theme.colors.text.primary};
-`;
-
-const QuarterThirdGenres = styled.p`
-  font-size: 1rem;
+const GenreName = styled.span`
+  width: 100px;
+  font-size: 0.875rem;
   color: ${({ theme }) => theme.colors.text.secondary};
+  flex-shrink: 0;
 `;
 
-// Stale Reading Section
+const GenreBar = styled.div<{ $pct: number }>`
+  flex: 1;
+  height: 8px;
+  background: #eaeaea;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    display: block;
+    width: ${({ $pct }) => $pct}%;
+    height: 100%;
+    background: ${({ theme }) => theme.colors.primary[400]};
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+`;
+
+const GenrePct = styled.span`
+  width: 40px;
+  text-align: right;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.primary};
+  flex-shrink: 0;
+`;
+
 const StaleSection = styled.div`
   background: white;
   border-radius: 0.75rem;
@@ -325,14 +314,14 @@ export default function StatsPage() {
   const [weekPageOffset, setWeekPageOffset] = useState(0);
   const [staleShowCount, setStaleShowCount] = useState(7);
 
-  const { data: me } = useMe();
-  const readingLevel = getMockReadingLevel(me?.uuid);
-
+  const { data: myStats } = useMyStats();
   const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
   const { data: readingLibrary = [] } = useMyLibraries('READING');
 
-  // TODO: API 연동 시 completedLibrary / readingLibrary 를 API 응답으로 교체
-  const { totalBooks, averageReadingDays, monthlyAverage, staleBooks, mostRecentFinishedAt, earliestFinishedAt } =
+  const totalBooksRead = myStats?.totalBooksRead ?? completedLibrary.length;
+  const readingLevel = getReadingLevel(totalBooksRead);
+
+  const { averageReadingDays, monthlyAverage, staleBooks, mostRecentFinishedAt, earliestFinishedAt } =
     computeStatsData(completedLibrary, readingLibrary);
 
   const weeklyData = computeWeeklyData(completedLibrary, mostRecentFinishedAt, weekPageOffset);
@@ -341,6 +330,12 @@ export default function StatsPage() {
     earliestFinishedAt,
     weekPageOffset,
   );
+
+  const genreData: PieChartDataItem[] | undefined = myStats?.genreStats?.length
+    ? myStats.genreStats.map(g => ({ name: g.genreName, value: g.booksRead }))
+    : completedLibrary.length > 0
+      ? [{ name: '기타', value: completedLibrary.length }]
+      : undefined;
 
   return (
     <Container>
@@ -360,7 +355,7 @@ export default function StatsPage() {
         <StatsGrid>
           <StatCard
             label="총 읽은 책 수"
-            value={totalBooks ? `${totalBooks}권` : undefined}
+            value={totalBooksRead ? `${totalBooksRead}권` : undefined}
             icon={<OpenedBookIcon size={24} />}
           />
           <StatCard
@@ -370,17 +365,17 @@ export default function StatsPage() {
           />
           <StatCard
             label="월 평균 권 수"
-            value={totalBooks ? `${monthlyAverage}권` : undefined}
+            value={totalBooksRead ? `${monthlyAverage}권` : undefined}
             icon={<BooksIcon size={24} />}
           />
         </StatsGrid>
       </StatsGridWrapper>
 
-      {/* Monthly Bar Chart */}
+      {/* 주간 바 차트 */}
       <ChartSection>
         <ChartHeader>
           <ChartSubHeader>
-            <SectionTitle>월별 독서량</SectionTitle>
+            <SectionTitle>주간 독서량</SectionTitle>
             <NavButtons>
               <NavButton
                 $size={24}
@@ -404,7 +399,7 @@ export default function StatsPage() {
           </ChartSubHeader>
           <ChartInfo>
             <ChartVolume>
-              {totalBooks}권 <span>(전체)</span>
+              {totalBooksRead}권 <span>(전체)</span>
             </ChartVolume>
             <ChartVolume>
               {monthlyAverage}권 <span>(월 평균)</span>
@@ -438,79 +433,60 @@ export default function StatsPage() {
 
       <ReadingCalendar />
 
-      {/* Pie Charts */}
-      <PieChart />
+      {/* 장르별 파이 차트 */}
+      <PieChart genreData={genreData} />
 
-      {/* Quarterly */}
-      <QuarterlySection>
-        <SectionTitle>분기별 많이 읽은 장르</SectionTitle>
-        <QuarterlyGrid>
-          <QuarterCard>
-            <QuarterLabel>1분기</QuarterLabel>
-            <GenreBox>
-              <QuarterGenre>스릴러 65%</QuarterGenre>
-              <QuarterSecondGenres>로맨스 23%</QuarterSecondGenres>
-              <QuarterThirdGenres>성장 13%</QuarterThirdGenres>
-            </GenreBox>
-          </QuarterCard>
-          <QuarterCard>
-            <QuarterLabel>2분기</QuarterLabel>
-            <GenreBox>
-              <QuarterGenre>라이트노벨 65%</QuarterGenre>
-              <QuarterSecondGenres>로맨스 23%</QuarterSecondGenres>
-              <QuarterThirdGenres>로맨스 13%</QuarterThirdGenres>
-            </GenreBox>
-          </QuarterCard>
-          <QuarterCard>
-            <QuarterLabel>3분기</QuarterLabel>
-            <GenreBox>
-              <QuarterGenre>예술/대중문화 65%</QuarterGenre>
-              <QuarterSecondGenres>로맨스 23%</QuarterSecondGenres>
-              <QuarterThirdGenres>로맨스 13%</QuarterThirdGenres>
-            </GenreBox>
-          </QuarterCard>
-          <QuarterCard>
-            <QuarterLabel>4분기</QuarterLabel>
-            <GenreBox>
-              <QuarterGenre>스릴러 65%</QuarterGenre>
-              <QuarterSecondGenres>로맨스 23%</QuarterSecondGenres>
-              <QuarterThirdGenres>로맨스 13%</QuarterThirdGenres>
-            </GenreBox>
-          </QuarterCard>
-        </QuarterlyGrid>
-      </QuarterlySection>
+      {/* 장르별 독서 비중 */}
+      {myStats?.genreStats && myStats.genreStats.length > 0 && (
+        <GenreSection>
+          <SectionTitle>장르별 독서 비중</SectionTitle>
+          <GenreList>
+            {myStats.genreStats.map(g => (
+              <GenreRow key={g.genreCode}>
+                <GenreName>{g.genreName}</GenreName>
+                <GenreBar $pct={g.percentage} />
+                <GenrePct>{Math.round(g.percentage)}%</GenrePct>
+              </GenreRow>
+            ))}
+          </GenreList>
+        </GenreSection>
+      )}
 
-      {/* Stale Reading */}
-      <StaleSection>
-        <SectionTitle>아직 이 책을 읽고 계신가요?</SectionTitle>
-        <StaleBooks>
-          {staleBooks.slice(0, staleShowCount).map(book => (
-            <StaleBookItem key={book.uuid}>
-              <BookCard book={book} size="sm" showTitle={false} initialStatus="reading" />
-              <StaleBookDate>
-                {book.date}부터
-                <br />
-                읽는 중
-              </StaleBookDate>
-            </StaleBookItem>
-          ))}
-        </StaleBooks>
-        {staleBooks.length > 7 && (
-          <ShowMoreToggle
-            onClick={() => (staleShowCount >= staleBooks.length ? setStaleShowCount(7) : setStaleShowCount(c => c + 7))}
-          >
-            {staleShowCount >= staleBooks.length ? (
-              <>
-                접기 <ChevronUp size={16} />
-              </>
-            ) : (
-              <>
-                더보기 <ChevronDown size={16} />
-              </>
-            )}
-          </ShowMoreToggle>
-        )}
-      </StaleSection>
+      {/* 아직 읽는 중인 책 */}
+      {staleBooks.length > 0 && (
+        <StaleSection>
+          <SectionTitle>아직 이 책을 읽고 계신가요?</SectionTitle>
+          <StaleBooks>
+            {staleBooks.slice(0, staleShowCount).map(book => (
+              <StaleBookItem key={book.uuid}>
+                <BookCard book={book} size="sm" showTitle={false} initialStatus="reading" />
+                <StaleBookDate>
+                  {book.date}부터
+                  <br />
+                  읽는 중
+                </StaleBookDate>
+              </StaleBookItem>
+            ))}
+          </StaleBooks>
+          {staleBooks.length > 7 && (
+            <ShowMoreToggle
+              onClick={() =>
+                staleShowCount >= staleBooks.length ? setStaleShowCount(7) : setStaleShowCount(c => c + 7)
+              }
+            >
+              {staleShowCount >= staleBooks.length ? (
+                <>
+                  접기 <ChevronUp size={16} />
+                </>
+              ) : (
+                <>
+                  더보기 <ChevronDown size={16} />
+                </>
+              )}
+            </ShowMoreToggle>
+          )}
+        </StaleSection>
+      )}
     </Container>
   );
 }

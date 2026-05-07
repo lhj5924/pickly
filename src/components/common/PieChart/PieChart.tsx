@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { AnimatedPieChart } from '../AnimatedPieChart';
-import type { HomeGenreStat } from '@/types/home';
 
-const keywordChartData = [
+export type PieChartDataItem = { name: string; value: number };
+
+const DEFAULT_KEYWORD_DATA: PieChartDataItem[] = [
   { name: '성장', value: 35 },
   { name: '로맨스', value: 25 },
   { name: '힐링', value: 10 },
@@ -82,11 +83,13 @@ const EmptyChart = styled.div`
 
 interface PieChartProps {
   className?: string;
-  genreStats?: HomeGenreStat[];
-  hasData?: boolean;
+  genreData?: PieChartDataItem[];
+  keywordData?: PieChartDataItem[];
 }
 
-export const PieChart: React.FC<PieChartProps> = ({ className, genreStats, hasData = false }) => {
+export const PieChart: React.FC<PieChartProps> = ({ className, genreData, keywordData }) => {
+  const hasData = genreData !== undefined && genreData.length > 0;
+  const resolvedKeywordData = keywordData ?? DEFAULT_KEYWORD_DATA;
   const [chartAnimated, setChartAnimated] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
 
@@ -109,12 +112,7 @@ export const PieChart: React.FC<PieChartProps> = ({ className, genreStats, hasDa
     return () => observer.disconnect();
   }, [chartAnimated]);
 
-  const genreChartData =
-    genreStats && genreStats.length > 0
-      ? genreStats.map(stat => ({ name: stat.genreName, value: stat.percentage }))
-      : [];
-
-  const topGenre = genreStats?.[0]?.genreName;
+  const topGenre = genreData?.[0]?.name;
   const chartTitle = topGenre
     ? `당신은 ${topGenre} 장르를 가장 많이 읽었어요`
     : '당신은 어떤 장르를 즐겨 읽으시나요?';
@@ -122,18 +120,18 @@ export const PieChart: React.FC<PieChartProps> = ({ className, genreStats, hasDa
   return (
     <ChartSection ref={chartRef} className={className}>
       <ChartTitle>{chartTitle}</ChartTitle>
-      {hasData && genreChartData.length > 0 ? (
+      {hasData ? (
         <ChartContainer>
           <PieChartWrapper>
             <PieChartLabel>장르별 독서량</PieChartLabel>
             <PieChartContainer>
-              <AnimatedPieChart data={genreChartData} animate={chartAnimated} />
+              <AnimatedPieChart data={genreData!} animate={chartAnimated} />
             </PieChartContainer>
           </PieChartWrapper>
           <PieChartWrapper>
             <PieChartLabel>키워드별 독서량</PieChartLabel>
             <PieChartContainer>
-              <AnimatedPieChart data={keywordChartData} animate={chartAnimated} />
+              <AnimatedPieChart data={resolvedKeywordData} animate={chartAnimated} />
             </PieChartContainer>
           </PieChartWrapper>
         </ChartContainer>

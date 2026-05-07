@@ -11,11 +11,6 @@ export const userKeys = {
   me: (userUuid: string | undefined) => [...userKeys.all, 'me', userUuid] as const,
 } as const;
 
-export const homeKeys = {
-  all: ['home'] as const,
-  data: (userUuid: string | undefined) => [...homeKeys.all, 'data', userUuid] as const,
-} as const;
-
 export const genreKeys = {
   all: ['genre'] as const,
   list: () => [...genreKeys.all, 'list'] as const,
@@ -46,4 +41,27 @@ export const reviewKeys = {
     [...reviewKeys.all, 'byBook', bookUuid, pageable.page, pageable.size, pageable.sort] as const,
   me: (userUuid: string | undefined) => [...reviewKeys.all, 'me', userUuid] as const,
   available: (userUuid: string | undefined) => [...reviewKeys.all, 'available', userUuid] as const,
+} as const;
+
+export const statsKeys = {
+  all: ['stats'] as const,
+  summary: (userUuid: string | undefined) => [...statsKeys.all, 'summary', userUuid] as const,
+  full: (userUuid: string | undefined) => [...statsKeys.all, 'full', userUuid] as const,
+  monthly: (userUuid: string | undefined, year?: number) => [...statsKeys.all, 'monthly', userUuid, year] as const,
+  genres: (userUuid: string | undefined) => [...statsKeys.all, 'genres', userUuid] as const,
+} as const;
+
+export const recommendationKeys = {
+  all: ['recommendation'] as const,
+  list: (userUuid: string | undefined, limit: number) => [...recommendationKeys.all, 'list', userUuid, limit] as const,
+  today: (userUuid: string | undefined, limit: number) => [...recommendationKeys.all, 'today', userUuid, limit] as const,
+  similar: (bookUuid: string, limit: number) => [...recommendationKeys.all, 'similar', bookUuid, limit] as const,
+  popular: (limit: number) => [...recommendationKeys.all, 'popular', limit] as const,
+  popularForMe: (userUuid: string | undefined, limit: number) =>
+    [...recommendationKeys.all, 'popularForMe', userUuid, limit] as const,
+} as const;
+
+export const homeKeys = {
+  all: ['home'] as const,
+  data: (userUuid: string | undefined) => [...homeKeys.all, 'data', userUuid] as const,
 } as const;
