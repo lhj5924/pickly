@@ -27,6 +27,7 @@ export const bookKeys = {
   external: (externalId: string, source: string) => [...bookKeys.all, 'external', externalId, source] as const,
   search: (query: string, target?: string, page?: number, size?: number) =>
     [...bookKeys.all, 'search', query, target, page, size] as const,
+  infiniteSearch: (query: string) => [...bookKeys.all, 'infiniteSearch', query] as const,
 } as const;
 
 export const libraryKeys = {
