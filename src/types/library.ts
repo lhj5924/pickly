@@ -15,8 +15,9 @@ export interface LibraryItem {
 }
 
 export interface AddLibraryRequest {
-  externalId: string;
-  source: BookSource;
+  bookUuid?: string;
+  externalId?: string;
+  source?: BookSource;
   status: BookStatus;
 }
 

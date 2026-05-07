@@ -5,7 +5,7 @@ import {
   removeFromLibrary,
   updateLibraryStatus,
 } from './library';
-import { libraryKeys } from './queryKeys';
+import { homeKeys, libraryKeys } from './queryKeys';
 import { useAuthStore } from '../stores';
 import type { BookStatus } from '../types/book';
 import type {
@@ -38,6 +38,7 @@ export const useAddToLibrary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.all });
+      queryClient.invalidateQueries({ queryKey: homeKeys.all });
     },
   });
 };
@@ -54,6 +55,7 @@ export const useRemoveFromLibrary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.all });
+      queryClient.invalidateQueries({ queryKey: homeKeys.all });
     },
   });
 };
@@ -70,6 +72,7 @@ export const useUpdateLibraryStatus = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.all });
+      queryClient.invalidateQueries({ queryKey: homeKeys.all });
     },
   });
 };
