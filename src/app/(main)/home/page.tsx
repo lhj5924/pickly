@@ -1,6 +1,6 @@
 'use client';
 
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import { BookCard, Button, StatsGrid, StatCard } from '@/components/common';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { OpenedBookIcon, CalendarIcon, BooksIcon } from '@/components/icons/StatIcons';

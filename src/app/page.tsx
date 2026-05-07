@@ -12,7 +12,7 @@ export default function RootPage() {
     if (isAuthenticated) {
       router.replace('/home');
     } else {
-      router.replace('/login');
+      router.replace('/landing');
     }
   }, [isAuthenticated, router]);
 

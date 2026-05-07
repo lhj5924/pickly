@@ -412,7 +412,7 @@ export default function RecommendPage() {
     .filter(item => item.finishedAt)
     .sort((a, b) => new Date(b.finishedAt!).getTime() - new Date(a.finishedAt!).getTime())[0];
 
-  const { data: similarBooksRaw = [] } = useSimilarBooks(recentBook?.book.uuid, 10);
+  const { data: similarBooksRaw = [] } = useSimilarBooks(recentBook?.book.uuid ?? undefined, 10);
   const { data: recommendationsRaw = [] } = useRecommendations(20);
   const { data: todayRaw = [] } = useTodayRecommendations(8);
   const { data: popularForMeRaw = [] } = usePopularBooksForMe(6);

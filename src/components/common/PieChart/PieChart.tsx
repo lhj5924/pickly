@@ -112,11 +112,14 @@ export const PieChart: React.FC<PieChartProps> = ({ className, genreData, keywor
     return () => observer.disconnect();
   }, [chartAnimated]);
 
-  const topGenre = genreData?.[0]?.name ?? resolvedKeywordData[0]?.name ?? '';
+  const topGenre = genreData?.[0]?.name;
+  const chartTitle = topGenre
+    ? `당신은 ${topGenre} 장르를 가장 많이 읽었어요`
+    : '당신은 어떤 장르를 즐겨 읽으시나요?';
 
   return (
     <ChartSection ref={chartRef} className={className}>
-      <ChartTitle>당신은 {topGenre} 중심의 소설을 가장 많이 소비해요</ChartTitle>
+      <ChartTitle>{chartTitle}</ChartTitle>
       {hasData ? (
         <ChartContainer>
           <PieChartWrapper>

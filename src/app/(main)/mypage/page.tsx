@@ -6,6 +6,7 @@ import { Pencil, ArrowRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores';
+import { logout as logoutApi } from '@/api/auth';
 import type { GenreInfo } from '@/types';
 import { useMe, useUpdateMe, useDeleteMe } from '@/api/useMe';
 import { useMyReviews } from '@/api/useReview';
@@ -157,7 +158,6 @@ const SectionTitle = styled.h2`
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.primary};
 `;
-
 
 const ReviewGrid = styled.div`
   display: grid;
@@ -364,14 +364,23 @@ export default function MyPage() {
     setShowGenreModal(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const uuid = serverUser?.uuid ?? localUser?.id;
+    if (uuid) {
+      try {
+        await logoutApi(uuid);
+      } catch {
+        // 서버 로그아웃 실패해도 로컬 로그아웃은 진행
+      }
+    }
     logout();
-    window.location.href = '/login';
+    window.location.href = '/landing';
   };
 
   const handleDeleteAccount = () => {
     if (window.confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       deleteUser();
+      window.location.href = '/landing';
     }
   };
 
