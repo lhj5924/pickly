@@ -17,3 +17,8 @@ export const refreshToken = async (body: RefreshRequest): Promise<TokenResponse>
   const { data } = await apiClient.post<TokenResponse>('/api/v1/auth/refresh', body);
   return data;
 };
+
+/** 로그아웃 (Refresh Token 무효화) */
+export const logout = async (userUuid: string): Promise<void> => {
+  await apiClient.post('/api/v1/auth/logout', null, { params: { userUuid } });
+};

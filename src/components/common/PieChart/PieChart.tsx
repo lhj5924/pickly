@@ -1,18 +1,12 @@
 'use client';
 
-import { useState, useEffect, useId, useRef } from 'react';
-import styled, { useTheme } from 'styled-components';
+import { useState, useEffect, useRef } from 'react';
+import styled from 'styled-components';
 import { AnimatedPieChart } from '../AnimatedPieChart';
-import { useMyLibraries } from '@/api/useLibrary';
 
-// UI-only 차트/배너 데이터는 아직 서버 API가 없어 로컬 상수로 유지합니다 (Stage 3).
-const genreChartData = [
-  { name: '소설', value: 54 },
-  { name: '에세이', value: 34 },
-  { name: '경제경영', value: 12 },
-];
+export type PieChartDataItem = { name: string; value: number };
 
-const keywordChartData = [
+const DEFAULT_KEYWORD_DATA: PieChartDataItem[] = [
   { name: '성장', value: 35 },
   { name: '로맨스', value: 25 },
   { name: '힐링', value: 10 },
@@ -21,7 +15,6 @@ const keywordChartData = [
   { name: '역사', value: 5 },
 ];
 
-// Chart Section
 const ChartSection = styled.div`
   background: white;
   border-radius: 1rem;
@@ -88,18 +81,18 @@ const EmptyChart = styled.div`
   font-size: 0.875rem;
 `;
 
-const CtaButtonWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-`;
+interface PieChartProps {
+  className?: string;
+  genreData?: PieChartDataItem[];
+  keywordData?: PieChartDataItem[];
+}
 
-export const PieChart: React.FC<{ className?: string }> = ({ className }) => {
-  const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
-  const hasData = completedLibrary.length > 0;
+export const PieChart: React.FC<PieChartProps> = ({ className, genreData, keywordData }) => {
+  const hasData = genreData !== undefined && genreData.length > 0;
+  const resolvedKeywordData = keywordData ?? DEFAULT_KEYWORD_DATA;
   const [chartAnimated, setChartAnimated] = useState(false);
   const chartRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for chart animation
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
@@ -119,29 +112,29 @@ export const PieChart: React.FC<{ className?: string }> = ({ className }) => {
     return () => observer.disconnect();
   }, [chartAnimated]);
 
+  const topGenre = genreData?.[0]?.name ?? resolvedKeywordData[0]?.name ?? '';
+
   return (
-    <>
-      <ChartSection ref={chartRef} className={className}>
-        <ChartTitle>당신은 {keywordChartData[0]?.name} 중심의 소설을 가장 많이 소비해요</ChartTitle>
-        {hasData ? (
-          <ChartContainer>
-            <PieChartWrapper>
-              <PieChartLabel>장르별 독서량</PieChartLabel>
-              <PieChartContainer>
-                <AnimatedPieChart data={genreChartData} animate={chartAnimated} />
-              </PieChartContainer>
-            </PieChartWrapper>
-            <PieChartWrapper>
-              <PieChartLabel>키워드별 독서량</PieChartLabel>
-              <PieChartContainer>
-                <AnimatedPieChart data={keywordChartData} animate={chartAnimated} />
-              </PieChartContainer>
-            </PieChartWrapper>
-          </ChartContainer>
-        ) : (
-          <EmptyChart>아직 데이터가 없습니다</EmptyChart>
-        )}
-      </ChartSection>
-    </>
+    <ChartSection ref={chartRef} className={className}>
+      <ChartTitle>당신은 {topGenre} 중심의 소설을 가장 많이 소비해요</ChartTitle>
+      {hasData ? (
+        <ChartContainer>
+          <PieChartWrapper>
+            <PieChartLabel>장르별 독서량</PieChartLabel>
+            <PieChartContainer>
+              <AnimatedPieChart data={genreData!} animate={chartAnimated} />
+            </PieChartContainer>
+          </PieChartWrapper>
+          <PieChartWrapper>
+            <PieChartLabel>키워드별 독서량</PieChartLabel>
+            <PieChartContainer>
+              <AnimatedPieChart data={resolvedKeywordData} animate={chartAnimated} />
+            </PieChartContainer>
+          </PieChartWrapper>
+        </ChartContainer>
+      ) : (
+        <EmptyChart>아직 데이터가 없습니다</EmptyChart>
+      )}
+    </ChartSection>
   );
 };

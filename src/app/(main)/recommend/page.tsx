@@ -7,14 +7,14 @@ import styled from 'styled-components';
 import { BookCard, NavButtons, NavButton, ShowMoreToggle } from '@/components/common';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '@/stores';
+import { useMyLibraries } from '@/api/useLibrary';
 import {
-  mockSimilarBooks,
-  mockGenreBooks,
-  mockAiRecommendBooks,
-  mockPopularBooks,
-  mockHiddenBooks,
-  type HiddenMockBook,
-} from '@/mocks';
+  useRecommendations,
+  useTodayRecommendations,
+  useSimilarBooks,
+  usePopularBooksForMe,
+} from '@/api/useRecommendation';
+import type { RecommendedBookResponse } from '@/types/recommendation';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -41,7 +41,6 @@ const SectionTitle = styled.h2`
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text.quaternary};
 `;
-
 
 const SimilarBooksLayout = styled.div`
   display: flex;
@@ -193,13 +192,6 @@ const VerticalBookAuthor = styled.p`
   margin-top: 0.5rem;
 `;
 
-// AI 추천 섹션
-const AIRecommendTitle = styled.h2`
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-`;
-
 const AIBookGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -210,7 +202,6 @@ const AIBookGrid = styled.div`
   }
 `;
 
-// 인기 책 섹션
 const PopularSection = styled.section`
   margin-bottom: 3rem;
 `;
@@ -225,7 +216,6 @@ const PopularGrid = styled.div`
   }
 `;
 
-// 숨겨진 취향 탐색
 const HiddenSection = styled.section`
   margin-bottom: 3rem;
 `;
@@ -265,18 +255,25 @@ const HiddenQuoteText = styled.p`
   word-break: keep-all;
 `;
 
-// Data from centralized mock data (replace with API calls later)
-const similarBooks = mockSimilarBooks;
-const genreBooks = mockGenreBooks;
-const aiBooks = mockAiRecommendBooks;
-const popularBooks = mockPopularBooks;
-const hiddenBooks = mockHiddenBooks;
+const EmptySection = styled.div`
+  padding: 3rem;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  font-size: 0.875rem;
+`;
 
 const SIMILAR_BOOKS_PAGE_SIZE = 5;
 const GENRE_BOOKS_PAGE_SIZE = 3;
 const AI_BOOKS_PAGE_SIZE = 4;
 const POPULAR_BOOKS_PAGE_SIZE = 3;
 const HIDDEN_BOOKS_PAGE_SIZE = 2;
+
+const HIDDEN_QUOTES = [
+  '어린왕자가 네 번째 별에서 만났던 별을 세는 사업가를 기억하시나요?',
+  '문장과 문장 사이, 당신이 잠시 숨을 고르는 그 순간에도 세계는 조금씩 움직이고 있어요.',
+  '읽고 싶은 책보다 읽어야 할 책이 많아질 때, 우리는 취향을 잃어버리곤 합니다.',
+  '가장 조용한 페이지 속에서 가장 큰 목소리를 들을 수 있을지도 몰라요.',
+];
 
 const useShowMore = <T,>(items: T[], pageSize: number) => {
   const [visibleCount, setVisibleCount] = useState(pageSize);
@@ -365,7 +362,11 @@ const useImagePalette = (src: string, fallback: string[]) => {
   return palette;
 };
 
-const HiddenBookCard = ({ book }: { book: HiddenMockBook }) => {
+interface HiddenBook extends RecommendedBookResponse {
+  quote: string;
+}
+
+const HiddenBookCard = ({ book }: { book: HiddenBook }) => {
   const router = useRouter();
   const seed = hashStringToInt(book.uuid);
   const fallback = PASTEL_FALLBACK_PALETTES[seed % PASTEL_FALLBACK_PALETTES.length];
@@ -406,88 +407,119 @@ export default function RecommendPage() {
   const { user } = useAuthStore();
   const nickname = user?.nickname?.split('_')[0] || '빨리';
 
+  const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
+  const recentBook = [...completedLibrary]
+    .filter(item => item.finishedAt)
+    .sort((a, b) => new Date(b.finishedAt!).getTime() - new Date(a.finishedAt!).getTime())[0];
+
+  const { data: similarBooksRaw = [] } = useSimilarBooks(recentBook?.book.uuid, 10);
+  const { data: recommendationsRaw = [] } = useRecommendations(20);
+  const { data: todayRaw = [] } = useTodayRecommendations(8);
+  const { data: popularForMeRaw = [] } = usePopularBooksForMe(6);
+
+  // 섹션별 데이터 분배 (recommendations를 장르 + 숨겨진 취향으로 나눔)
+  const genreBooksRaw = recommendationsRaw.slice(0, 10);
+  const hiddenBooksRaw: HiddenBook[] = recommendationsRaw.slice(10).map((book, i) => ({
+    ...book,
+    quote: book.reason || HIDDEN_QUOTES[i % HIDDEN_QUOTES.length],
+  }));
+
   const [similarBooksPage, setSimilarBooksPage] = useState(0);
-  const similarBooksMaxPage = Math.max(0, Math.ceil(similarBooks.length / SIMILAR_BOOKS_PAGE_SIZE) - 1);
+  const similarBooksMaxPage = Math.max(0, Math.ceil(similarBooksRaw.length / SIMILAR_BOOKS_PAGE_SIZE) - 1);
   const canGoPrevSimilarBooks = similarBooksPage > 0;
   const canGoNextSimilarBooks = similarBooksPage < similarBooksMaxPage;
-  const visibleSimilarBooks = similarBooks.slice(
+  const visibleSimilarBooks = similarBooksRaw.slice(
     similarBooksPage * SIMILAR_BOOKS_PAGE_SIZE,
     (similarBooksPage + 1) * SIMILAR_BOOKS_PAGE_SIZE,
   );
   const featuredSimilarBook = visibleSimilarBooks[0];
   const visibleSmallSimilarBooks = visibleSimilarBooks.slice(1);
 
-  const genre = useShowMore(genreBooks, GENRE_BOOKS_PAGE_SIZE);
-  const ai = useShowMore(aiBooks, AI_BOOKS_PAGE_SIZE);
-  const popular = useShowMore(popularBooks, POPULAR_BOOKS_PAGE_SIZE);
-  const hidden = useShowMore(hiddenBooks, HIDDEN_BOOKS_PAGE_SIZE);
+  const genre = useShowMore(genreBooksRaw, GENRE_BOOKS_PAGE_SIZE);
+  const ai = useShowMore(todayRaw, AI_BOOKS_PAGE_SIZE);
+  const popular = useShowMore(popularForMeRaw, POPULAR_BOOKS_PAGE_SIZE);
+  const hidden = useShowMore(hiddenBooksRaw, HIDDEN_BOOKS_PAGE_SIZE);
 
   return (
     <Container>
       {/* 비슷한 책 */}
-      <Section>
-        <SectionHeader>
-          <SectionTitle>&lt;내가 없던 어느 밤에&gt; 와 비슷한 책</SectionTitle>
-        </SectionHeader>
-        <SimilarBooksLayout>
-          {featuredSimilarBook && (
-            <FeaturedBookColumn>
-              <BookCard book={featuredSimilarBook} size="md" />
-              <FeaturedTextWrapper>
-                <FeaturedTitle>{featuredSimilarBook.title}</FeaturedTitle>
-                <FeaturedSubtitle>{featuredSimilarBook.authors?.[0]}</FeaturedSubtitle>
-              </FeaturedTextWrapper>
-            </FeaturedBookColumn>
+      {recentBook && (
+        <Section>
+          <SectionHeader>
+            <SectionTitle>
+              &lt;{recentBook.book.title}&gt;{getKoreanObjectParticle(recentBook.book.title, '과', '와')} 비슷한 책
+            </SectionTitle>
+          </SectionHeader>
+          {similarBooksRaw.length > 0 ? (
+            <SimilarBooksLayout>
+              {featuredSimilarBook && (
+                <FeaturedBookColumn>
+                  <BookCard book={featuredSimilarBook} size="md" />
+                  <FeaturedTextWrapper>
+                    <FeaturedTitle>{featuredSimilarBook.title}</FeaturedTitle>
+                    <FeaturedSubtitle>{featuredSimilarBook.authors?.[0]}</FeaturedSubtitle>
+                  </FeaturedTextWrapper>
+                </FeaturedBookColumn>
+              )}
+              <SmallBooksColumn>
+                <SmallBooksGrid>
+                  {visibleSmallSimilarBooks.map(book => (
+                    <SmallBookItem key={book.uuid}>
+                      <BookCard book={book} size="sm" showTitle={false} />
+                      <SmallBookTextWrapper>
+                        <SmallBookTitle>{book.title}</SmallBookTitle>
+                      </SmallBookTextWrapper>
+                    </SmallBookItem>
+                  ))}
+                </SmallBooksGrid>
+                <NavButtons>
+                  <NavButton
+                    onClick={() => setSimilarBooksPage(p => Math.max(0, p - 1))}
+                    disabled={!canGoPrevSimilarBooks}
+                    aria-label="이전"
+                  >
+                    <ChevronLeft size={20} />
+                  </NavButton>
+                  <NavButton
+                    onClick={() => setSimilarBooksPage(p => Math.min(similarBooksMaxPage, p + 1))}
+                    disabled={!canGoNextSimilarBooks}
+                    aria-label="다음"
+                  >
+                    <ChevronRight size={20} />
+                  </NavButton>
+                </NavButtons>
+              </SmallBooksColumn>
+            </SimilarBooksLayout>
+          ) : (
+            <EmptySection>비슷한 책을 불러오는 중입니다...</EmptySection>
           )}
-          <SmallBooksColumn>
-            <SmallBooksGrid>
-              {visibleSmallSimilarBooks.map(book => (
-                <SmallBookItem key={book.uuid}>
-                  <BookCard book={book} size="sm" showTitle={false} />
-                  <SmallBookTextWrapper>
-                    <SmallBookTitle>{book.title}</SmallBookTitle>
-                  </SmallBookTextWrapper>
-                </SmallBookItem>
-              ))}
-            </SmallBooksGrid>
-            <NavButtons>
-              <NavButton
-                onClick={() => setSimilarBooksPage(p => Math.max(0, p - 1))}
-                disabled={!canGoPrevSimilarBooks}
-                aria-label="이전"
-              >
-                <ChevronLeft size={20} />
-              </NavButton>
-              <NavButton
-                onClick={() => setSimilarBooksPage(p => Math.min(similarBooksMaxPage, p + 1))}
-                disabled={!canGoNextSimilarBooks}
-                aria-label="다음"
-              >
-                <ChevronRight size={20} />
-              </NavButton>
-            </NavButtons>
-          </SmallBooksColumn>
-        </SimilarBooksLayout>
-      </Section>
+        </Section>
+      )}
 
       {/* 장르 기반 추천 */}
       <Section>
         <SectionHeader>
           <SectionTitle>가장 최근 읽은 장르 기반 추천</SectionTitle>
         </SectionHeader>
-        <VerticalGrid>
-          {genre.items.map(book => (
-            <VerticalBookCard key={book.uuid} onClick={() => router.push(`/book/${book.uuid}`)}>
-              <VerticalBookCoverWrapper>
-                <BookCard book={book} size="sm" showTitle={false} />
-              </VerticalBookCoverWrapper>
-              <VerticalBookTitle>{book.title}</VerticalBookTitle>
-              <VerticalBookSubTitle>{book.publisher}</VerticalBookSubTitle>
-              <VerticalBookAuthor>{book.authors?.[0]}</VerticalBookAuthor>
-            </VerticalBookCard>
-          ))}
-        </VerticalGrid>
-        {genre.canExpand && <ShowMoreToggle expanded={genre.expanded} onToggle={genre.toggle} />}
+        {genre.items.length > 0 ? (
+          <>
+            <VerticalGrid>
+              {genre.items.map(book => (
+                <VerticalBookCard key={book.uuid} onClick={() => router.push(`/book/${book.uuid}`)}>
+                  <VerticalBookCoverWrapper>
+                    <BookCard book={book} size="sm" showTitle={false} />
+                  </VerticalBookCoverWrapper>
+                  <VerticalBookTitle>{book.title}</VerticalBookTitle>
+                  <VerticalBookSubTitle>{book.reason}</VerticalBookSubTitle>
+                  <VerticalBookAuthor>{book.authors?.[0]}</VerticalBookAuthor>
+                </VerticalBookCard>
+              ))}
+            </VerticalGrid>
+            {genre.canExpand && <ShowMoreToggle expanded={genre.expanded} onToggle={genre.toggle} />}
+          </>
+        ) : (
+          <EmptySection>추천 데이터를 불러오는 중입니다...</EmptySection>
+        )}
       </Section>
 
       {/* AI 추천 */}
@@ -495,12 +527,18 @@ export default function RecommendPage() {
         <SectionHeader>
           <SectionTitle>{nickname}님의 독서 취향 기반 AI 추천</SectionTitle>
         </SectionHeader>
-        <AIBookGrid>
-          {ai.items.map(book => (
-            <BookCard key={book.uuid} book={book} size="md" />
-          ))}
-        </AIBookGrid>
-        {ai.canExpand && <ShowMoreToggle expanded={ai.expanded} onToggle={ai.toggle} />}
+        {ai.items.length > 0 ? (
+          <>
+            <AIBookGrid>
+              {ai.items.map(book => (
+                <BookCard key={book.uuid} book={book} size="md" />
+              ))}
+            </AIBookGrid>
+            {ai.canExpand && <ShowMoreToggle expanded={ai.expanded} onToggle={ai.toggle} />}
+          </>
+        ) : (
+          <EmptySection>오늘의 추천을 불러오는 중입니다...</EmptySection>
+        )}
       </Section>
 
       {/* 인기 책 */}
@@ -508,39 +546,47 @@ export default function RecommendPage() {
         <SectionHeader>
           <SectionTitle>요즘엔 이런 책이 인기있어요</SectionTitle>
         </SectionHeader>
-        <PopularGrid>
-          {popular.items.map(book => (
-            <VerticalBookCard key={book.uuid} onClick={() => router.push(`/book/${book.uuid}`)}>
-              <PopularCoverWrapper>
-                <BookCard book={book} size="md" />
-              </PopularCoverWrapper>
-              <div>
-                <Image src="/icons/shootingstar.svg" alt="" width={24} height={24} />
-              </div>
-              {`${nickname}님이 읽은`}
-              <div>
-                <VerticalBookTitle as="span">&quot;{book.title}&quot;</VerticalBookTitle>
-                {getKoreanObjectParticle(book.title, '과', '와')}
-              </div>
-              비슷한 작품이에요!
-            </VerticalBookCard>
-          ))}
-        </PopularGrid>
-        {popular.canExpand && <ShowMoreToggle expanded={popular.expanded} onToggle={popular.toggle} />}
+        {popular.items.length > 0 ? (
+          <>
+            <PopularGrid>
+              {popular.items.map(book => (
+                <VerticalBookCard key={book.uuid} onClick={() => router.push(`/book/${book.uuid}`)}>
+                  <PopularCoverWrapper>
+                    <BookCard book={book} size="md" />
+                  </PopularCoverWrapper>
+                  <div>
+                    <Image src="/icons/shootingstar.svg" alt="" width={24} height={24} />
+                  </div>
+                  {`${nickname}님이 읽은`}
+                  <div>
+                    <VerticalBookTitle as="span">&quot;{book.title}&quot;</VerticalBookTitle>
+                    {getKoreanObjectParticle(book.title, '과', '와')}
+                  </div>
+                  비슷한 작품이에요!
+                </VerticalBookCard>
+              ))}
+            </PopularGrid>
+            {popular.canExpand && <ShowMoreToggle expanded={popular.expanded} onToggle={popular.toggle} />}
+          </>
+        ) : (
+          <EmptySection>인기 추천을 불러오는 중입니다...</EmptySection>
+        )}
       </PopularSection>
 
       {/* 숨겨진 취향 */}
-      <HiddenSection>
-        <SectionHeader>
-          <SectionTitle>숨겨진 취향 탐색 - 이런 책은 어때요?</SectionTitle>
-        </SectionHeader>
-        <HiddenGrid>
-          {hidden.items.map(book => (
-            <HiddenBookCard key={book.uuid} book={book} />
-          ))}
-        </HiddenGrid>
-        {hidden.canExpand && <ShowMoreToggle expanded={hidden.expanded} onToggle={hidden.toggle} />}
-      </HiddenSection>
+      {hidden.items.length > 0 && (
+        <HiddenSection>
+          <SectionHeader>
+            <SectionTitle>숨겨진 취향 탐색 - 이런 책은 어때요?</SectionTitle>
+          </SectionHeader>
+          <HiddenGrid>
+            {hidden.items.map(book => (
+              <HiddenBookCard key={book.uuid} book={book} />
+            ))}
+          </HiddenGrid>
+          {hidden.canExpand && <ShowMoreToggle expanded={hidden.expanded} onToggle={hidden.toggle} />}
+        </HiddenSection>
+      )}
     </Container>
   );
 }
