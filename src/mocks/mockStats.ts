@@ -38,7 +38,7 @@ export type WeeklyDataItem = {
 
 export type StaleBook = {
   uuid: string;
-  libraryUuid: string;
+  libraryItemUuid: string;
   title: string;
   thumbnailUrl: string;
   authors: string[];
@@ -113,7 +113,7 @@ export const computeStatsData = (
     .filter(item => item.startedAt)
     .map(item => ({
       uuid: item.book.uuid ?? '',
-      libraryUuid: item.uuid,
+      libraryItemUuid: item.uuid,
       title: item.book.title,
       thumbnailUrl: item.book.thumbnailUrl,
       authors: item.book.authors,

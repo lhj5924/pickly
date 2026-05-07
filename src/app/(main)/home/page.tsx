@@ -262,7 +262,7 @@ export default function HomePage() {
           {readingBooks.length > 0 ? (
             <BooksScroll>
               {readingBooks.map(item => (
-                <BookCard key={item.uuid} book={item.book} size="sm" initialStatus="reading" />
+                <BookCard key={item.uuid} book={item.book} size="sm" initialStatus="reading" libraryItemUuid={item.uuid} />
               ))}
             </BooksScroll>
           ) : (
