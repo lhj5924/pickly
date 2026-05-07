@@ -42,6 +42,7 @@ const Cover = styled.img`
   object-fit: cover;
   border-radius: 0.75rem;
   box-shadow: 0px 10px 28px rgba(180, 180, 180, 0.35);
+  cursor: pointer;
 `;
 
 const BookTitle = styled.h1`
@@ -113,7 +114,11 @@ export default function ReviewDetailPage() {
         <ChevronLeft size={18} /> 돌아가기
       </BackButton>
       <Card>
-        <Cover src={review.book.thumbnailUrl} alt={review.book.title} />
+        <Cover
+          src={review.book.thumbnailUrl}
+          alt={review.book.title}
+          onClick={() => router.push(`/book/${review.book.uuid}`)}
+        />
         <BookTitle>{review.book.title}</BookTitle>
         <Authors>{review.book.authors.join(', ')}</Authors>
         <StarRating rating={review.rating} readonly size={24} />
