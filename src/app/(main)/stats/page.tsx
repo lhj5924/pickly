@@ -452,41 +452,37 @@ export default function StatsPage() {
         </GenreSection>
       )}
 
-      {/* 아직 읽는 중인 책 */}
-      {staleBooks.length > 0 && (
-        <StaleSection>
-          <SectionTitle>아직 이 책을 읽고 계신가요?</SectionTitle>
-          <StaleBooks>
-            {staleBooks.slice(0, staleShowCount).map(book => (
-              <StaleBookItem key={book.uuid}>
-                <BookCard book={book} size="sm" showTitle={false} initialStatus="reading" />
-                <StaleBookDate>
-                  {book.date}부터
-                  <br />
-                  읽는 중
-                </StaleBookDate>
-              </StaleBookItem>
-            ))}
-          </StaleBooks>
-          {staleBooks.length > 7 && (
-            <ShowMoreToggle
-              onClick={() =>
-                staleShowCount >= staleBooks.length ? setStaleShowCount(7) : setStaleShowCount(c => c + 7)
-              }
-            >
-              {staleShowCount >= staleBooks.length ? (
-                <>
-                  접기 <ChevronUp size={16} />
-                </>
-              ) : (
-                <>
-                  더보기 <ChevronDown size={16} />
-                </>
-              )}
-            </ShowMoreToggle>
-          )}
-        </StaleSection>
-      )}
+      {/* Stale Reading */}
+      <StaleSection>
+        <SectionTitle>아직 이 책을 읽고 계신가요?</SectionTitle>
+        <StaleBooks>
+          {staleBooks.slice(0, staleShowCount).map(book => (
+            <StaleBookItem key={book.uuid}>
+              <BookCard book={book} size="sm" showTitle={false} libraryItemUuid={book.libraryItemUuid} />
+              <StaleBookDate>
+                {book.date}부터
+                <br />
+                읽는 중
+              </StaleBookDate>
+            </StaleBookItem>
+          ))}
+        </StaleBooks>
+        {staleBooks.length > 7 && (
+          <ShowMoreToggle
+            onClick={() => (staleShowCount >= staleBooks.length ? setStaleShowCount(7) : setStaleShowCount(c => c + 7))}
+          >
+            {staleShowCount >= staleBooks.length ? (
+              <>
+                접기 <ChevronUp size={16} />
+              </>
+            ) : (
+              <>
+                더보기 <ChevronDown size={16} />
+              </>
+            )}
+          </ShowMoreToggle>
+        )}
+      </StaleSection>
     </Container>
   );
 }

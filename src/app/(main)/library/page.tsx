@@ -99,7 +99,7 @@ export default function LibraryPage() {
         <Section>
           <BookGrid>
             {completedLibrary.slice(0, completedVisible).map(item => (
-              <BookCard key={item.uuid} book={{ ...item.book, libraryUuid: item.uuid }} size="sm" initialStatus="completed" />
+              <BookCard key={item.uuid} book={item.book} size="sm" initialStatus="completed" libraryItemUuid={item.uuid} />
             ))}
           </BookGrid>
           {completedLibrary.length > FIRST_ROW_COUNT && (
@@ -124,7 +124,7 @@ export default function LibraryPage() {
           <>
             <BookGrid>
               {readingLibrary.slice(0, readingVisible).map(item => (
-                <BookCard key={item.uuid} book={{ ...item.book, libraryUuid: item.uuid }} size="sm" showProgress initialStatus="reading" />
+                <BookCard key={item.uuid} book={item.book} size="sm" showProgress initialStatus="reading" libraryItemUuid={item.uuid} />
               ))}
             </BookGrid>
             {readingLibrary.length > FIRST_ROW_COUNT && (
@@ -150,7 +150,7 @@ export default function LibraryPage() {
           <>
             <BookGrid>
               {wishlistLibrary.slice(0, wishlistVisible).map(item => (
-                <BookCard key={item.uuid} book={{ ...item.book, libraryUuid: item.uuid }} size="sm" initialStatus="wishlist" />
+                <BookCard key={item.uuid} book={item.book} size="sm" initialStatus="wishlist" libraryItemUuid={item.uuid} />
               ))}
             </BookGrid>
             {wishlistLibrary.length > FIRST_ROW_COUNT && (
