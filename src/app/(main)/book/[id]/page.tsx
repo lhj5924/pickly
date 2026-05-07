@@ -2,12 +2,14 @@
 
 import styled from 'styled-components';
 import { Button } from '@/components/common';
-import { ChevronDown, ArrowRight } from 'lucide-react';
+import { ChevronDown, ArrowRight, Eye, Heart, Check } from 'lucide-react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useBook, useExternalBook } from '@/api/useBook';
 import { useBookReviews } from '@/api/useReview';
+import { useMyLibraries, useUpdateLibraryStatus, useAddToLibrary } from '@/api/useLibrary';
+import type { BookStatus } from '@/types/book';
 
 const Container = styled.div`
   max-width: 900px;
@@ -245,6 +247,36 @@ function BookDetailContent() {
   const [descExpanded, setDescExpanded] = useState(false);
   const [authorExpanded, setAuthorExpanded] = useState(false);
 
+  const { data: allLibraries = [] } = useMyLibraries();
+  const { mutate: updateStatus } = useUpdateLibraryStatus();
+  const { mutate: addBook } = useAddToLibrary();
+
+  const libraryItem = book?.uuid ? allLibraries.find(item => item.book.uuid === book.uuid) : undefined;
+
+  const STATUS_TO_API: Record<string, BookStatus> = {
+    wishlist: 'WANT_TO_READ',
+    reading: 'READING',
+    completed: 'COMPLETED',
+  };
+
+  const API_TO_LABEL: Record<BookStatus, string> = {
+    WANT_TO_READ: 'wishlist',
+    READING: 'reading',
+    COMPLETED: 'completed',
+    DROPPED: 'dropped',
+  };
+
+  const currentStatus = libraryItem ? API_TO_LABEL[libraryItem.status] : null;
+
+  const handleStatusClick = (status: string) => {
+    const apiStatus = STATUS_TO_API[status];
+    if (libraryItem) {
+      updateStatus({ uuid: libraryItem.uuid, body: { status: apiStatus } });
+    } else if (book) {
+      addBook({ externalId: book.externalId, source: book.source, status: apiStatus });
+    }
+  };
+
   if (isLoading) {
     return (
       <Container>
@@ -281,6 +313,20 @@ function BookDetailContent() {
               <Tag key={genre.code}>{genre.name}</Tag>
             ))}
           </TagList>
+          <StatusButtons>
+            <StatusButton $active={currentStatus === 'wishlist'} $color="#ef4444" onClick={() => handleStatusClick('wishlist')}>
+              <Heart size={18} fill={currentStatus === 'wishlist' ? 'currentColor' : 'none'} />
+              보고싶어요
+            </StatusButton>
+            <StatusButton $active={currentStatus === 'reading'} $color="#3b82f6" onClick={() => handleStatusClick('reading')}>
+              <Eye size={18} />
+              읽는 중
+            </StatusButton>
+            <StatusButton $active={currentStatus === 'completed'} $color="#22c55e" onClick={() => handleStatusClick('completed')}>
+              <Check size={18} />
+              독서완료
+            </StatusButton>
+          </StatusButtons>
         </BookInfo>
       </BookHeader>
 

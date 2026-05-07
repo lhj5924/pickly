@@ -19,12 +19,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!isAuthenticated && !PUBLIC_PATHS.includes(pathname)) {
+    if (isAuthenticated && pathname === '/landing') {
+      router.replace('/home');
+    } else if (!isAuthenticated && !PUBLIC_PATHS.includes(pathname)) {
       router.replace('/landing');
     }
   }, [hydrated, isAuthenticated, pathname, router]);
 
   if (!hydrated) return null;
+  if (isAuthenticated && pathname === '/landing') return null;
   if (!isAuthenticated && !PUBLIC_PATHS.includes(pathname)) return null;
 
   return (
