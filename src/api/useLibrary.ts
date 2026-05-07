@@ -5,6 +5,7 @@ import {
   removeFromLibrary,
   updateLibraryStatus,
 } from './library';
+import { getBook } from './book';
 import { homeKeys, libraryKeys } from './queryKeys';
 import { useAuthStore } from '../stores';
 import type { BookStatus } from '../types/book';
@@ -52,6 +53,24 @@ export const useRemoveFromLibrary = () => {
     mutationFn: (uuid) => {
       if (!userUuid) throw new Error('No authenticated user');
       return removeFromLibrary(userUuid, uuid);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.all });
+      queryClient.invalidateQueries({ queryKey: homeKeys.all });
+    },
+  });
+};
+
+/** book.uuid만 있는 경우 (추천 도서 등) — 책 상세 조회로 externalId+source 확보 후 라이브러리 추가 */
+export const useAddToLibraryByBookUuid = () => {
+  const queryClient = useQueryClient();
+  const userUuid = useAuthStore(state => state.user?.id);
+
+  return useMutation<LibraryItem, Error, { bookUuid: string; status: BookStatus }>({
+    mutationFn: async ({ bookUuid, status }) => {
+      if (!userUuid) throw new Error('No authenticated user');
+      const book = await getBook(bookUuid);
+      return addToLibrary(userUuid, { externalId: book.externalId, source: book.source, status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.all });

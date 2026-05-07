@@ -5,7 +5,7 @@ import { Eye, Heart, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
-import { useUpdateLibraryStatus, useAddToLibrary } from '../../../api/useLibrary';
+import { useUpdateLibraryStatus, useAddToLibrary, useAddToLibraryByBookUuid } from '../../../api/useLibrary';
 import type { BookSource, BookStatus } from '../../../types/book';
 
 /**
@@ -348,6 +348,7 @@ export const BookCard = ({
 
   const { mutate: updateStatus } = useUpdateLibraryStatus();
   const { mutate: addBook } = useAddToLibrary();
+  const { mutate: addBookByUuid } = useAddToLibraryByBookUuid();
 
   const handleStatusClick = (e: React.MouseEvent, status: StatusKey) => {
     e.stopPropagation();
@@ -370,7 +371,7 @@ export const BookCard = ({
           { onError: () => setCurrentStatus(prevStatus) },
         );
       } else if (book.uuid) {
-        addBook(
+        addBookByUuid(
           { bookUuid: book.uuid, status: apiStatus },
           { onError: () => setCurrentStatus(prevStatus) },
         );
