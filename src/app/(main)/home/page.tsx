@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores';
 import { useHome } from '@/api/useHome';
+import { useRecommendations } from '@/api/useRecommendation';
 import { PieChart } from '@/components/common/PieChart';
 import type { PieChartDataItem } from '@/components/common/PieChart/PieChart';
 
@@ -169,6 +170,7 @@ const EmptyBooks = styled.div`
 export default function HomePage() {
   const { user } = useAuthStore();
   const { data: home } = useHome();
+  const { data: recommendations } = useRecommendations();
 
   const readingBooks = [...(home?.currentlyReadingBooks ?? [])]
     .sort((a, b) => {
@@ -178,7 +180,7 @@ export default function HomePage() {
     })
     .slice(0, 5);
 
-  const recommendedBooks = home?.recommendations ?? [];
+  const recommendedBooks = recommendations ?? [];
   const totalBooksRead = home?.totalBooksRead ?? 0;
   const currentlyReadingCount = home?.currentlyReadingCount ?? 0;
   const monthlyAverageBooks = home?.monthlyAverageBooks ?? 0;
