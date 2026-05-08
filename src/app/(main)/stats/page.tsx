@@ -8,7 +8,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'l
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMyLibraries } from '@/api/useLibrary';
-import { useMyStats } from '@/api/useStats';
+import { useMyStats, useMyGenreStats } from '@/api/useStats';
 import { PieChart } from '@/components/common/PieChart';
 import {
   computeStatsData,
@@ -315,6 +315,7 @@ export default function StatsPage() {
   const [staleShowCount, setStaleShowCount] = useState(7);
 
   const { data: myStats } = useMyStats();
+  const { data: genreStats } = useMyGenreStats();
   const { data: completedLibrary = [] } = useMyLibraries('COMPLETED');
   const { data: readingLibrary = [] } = useMyLibraries('READING');
 
@@ -331,8 +332,8 @@ export default function StatsPage() {
     weekPageOffset,
   );
 
-  const genreData: PieChartDataItem[] | undefined = myStats?.genreStats?.length
-    ? myStats.genreStats.map(g => ({ name: g.genreName, value: g.booksRead }))
+  const genreData: PieChartDataItem[] | undefined = genreStats?.length
+    ? genreStats.map(g => ({ name: g.genreName, value: g.booksRead }))
     : completedLibrary.length > 0
       ? [{ name: '기타', value: completedLibrary.length }]
       : undefined;
@@ -437,11 +438,11 @@ export default function StatsPage() {
       <PieChart genreData={genreData} />
 
       {/* 장르별 독서 비중 */}
-      {myStats?.genreStats && myStats.genreStats.length > 0 && (
+      {genreStats && genreStats.length > 0 && (
         <GenreSection>
           <SectionTitle>장르별 독서 비중</SectionTitle>
           <GenreList>
-            {myStats.genreStats.map(g => (
+            {genreStats.map(g => (
               <GenreRow key={g.genreCode}>
                 <GenreName>{g.genreName}</GenreName>
                 <GenreBar $pct={g.percentage} />
