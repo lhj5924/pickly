@@ -7,7 +7,7 @@ import { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useReviewAvailableBooks, useCreateReview } from '@/api/useReview';
 import { useAddToLibrary } from '@/api/useLibrary';
-import { useInfiniteBookSearch } from '@/api/useBook';
+import { useInfiniteBookSearch, useBook } from '@/api/useBook';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { LibraryItem } from '@/types';
 import type { BookSummary } from '@/types/book';
@@ -346,6 +346,12 @@ function ReviewWriteContent() {
   const searchRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
 
+  const bookUuidParam = searchParams.get('bookUuid') ?? undefined;
+  const libraryUuidParam = searchParams.get('libraryUuid') ?? undefined;
+
+  // bookUuid로 진입 시 책 정보 사전 로드 (완독 목록에 없을 경우 대비)
+  const { data: preselectedBookData } = useBook(bookUuidParam);
+
   const debouncedQuery = useDebounce(searchQuery, 300);
 
   const {
@@ -382,17 +388,48 @@ function ReviewWriteContent() {
 
   const showDropdown = dropdownOpen && searchQuery.length > 0 && !selectedBook;
 
-  // URL 파라미터로 책 사전 선택
+  // URL 파라미터로 책 사전 선택 (bookUuid 또는 libraryUuid)
   useEffect(() => {
-    const libraryUuid = searchParams.get('libraryUuid');
-    if (libraryUuid && availableBooks.length > 0) {
-      const item = availableBooks.find(b => b.uuid === libraryUuid);
+    if (selectedBook) return;
+
+    if (bookUuidParam) {
+      // 완독 목록에서 book UUID로 먼저 탐색
+      if (availableBooks.length > 0) {
+        const item = availableBooks.find(b => b.book.uuid === bookUuidParam);
+        if (item) {
+          setSelectedBook({ isInAvailableBooks: true, libraryItem: item, bookSummary: null });
+          setSearchQuery(item.book.title);
+          return;
+        }
+      }
+      // 완독 목록에 없으면 책 상세 데이터로 pre-select
+      if (preselectedBookData) {
+        const summary: BookSummary = {
+          uuid: preselectedBookData.uuid,
+          externalId: preselectedBookData.externalId,
+          isbn: preselectedBookData.isbn13 || preselectedBookData.isbn10,
+          title: preselectedBookData.title,
+          authors: preselectedBookData.authors,
+          thumbnailUrl: preselectedBookData.thumbnailUrl,
+          publishedDate: preselectedBookData.publishedDate,
+          publisher: preselectedBookData.publisher,
+          source: preselectedBookData.source,
+        };
+        setSelectedBook({ isInAvailableBooks: false, libraryItem: null, bookSummary: summary });
+        setSearchQuery(preselectedBookData.title);
+      }
+      return;
+    }
+
+    // 기존 libraryUuid 파라미터 지원
+    if (libraryUuidParam && availableBooks.length > 0) {
+      const item = availableBooks.find(b => b.uuid === libraryUuidParam);
       if (item) {
         setSelectedBook({ isInAvailableBooks: true, libraryItem: item, bookSummary: null });
         setSearchQuery(item.book.title);
       }
     }
-  }, [searchParams, availableBooks]);
+  }, [bookUuidParam, libraryUuidParam, availableBooks, preselectedBookData, selectedBook]);
 
   // 클릭 외부 감지
   useEffect(() => {
