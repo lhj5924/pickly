@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores';
 import { useUpdateMe } from '@/api/useMe';
 import { useGenres, useUpdatePreferredGenres } from '@/api/useGenre';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { GenreInfo } from '@/types';
 import { ArrowRight } from 'lucide-react';
 
@@ -192,11 +192,18 @@ const Tooltip = styled.span`
 export default function PreferencesPage() {
   const router = useRouter();
   const { updateSignupData, completeSignup } = useAuthStore();
+  const signupStep = useAuthStore(state => state.signupStep);
   const { mutate: updateUser } = useUpdateMe();
   const { data: allGenres = [] } = useGenres();
   const { mutate: savePreferredGenres } = useUpdatePreferredGenres();
   const [selectedGenres, setSelectedGenres] = useState<GenreInfo[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (signupStep === 'complete') {
+      router.replace('/home');
+    }
+  }, [signupStep, router]);
 
   const handleGenreToggle = (genre: GenreInfo) => {
     setSelectedGenres(prev =>
