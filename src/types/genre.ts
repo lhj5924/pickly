@@ -3,6 +3,7 @@
 // ============================================================
 
 export interface GenreInfo {
+  id: number;
   code: string;
   name: string;
   description: string;
@@ -14,4 +15,8 @@ export interface PreferredGenresResponse {
 
 export interface UpdatePreferredGenresRequest {
   genreCodes: string[];
+}
+
+export interface UpdateBookGenresRequest {
+  genreIds: number[];
 }

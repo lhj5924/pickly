@@ -28,6 +28,7 @@ const mockUserResponse: UserResponse = {
   ageGroup: 'TWENTIES',
   preferredGenres: [],
   isOnboarded: true,
+  role: 'USER',
 };
 
 const mockLoginResponse: LoginResponse = {

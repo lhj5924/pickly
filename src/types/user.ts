@@ -1,4 +1,5 @@
 import type { GenreInfo } from './genre';
+import type { UserRole } from './api';
 
 export type SocialProvider = 'google' | 'kakao';
 
@@ -10,6 +11,7 @@ export interface User {
   provider: SocialProvider;
   preferences: UserPreferences;
   createdAt: string;
+  role: UserRole;
 }
 
 export interface UserPreferences {
