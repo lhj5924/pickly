@@ -30,7 +30,7 @@ export const mockUserResponse: UserResponse = {
   nickname: mockUser.nickname,
   profileImageUrl: mockUser.profileImage ?? '',
   provider: 'KAKAO',
-  gender: 'MALE',
+  gender: 'FEMALE',
   ageGroup: 'TWENTIES',
   isOnboarded: true,
   preferredGenres: mockUser.preferences.preferredGenres,

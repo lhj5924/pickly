@@ -26,6 +26,7 @@ export const searchBooks = async (params: BookSearchParams): Promise<BookSearchR
     params: {
       query: params.query,
       target: params.target,
+      source: params.source ?? 'KAKAO',
       page: params.page ?? 0,
       size: params.size ?? 10,
     },
