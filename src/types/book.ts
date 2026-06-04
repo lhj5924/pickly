@@ -53,6 +53,7 @@ export interface BookSearchResponse {
 export interface BookSearchParams {
   query: string;
   target?: 'title' | 'author';
+  source?: BookSource;
   page?: number;
   size?: number;
 }

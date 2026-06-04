@@ -16,12 +16,13 @@ export const mockUser: User = {
   provider: 'kakao',
   preferences: {
     preferredGenres: [
-      { code: 'NOVEL', name: '소설', description: '소설 장르' },
-      { code: 'ESSAY', name: '에세이', description: '에세이 장르' },
-      { code: 'ECONOMY', name: '경제경영', description: '경제경영 장르' },
+      { id: 1, code: 'NOVEL', name: '소설', description: '소설 장르' },
+      { id: 2, code: 'ESSAY', name: '에세이', description: '에세이 장르' },
+      { id: 3, code: 'ECONOMY', name: '경제경영', description: '경제경영 장르' },
     ],
   },
   createdAt: '2025-09-01T10:00:00Z',
+  role: 'USER',
 };
 
 export const mockUserResponse: UserResponse = {
@@ -30,8 +31,9 @@ export const mockUserResponse: UserResponse = {
   nickname: mockUser.nickname,
   profileImageUrl: mockUser.profileImage ?? '',
   provider: 'KAKAO',
-  gender: 'MALE',
+  gender: 'FEMALE',
   ageGroup: 'TWENTIES',
   isOnboarded: true,
   preferredGenres: mockUser.preferences.preferredGenres,
+  role: 'USER',
 };

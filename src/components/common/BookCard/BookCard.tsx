@@ -5,7 +5,7 @@ import { Eye, Heart, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Image from 'next/image';
-import { useUpdateLibraryStatus, useAddToLibrary } from '../../../api/useLibrary';
+import { useUpdateLibraryStatus, useAddToLibrary, useAddExternalToLibrary } from '../../../api/useLibrary';
 import type { BookSource, BookStatus } from '../../../types/book';
 
 /**
@@ -348,6 +348,7 @@ export const BookCard = ({
 
   const { mutate: updateStatus } = useUpdateLibraryStatus();
   const { mutate: addBook } = useAddToLibrary();
+  const { mutate: addExternalBook } = useAddExternalToLibrary();
 
   const handleStatusClick = (e: React.MouseEvent, status: StatusKey) => {
     e.stopPropagation();
@@ -364,14 +365,11 @@ export const BookCard = ({
           { uuid: libraryItemUuid, body: { status: apiStatus } },
           { onError: () => setCurrentStatus(prevStatus) },
         );
-      } else if (book.externalId && book.source) {
-        addBook(
+      } else if (book.externalId && book.source && !book.uuid) {
+        // 1단계: Kakao external API로 DB 저장 + Google 장르 보강
+        // 2단계: 반환된 UUID로 라이브러리 추가
+        addExternalBook(
           { externalId: book.externalId, source: book.source, status: apiStatus },
-          { onError: () => setCurrentStatus(prevStatus) },
-        );
-      } else if (book.uuid) {
-        addBook(
-          { bookUuid: book.uuid, status: apiStatus },
           { onError: () => setCurrentStatus(prevStatus) },
         );
       }

@@ -5,9 +5,10 @@ import {
   removeFromLibrary,
   updateLibraryStatus,
 } from './library';
+import { getExternalBook } from './book';
 import { homeKeys, libraryKeys } from './queryKeys';
 import { useAuthStore } from '../stores';
-import type { BookStatus } from '../types/book';
+import type { BookSource, BookStatus } from '../types/book';
 import type {
   AddLibraryRequest,
   LibraryItem,
@@ -35,6 +36,27 @@ export const useAddToLibrary = () => {
     mutationFn: (body) => {
       if (!userUuid) throw new Error('No authenticated user');
       return addToLibrary(userUuid, body);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: libraryKeys.all });
+      queryClient.invalidateQueries({ queryKey: homeKeys.all });
+    },
+  });
+};
+
+/** 외부 책을 2단계로 라이브러리에 추가:
+ *  1단계) GET /api/v1/books/external?source=KAKAO → 기본 정보 저장 + Google 장르 보강(백엔드)
+ *  2단계) POST /api/v1/libraries with bookUuid
+ */
+export const useAddExternalToLibrary = () => {
+  const queryClient = useQueryClient();
+  const userUuid = useAuthStore(state => state.user?.id);
+
+  return useMutation<LibraryItem, Error, { externalId: string; source: BookSource; status: BookStatus }>({
+    mutationFn: async ({ externalId, source, status }) => {
+      if (!userUuid) throw new Error('No authenticated user');
+      const book = await getExternalBook(externalId, source);
+      return addToLibrary(userUuid, { bookUuid: book.uuid, status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: libraryKeys.all });
