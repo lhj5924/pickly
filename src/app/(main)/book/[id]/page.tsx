@@ -2,13 +2,16 @@
 
 import styled from 'styled-components';
 import { Button } from '@/components/common';
-import { ChevronDown, ArrowRight, Eye, Heart, Check } from 'lucide-react';
+import { ChevronDown, ArrowRight, Eye, Heart, Check, Pencil, X } from 'lucide-react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useBook, useExternalBook } from '@/api/useBook';
 import { useBookReviews } from '@/api/useReview';
 import { useMyLibraries, useUpdateLibraryStatus, useAddToLibrary } from '@/api/useLibrary';
+import { useGenres } from '@/api/useGenre';
+import { useUpdateBookGenres } from '@/api/useAdmin';
+import { useAuthStore } from '@/stores/authStore';
 import type { BookStatus } from '@/types/book';
 
 const Container = styled.div`
@@ -222,6 +225,114 @@ const SimilarBooksGrid = styled.div`
   padding-bottom: 0.5rem;
 `;
 
+// Admin Genre Edit
+const AdminEditButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.text.tertiary};
+  padding: 0.25rem 0.5rem;
+  border: 1px solid ${({ theme }) => theme.colors.neutral[200]};
+  border-radius: 0.375rem;
+  background: ${({ theme }) => theme.colors.neutral[50]};
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.neutral[100]};
+    color: ${({ theme }) => theme.colors.text.secondary};
+  }
+`;
+
+const AdminBadge = styled.span`
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: white;
+  background: #7c3aed;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  letter-spacing: 0.05em;
+`;
+
+const GenreEditSection = styled.div`
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: ${({ theme }) => theme.colors.neutral[50]};
+  border: 1px solid ${({ theme }) => theme.colors.neutral[200]};
+  border-radius: 0.5rem;
+`;
+
+const GenreEditTitle = styled.p`
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const GenreCheckList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+`;
+
+const GenreCheckItem = styled.label<{ $selected: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  border: 1px solid ${({ $selected, theme }) =>
+    $selected ? theme.colors.primary[400] : theme.colors.neutral[200]};
+  background: ${({ $selected, theme }) =>
+    $selected ? theme.colors.primary[50] : 'white'};
+  color: ${({ $selected, theme }) =>
+    $selected ? theme.colors.primary[700] : theme.colors.text.secondary};
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary[300]};
+  }
+
+  input {
+    display: none;
+  }
+`;
+
+const GenreEditActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+`;
+
+const SmallButton = styled.button<{ $variant?: 'primary' | 'ghost' }>`
+  padding: 0.375rem 0.875rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+
+  ${({ $variant, theme }) =>
+    $variant === 'primary'
+      ? `
+    background: ${theme.colors.primary[600]};
+    color: white;
+    &:hover { background: ${theme.colors.primary[700]}; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  `
+      : `
+    background: white;
+    color: ${theme.colors.text.secondary};
+    border: 1px solid ${theme.colors.neutral[200]};
+    &:hover { background: ${theme.colors.neutral[50]}; }
+  `}
+`;
+
 function BookDetailContent() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -251,6 +362,13 @@ function BookDetailContent() {
   const { mutate: updateStatus } = useUpdateLibraryStatus();
   const { mutate: addBook } = useAddToLibrary();
 
+  const userRole = useAuthStore(state => state.user?.role);
+  const isAdmin = userRole === 'ADMIN';
+  const { data: allGenres = [] } = useGenres();
+  const { mutate: updateGenres, isPending: isUpdatingGenres } = useUpdateBookGenres();
+  const [genreEditOpen, setGenreEditOpen] = useState(false);
+  const [selectedGenreIds, setSelectedGenreIds] = useState<number[]>([]);
+
   const libraryItem = book?.uuid ? allLibraries.find(item => item.book.uuid === book.uuid) : undefined;
 
   const STATUS_TO_API: Record<string, BookStatus> = {
@@ -275,6 +393,25 @@ function BookDetailContent() {
     } else if (book) {
       addBook({ externalId: book.externalId, source: book.source, status: apiStatus });
     }
+  };
+
+  const openGenreEdit = () => {
+    setSelectedGenreIds(book?.genres.map(g => g.id) ?? []);
+    setGenreEditOpen(true);
+  };
+
+  const toggleGenre = (id: number) => {
+    setSelectedGenreIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id],
+    );
+  };
+
+  const handleSaveGenres = () => {
+    if (!book?.uuid) return;
+    updateGenres(
+      { bookUuid: book.uuid, body: { genreIds: selectedGenreIds } },
+      { onSuccess: () => setGenreEditOpen(false) },
+    );
   };
 
   if (isLoading) {
@@ -307,12 +444,55 @@ function BookDetailContent() {
           <BookMeta>
             저자 : {authorText} | 출판사 : {book.publisher} | 발행일 : {book.publishedDate}
           </BookMeta>
-          <CategoryLabel>카테고리</CategoryLabel>
+          <CategoryLabel style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            카테고리
+            {isAdmin && !genreEditOpen && (
+              <AdminEditButton onClick={openGenreEdit}>
+                <Pencil size={11} />
+                장르 수정
+                <AdminBadge>ADMIN</AdminBadge>
+              </AdminEditButton>
+            )}
+          </CategoryLabel>
           <TagList>
             {book.genres.map(genre => (
               <Tag key={genre.code}>{genre.name}</Tag>
             ))}
           </TagList>
+          {isAdmin && genreEditOpen && (
+            <GenreEditSection>
+              <GenreEditTitle>
+                장르 선택
+                <button onClick={() => setGenreEditOpen(false)} style={{ background: 'none', cursor: 'pointer' }}>
+                  <X size={14} />
+                </button>
+              </GenreEditTitle>
+              <GenreCheckList>
+                {allGenres.map(genre => (
+                  <GenreCheckItem key={genre.id} $selected={selectedGenreIds.includes(genre.id)}>
+                    <input
+                      type="checkbox"
+                      checked={selectedGenreIds.includes(genre.id)}
+                      onChange={() => toggleGenre(genre.id)}
+                    />
+                    {genre.name}
+                  </GenreCheckItem>
+                ))}
+              </GenreCheckList>
+              <GenreEditActions>
+                <SmallButton $variant="ghost" onClick={() => setGenreEditOpen(false)}>
+                  취소
+                </SmallButton>
+                <SmallButton
+                  $variant="primary"
+                  onClick={handleSaveGenres}
+                  disabled={isUpdatingGenres}
+                >
+                  {isUpdatingGenres ? '저장 중…' : '저장'}
+                </SmallButton>
+              </GenreEditActions>
+            </GenreEditSection>
+          )}
           <StatusButtons>
             <StatusButton $active={currentStatus === 'wishlist'} $color="#ef4444" onClick={() => handleStatusClick('wishlist')}>
               <Heart size={18} fill={currentStatus === 'wishlist' ? 'currentColor' : 'none'} />

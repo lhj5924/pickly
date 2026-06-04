@@ -16,6 +16,7 @@ export interface ApiError {
 export type OAuthProvider = 'KAKAO' | 'GOOGLE';
 export type Gender = 'MALE' | 'FEMALE';
 export type AgeGroup = 'TEENS' | 'TWENTIES' | 'THIRTIES' | 'FORTIES' | 'FIFTIES_PLUS';
+export type UserRole = 'USER' | 'ADMIN';
 
 // --- User ---
 export interface UserResponse {
@@ -28,6 +29,7 @@ export interface UserResponse {
   ageGroup: AgeGroup;
   preferredGenres: GenreInfo[];
   isOnboarded: boolean;
+  role: UserRole;
 }
 
 // --- Auth ---

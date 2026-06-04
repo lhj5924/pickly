@@ -28,6 +28,7 @@ const mockUser: UserResponse = {
   ageGroup: 'TWENTIES',
   preferredGenres: [],
   isOnboarded: true,
+  role: 'USER',
 };
 
 function createWrapper(queryClient: QueryClient) {

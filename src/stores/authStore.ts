@@ -65,6 +65,7 @@ export const useAuthStore = create<AuthState>()(
           provider,
           preferences: { preferredGenres: apiUser.preferredGenres ?? [] },
           createdAt: new Date().toISOString(),
+          role: apiUser.role ?? 'USER',
         };
 
         set({
@@ -85,6 +86,7 @@ export const useAuthStore = create<AuthState>()(
           provider,
           preferences: { preferredGenres: apiUser.preferredGenres ?? [] },
           createdAt: new Date().toISOString(),
+          role: apiUser.role ?? 'USER',
         };
         set({ user: newUser });
       },
@@ -129,6 +131,7 @@ export const useAuthStore = create<AuthState>()(
           provider: signupData.provider,
           preferences: { preferredGenres: signupData.preferredGenres },
           createdAt: new Date().toISOString(),
+          role: 'USER',
         };
         set({
           user: newUser,

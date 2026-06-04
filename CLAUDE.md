@@ -4,7 +4,7 @@
 
 - **Base URL (로컬)**: `http://localhost:8080`
 - **환경변수**: `VITE_API_BASE_URL` (Next.js는 `NEXT_PUBLIC_API_BASE_URL`)
-- **API 문서**: http://localhost:8080/swagger-ui.html
+- **API 문서**: https://api.pickly.dev/swagger-ui/index.html#/
 - **인증**: JWT Bearer Token → `Authorization: Bearer {accessToken}`
 
 ## 토큰 정책
