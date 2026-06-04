@@ -372,11 +372,6 @@ export const BookCard = ({
           { externalId: book.externalId, source: book.source, status: apiStatus },
           { onError: () => setCurrentStatus(prevStatus) },
         );
-      } else if (book.uuid) {
-        addBook(
-          { bookUuid: book.uuid, status: apiStatus },
-          { onError: () => setCurrentStatus(prevStatus) },
-        );
       }
     }
   };
