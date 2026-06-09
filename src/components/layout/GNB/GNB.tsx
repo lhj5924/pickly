@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Logo } from '@/components/common';
+import { useAuthStore } from '@/stores/authStore';
 
 const Header = styled.header`
   position: sticky;
@@ -85,6 +86,19 @@ const SearchInput = styled.input`
   }
 `;
 
+const AdminBadge = styled.span`
+  display: inline-block;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background: ${({ theme }) => theme.colors.primary[500]};
+  color: white;
+  vertical-align: middle;
+  margin-left: 0.375rem;
+  letter-spacing: 0.02em;
+`;
+
 const navItems = [
   { href: '/home', label: '홈' },
   { href: '/recommend', label: '추천' },
@@ -98,6 +112,8 @@ export const GNB = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const userRole = useAuthStore(state => state.user?.role);
+  const isAdmin = userRole === 'ADMIN';
 
   const handleSearch = () => {
     const trimmed = query.trim();
@@ -128,6 +144,15 @@ export const GNB = () => {
               {item.label}
             </NavLink>
           ))}
+          {isAdmin && (
+            <NavLink
+              href="/admin/genres"
+              $active={pathname.startsWith('/admin')}
+            >
+              장르 관리
+              <AdminBadge>ADMIN</AdminBadge>
+            </NavLink>
+          )}
         </Nav>
 
         <SearchWrapper>
