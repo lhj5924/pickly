@@ -13,8 +13,8 @@ export const useLogin = (provider: 'kakao' | 'google') => {
   const loginWithApi = useAuthStore(state => state.loginWithApi);
   const queryClient = useQueryClient();
 
-  return useMutation<LoginResponse, Error, { code: string }>({
-    mutationFn: ({ code }) => login(provider, { code }),
+  return useMutation<LoginResponse, Error, { code: string; redirectUri?: string }>({
+    mutationFn: ({ code, redirectUri }) => login(provider, { code, redirectUri }),
     onSuccess: (data) => {
       loginWithApi(data);
 

@@ -34,8 +34,10 @@ export default function OAuthCallbackPage() {
     if (!code || calledRef.current) return;
     calledRef.current = true;
 
+    const redirectUri = `${window.location.origin}/auth/${provider}/callback`;
+
     mutate(
-      { code },
+      { code, redirectUri },
       {
         onSuccess: () => {
           const step = useAuthStore.getState().signupStep;
@@ -50,7 +52,7 @@ export default function OAuthCallbackPage() {
         },
       },
     );
-  }, [code, mutate, router]);
+  }, [code, mutate, router, provider]);
 
   if (isError) {
     return (
