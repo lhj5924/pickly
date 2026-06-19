@@ -104,12 +104,12 @@ const variantStyles = {
     }
   `,
   cta: css`
-    padding: 24px 72px;
+    padding: 16px 48px;
     font-size: 1.25rem;
     font-weight: 700;
     white-space: nowrap;
     background: linear-gradient(90deg, #fec893 0%, #90cf80 100%);
-    border-radius: 16px;
+    border-radius: 12px;
     color: white;
 
     &:hover:not(:disabled) {
