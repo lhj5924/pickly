@@ -44,6 +44,7 @@ export interface LoginResponse extends TokenResponse {
 
 export interface LoginRequest {
   code: string;
+  redirectUri: string;
 }
 
 export interface RefreshRequest {

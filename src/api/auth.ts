@@ -6,9 +6,17 @@
 import { apiClient } from './client';
 import type { LoginRequest, LoginResponse, RefreshRequest, TokenResponse } from '../types/api';
 
+const REDIRECT_URI: Record<'kakao' | 'google', string> = {
+  kakao: process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI!,
+  google: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI!,
+};
+
 /** OAuth 로그인 (provider: 'kakao' | 'google') */
-export const login = async (provider: 'kakao' | 'google', body: LoginRequest): Promise<LoginResponse> => {
-  const { data } = await apiClient.post<LoginResponse>(`/api/v1/auth/login/${provider}`, body);
+export const login = async (provider: 'kakao' | 'google', body: Omit<LoginRequest, 'redirectUri'>): Promise<LoginResponse> => {
+  const { data } = await apiClient.post<LoginResponse>(`/api/v1/auth/login/${provider}`, {
+    ...body,
+    redirectUri: REDIRECT_URI[provider],
+  });
   return data;
 };
 
