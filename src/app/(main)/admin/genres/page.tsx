@@ -140,9 +140,16 @@ const ThumbPlaceholder = styled.div`
   background: ${({ theme }) => theme.colors.neutral[200]};
 `;
 
-const BookRowInfo = styled.div`
+const BookRowInfo = styled.div<{ $clickable?: boolean }>`
   flex: 1;
   min-width: 0;
+  ${({ $clickable }) => $clickable && `
+    cursor: pointer;
+    &:hover p:first-child {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  `}
 `;
 
 const BookRowTitle = styled.p`
@@ -526,14 +533,20 @@ function AdminGenresContent() {
                 )}
               </BookThumb>
 
-              <BookRowInfo>
+              <BookRowInfo
+                $clickable={!book.uuid}
+                onClick={!book.uuid ? () => router.push(
+                  `/book/external?externalId=${encodeURIComponent(book.externalId)}&source=${encodeURIComponent(book.source)}`
+                ) : undefined}
+                title={!book.uuid ? '클릭하면 책 상세 페이지로 이동합니다' : undefined}
+              >
                 <BookRowTitle>{book.title}</BookRowTitle>
                 <BookRowMeta>
                   {book.authors.join(', ')}
                   {book.publisher ? ` · ${book.publisher}` : ''}
                 </BookRowMeta>
                 <BookRowSource $local={!!book.uuid}>
-                  {book.uuid ? 'DB 등록됨' : '미등록'}
+                  {book.uuid ? 'DB 등록됨' : '미등록 · 클릭하여 상세 보기'}
                 </BookRowSource>
               </BookRowInfo>
 
